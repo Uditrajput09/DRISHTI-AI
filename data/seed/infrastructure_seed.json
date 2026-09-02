@@ -1,0 +1,248 @@
+{
+  "district": "East Khasi Hills, Meghalaya",
+  "generated_at": "2026-09-02T12:00:00Z",
+  "facilities": [
+    {
+      "id": "HOSP-01",
+      "name": "NEIGRIHMS (North Eastern Indira Gandhi Regional Institute of Health & Medical Sciences)",
+      "type": "hospital",
+      "category": "Tertiary Trauma & Emergency Center",
+      "lat": 25.5905,
+      "lon": 91.9365,
+      "capacity_beds": 550,
+      "icu_available": true,
+      "contact": "+91-364-2538013",
+      "zone_id": "EKH-Z03"
+    },
+    {
+      "id": "HOSP-02",
+      "name": "Civil Hospital Shillong",
+      "type": "hospital",
+      "category": "District Headquarters Hospital",
+      "lat": 25.5714,
+      "lon": 91.8785,
+      "capacity_beds": 350,
+      "icu_available": true,
+      "contact": "+91-364-2224100",
+      "zone_id": "EKH-Z06"
+    },
+    {
+      "id": "HOSP-03",
+      "name": "Sohra Community Health Centre (CHC)",
+      "type": "hospital",
+      "category": "Sub-Divisional Emergency Health Hub",
+      "lat": 25.2785,
+      "lon": 91.7280,
+      "capacity_beds": 50,
+      "icu_available": false,
+      "contact": "+91-3637-264210",
+      "zone_id": "EKH-Z01"
+    },
+    {
+      "id": "HOSP-04",
+      "name": "Mawsynram Primary Health Centre (PHC)",
+      "type": "hospital",
+      "category": "Rural Medical First Aid Post",
+      "lat": 25.3010,
+      "lon": 91.5850,
+      "capacity_beds": 20,
+      "icu_available": false,
+      "contact": "+91-3637-271020",
+      "zone_id": "EKH-Z02"
+    },
+    {
+      "id": "HOSP-05",
+      "name": "Pynursla Community Health Centre",
+      "type": "hospital",
+      "category": "Sub-Divisional Emergency Post",
+      "lat": 25.3160,
+      "lon": 91.9050,
+      "capacity_beds": 30,
+      "icu_available": false,
+      "contact": "+91-3637-282015",
+      "zone_id": "EKH-Z04"
+    },
+    {
+      "id": "SHEL-01",
+      "name": "State Central Library & Disaster Relief Shelter Shillong",
+      "type": "shelter",
+      "category": "Designated High-Capacity Safe Shelter",
+      "lat": 25.5750,
+      "lon": 91.8840,
+      "capacity_persons": 1200,
+      "backup_power": true,
+      "drinking_water": true,
+      "helipad_nearby": true,
+      "zone_id": "EKH-Z06"
+    },
+    {
+      "id": "SHEL-02",
+      "name": "Sohra Multi-Purpose Cyclone & Landslide Refuge",
+      "type": "shelter",
+      "category": "Reinforced RCC Community Safe Haven",
+      "lat": 25.2720,
+      "lon": 91.7350,
+      "capacity_persons": 600,
+      "backup_power": true,
+      "drinking_water": true,
+      "helipad_nearby": false,
+      "zone_id": "EKH-Z01"
+    },
+    {
+      "id": "SHEL-03",
+      "name": "Mawsynram Block Relief & Assembly Hall",
+      "type": "shelter",
+      "category": "Block Emergency Safe Shelter",
+      "lat": 25.2950,
+      "lon": 91.5810,
+      "capacity_persons": 450,
+      "backup_power": true,
+      "drinking_water": true,
+      "helipad_nearby": false,
+      "zone_id": "EKH-Z02"
+    },
+    {
+      "id": "SHEL-04",
+      "name": "Pynursla Higher Secondary School Evacuation Center",
+      "type": "shelter",
+      "category": "Designated Relief Center",
+      "lat": 25.3090,
+      "lon": 91.9000,
+      "capacity_persons": 500,
+      "backup_power": true,
+      "drinking_water": true,
+      "helipad_nearby": false,
+      "zone_id": "EKH-Z04"
+    },
+    {
+      "id": "SHEL-05",
+      "name": "Dawki Border Inspection & Emergency Refuge",
+      "type": "shelter",
+      "category": "High Ground Border Evacuation Point",
+      "lat": 25.1880,
+      "lon": 92.0150,
+      "capacity_persons": 350,
+      "backup_power": true,
+      "drinking_water": true,
+      "helipad_nearby": true,
+      "zone_id": "EKH-Z05"
+    },
+    {
+      "id": "EMERG-01",
+      "name": "Meghalaya State Disaster Management Authority (SDMA) Emergency Ops Center",
+      "type": "emergency_center",
+      "category": "State 24x7 Control Room",
+      "lat": 25.5680,
+      "lon": 91.8890,
+      "contact": "1070 / 112",
+      "zone_id": "EKH-Z06"
+    },
+    {
+      "id": "EMERG-02",
+      "name": "NDRF 1st Battalion Pre-Positioned Rescue Post",
+      "type": "emergency_center",
+      "category": "National Disaster Response Team Base",
+      "lat": 25.6450,
+      "lon": 91.9480,
+      "contact": "+91-364-2570014",
+      "zone_id": "EKH-Z03"
+    }
+  ],
+  "roads": [
+    {
+      "id": "ROAD-01",
+      "name": "NH-6 (Shillong-Guwahati Lifeline Corridor)",
+      "type": "national_highway",
+      "vulnerability": "High (Cut Slopes & Debris Influx)",
+      "coordinates": [
+        [91.9100, 25.6800],
+        [91.9350, 25.6550],
+        [91.9560, 25.6350],
+        [91.9750, 25.6100],
+        [91.8900, 25.5750]
+      ]
+    },
+    {
+      "id": "ROAD-02",
+      "name": "SH-5 (Shillong-Sohra Scenic Highway)",
+      "type": "state_highway",
+      "vulnerability": "Critical (Steep Valley Escarpment)",
+      "coordinates": [
+        [91.8500, 25.5400],
+        [91.7800, 25.4600],
+        [91.7450, 25.3500],
+        [91.7320, 25.2750]
+      ]
+    },
+    {
+      "id": "ROAD-03",
+      "name": "NH-206 (Shillong-Pynursla-Dawki Highway)",
+      "type": "national_highway",
+      "vulnerability": "Critical (Gorge Cut Slopes & Rockfall)",
+      "coordinates": [
+        [91.8700, 25.5200],
+        [91.8900, 25.4000],
+        [91.9020, 25.3120],
+        [91.9600, 25.2400],
+        [92.0190, 25.1850]
+      ]
+    },
+    {
+      "id": "ROAD-04",
+      "name": "Sohra-Shella Heavy Mining Road",
+      "type": "major_district_road",
+      "vulnerability": "Critical (Active Limestone Quarry Slopes)",
+      "coordinates": [
+        [91.7320, 25.2750],
+        [91.6850, 25.2300],
+        [91.6420, 25.1950]
+      ]
+    },
+    {
+      "id": "ROAD-05",
+      "name": "Shillong-Mawsynram Road",
+      "type": "state_highway",
+      "vulnerability": "High (Monsoon Heavy Washout Sector)",
+      "coordinates": [
+        [91.8200, 25.5200],
+        [91.7400, 25.4300],
+        [91.6500, 25.3600],
+        [91.5830, 25.2980]
+      ]
+    }
+  ],
+  "evacuation_routes": [
+    {
+      "id": "EVAC-01",
+      "name": "Sohra High-Plateau Evacuation Corridor",
+      "from_zone": "EKH-Z01",
+      "to_shelter": "SHEL-02",
+      "status": "Clear",
+      "safety_rating": 4.5
+    },
+    {
+      "id": "EVAC-02",
+      "name": "Mawsynram Ridge Alternative Bypass",
+      "from_zone": "EKH-Z02",
+      "to_shelter": "SHEL-03",
+      "status": "Clear",
+      "safety_rating": 4.2
+    },
+    {
+      "id": "EVAC-03",
+      "name": "Dawki Gorge Upward Evacuation Path",
+      "from_zone": "EKH-Z05",
+      "to_shelter": "SHEL-05",
+      "status": "Caution Required",
+      "safety_rating": 3.8
+    },
+    {
+      "id": "EVAC-04",
+      "name": "Pynursla High School Safety Corridor",
+      "from_zone": "EKH-Z04",
+      "to_shelter": "SHEL-04",
+      "status": "Clear",
+      "safety_rating": 4.7
+    }
+  ]
+}

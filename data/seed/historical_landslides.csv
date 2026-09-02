@@ -1,0 +1,27 @@
+event_id,date,location,latitude,longitude,slope_angle,rainfall_24h_mm,rainfall_72h_mm,antecedent_rainfall_index,soil_moisture_pct,land_cover,distance_to_road_m,landslide_occurred,severity,source_citation
+EKH-LS-2018-01,2018-06-12,Cherrapunji-Sohra Escarpment,25.2750,91.7320,38.5,145.2,310.5,245.0,92.5,sparse_vegetation,12.0,1,High,GSI Bhukosh Landslide Inventory (2018-NER-MEG-014)
+EKH-LS-2018-02,2018-07-04,Pynursla-Dawki Ghat (NH-206),25.3120,91.9020,36.8,110.0,265.4,198.2,88.4,cut_slope,8.5,1,High,Meghalaya State Disaster Management Authority (SDMA-2018-R04)
+EKH-LS-2019-01,2019-06-25,Mawsynram Slopes,25.2980,91.5830,41.2,185.6,420.8,320.1,96.2,barren_rock_soil,25.0,1,Critical,GSI Landslide Hazard Zonation Report Meghalaya (2019)
+EKH-LS-2019-02,2019-08-14,Shillong Bypass Cut-Slope (NH-6),25.6540,91.9560,34.0,98.4,195.0,154.6,84.1,cut_slope,5.0,1,Medium,PWD Meghalaya Road Cut Monitoring (2019-LS-08)
+EKH-LS-2020-01,2020-05-22,Shella-Sohra Limestone Ghat,25.1950,91.6420,42.0,165.0,380.0,290.4,94.0,quarry_slope,15.0,1,Critical,NDMA Landslide Incident Log (NER-2020-05)
+EKH-LS-2020-02,2020-06-18,Elephant Falls Valley Road,25.5360,91.8260,35.2,85.2,175.6,132.0,81.0,mixed_forest,30.0,1,Medium,District Administration East Khasi Hills Incident Report
+EKH-LS-2021-01,2021-06-08,Dawki Gorge Border Road,25.1850,92.0190,44.5,140.5,325.0,260.0,91.5,steep_gorge,10.0,1,High,GSI Bhukosh Landslide Event ID 2021-MEG-044
+EKH-LS-2021-02,2021-07-19,Sohra-Nohkalikai Ridge,25.2750,91.7320,39.0,210.4,490.2,380.0,98.0,grassland_thin_soil,45.0,1,Critical,Meghalaya SDMA Monsoon Monograph 2021
+EKH-LS-2022-01,2022-05-15,Mawsynram East Slopes,25.2980,91.5830,40.5,190.0,430.0,340.5,95.0,degraded_slope,20.0,1,Critical,GSI Field Investigation Report Meghalaya 2022
+EKH-LS-2022-02,2022-06-17,Laitkor-Upper Shillong Link,25.5520,91.8680,28.5,75.0,150.0,115.0,76.0,dense_pine,50.0,0,Low,Baseline Non-failure Record (Rainfall Below Critical Threshold)
+EKH-LS-2022-03,2022-06-20,Mawlynnong-Wah Umngot Escarpment,25.2010,91.9160,33.5,125.0,280.0,210.0,87.0,bamboo_groves,35.0,1,Medium,District DDMA Log 2022
+EKH-LS-2022-04,2022-08-02,Shillong Bypass Mawryngkneng,25.6540,91.9560,34.0,115.0,240.0,185.0,89.0,cut_slope,6.0,1,High,National Highways Authority of India (NHAI Incident Log)
+EKH-LS-2023-01,2023-06-14,Pynursla Valley Cut-Slope,25.3120,91.9020,37.0,135.0,310.0,240.0,90.5,terrace_farming,18.0,1,High,Meghalaya SDMA Monsoon Report 2023
+EKH-LS-2023-02,2023-07-22,Shella Mining Road Sector,25.1950,91.6420,43.0,170.0,390.0,305.0,94.8,bare_cut_slope,12.0,1,Critical,GSI Bhukosh Incident ID 2023-MEG-081
+EKH-LS-2023-03,2023-08-11,Mawphlang Sacred Grove Edge,25.4520,91.7580,29.0,60.0,120.0,95.0,68.0,dense_sacred_forest,80.0,0,Low,Baseline Stable Forest Slope Record
+EKH-LS-2024-01,2024-05-28,Cyclone Remal Aftermath Sohra,25.2750,91.7320,38.5,235.0,520.0,410.0,99.0,thin_vegetation,15.0,1,Critical,NDMA Flash Bulletin & SDMA Meghalaya (May 2024)
+EKH-LS-2024-02,2024-06-15,Dawki Border Highway NH-206,25.1850,92.0190,44.5,155.0,345.0,275.0,93.0,gorge_slope,8.0,1,Critical,Border Roads Organisation (BRO Project Sewak Log 2024)
+EKH-LS-2024-03,2024-07-09,Mawsynram Road Cut Km 14,25.2980,91.5830,41.2,160.0,360.0,285.0,92.0,cut_slope,10.0,1,High,PWD Meghalaya Incident Verification 2024
+EKH-BASE-01,2024-01-15,Sohra Plateau Winter Dry,25.2750,91.7320,38.5,0.0,0.0,2.0,28.0,sparse_vegetation,12.0,0,None,Stable Dry Season Baseline Record
+EKH-BASE-02,2024-02-20,Mawsynram Valley Dry,25.2980,91.5830,41.2,0.5,1.2,5.0,32.0,barren_rock_soil,25.0,0,None,Stable Dry Season Baseline Record
+EKH-BASE-03,2024-03-10,Shillong Bypass Spring,25.6540,91.9560,34.0,12.0,25.0,20.0,45.0,cut_slope,5.0,0,None,Stable Spring Baseline Record
+EKH-BASE-04,2024-04-05,Pynursla Pre-monsoon,25.3120,91.9020,36.8,25.0,55.0,42.0,58.0,terrace_farming,18.0,0,None,Stable Pre-monsoon Baseline Record
+EKH-BASE-05,2024-04-18,Dawki Gorge Spring,25.1850,92.0190,44.5,18.0,40.0,35.0,52.0,steep_gorge,10.0,0,None,Stable Spring Baseline Record
+EKH-BASE-06,2024-05-02,Laitkor Peak Moderate Rain,25.5520,91.8680,28.5,45.0,90.0,72.0,65.0,dense_pine,50.0,0,None,Stable Moderate Rain Baseline Record
+EKH-BASE-07,2024-05-10,Elephant Falls Gentle Showers,25.5360,91.8260,35.2,30.0,68.0,55.0,60.0,mixed_forest,30.0,0,None,Stable Gentle Rain Baseline Record
+EKH-BASE-08,2024-06-01,Mawphlang Sacred Grove Monsoon,25.4520,91.7580,29.0,70.0,140.0,110.0,72.0,dense_sacred_forest,80.0,0,Low,Stable Forest Root Cohesion Baseline Record

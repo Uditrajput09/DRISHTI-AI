@@ -1,0 +1,297 @@
+{
+  "type": "FeatureCollection",
+  "name": "East_Khasi_Hills_Landslide_Monitoring_Zones",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z01",
+        "name": "Sohra (Cherrapunji) Escarpment",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.2750,
+        "center_lon": 91.7320,
+        "base_slope_deg": 38.5,
+        "base_elevation_m": 1430,
+        "vulnerability_index": 0.88,
+        "soil_type": "Clayey Loam over Sandstone / Limestone",
+        "geology": "Shella Formation (Jaintia Group)",
+        "key_roads": ["SH-5 (Shillong-Sohra Road)", "Cherra-Shella Road"],
+        "critical_facilities": 4,
+        "population_density": "Moderate"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.7050, 25.2600],
+          [91.7550, 25.2600],
+          [91.7600, 25.2950],
+          [91.7100, 25.2950],
+          [91.7050, 25.2600]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z02",
+        "name": "Mawsynram Valley & Ridge Slopes",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.2980,
+        "center_lon": 91.5830,
+        "base_slope_deg": 41.2,
+        "base_elevation_m": 1400,
+        "vulnerability_index": 0.92,
+        "soil_type": "Residual Sandy Silt over Karstified Limestone",
+        "geology": "Therria Sandstone & Sylhet Limestone",
+        "key_roads": ["Mawsynram-Balat Road", "Shillong-Mawsynram SH"],
+        "critical_facilities": 3,
+        "population_density": "Moderate"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.5580, 25.2800],
+          [91.6100, 25.2800],
+          [91.6150, 25.3150],
+          [91.5620, 25.3150],
+          [91.5580, 25.2800]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z03",
+        "name": "Shillong Bypass Cut-Slope Corridor",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.6540,
+        "center_lon": 91.9560,
+        "base_slope_deg": 34.0,
+        "base_elevation_m": 1350,
+        "vulnerability_index": 0.78,
+        "soil_type": "Weathered Quartzite Gravel & Red Clay",
+        "geology": "Shillong Group Quartzites & Phyllites",
+        "key_roads": ["NH-6 (Shillong Bypass)", "Umiam Link Road"],
+        "critical_facilities": 5,
+        "population_density": "High (Highway Corridor)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.9300, 25.6350],
+          [91.9800, 25.6350],
+          [91.9850, 25.6750],
+          [91.9350, 25.6750],
+          [91.9300, 25.6350]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z04",
+        "name": "Pynursla - Wah Umngot Valley",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.3120,
+        "center_lon": 91.9020,
+        "base_slope_deg": 36.8,
+        "base_elevation_m": 1280,
+        "vulnerability_index": 0.84,
+        "soil_type": "Loamy Sand over Sandstone / Shale",
+        "geology": "Langpar Formation / Mahadek Sandstone",
+        "key_roads": ["NH-206 (Shillong-Dawki Highway)", "Pynursla-Mawlynnong Link"],
+        "critical_facilities": 3,
+        "population_density": "Low-Moderate"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.8750, 25.2950],
+          [91.9300, 25.2950],
+          [91.9350, 25.3350],
+          [91.8800, 25.3350],
+          [91.8750, 25.2950]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z05",
+        "name": "Dawki Gorge & International Border Ghats",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.1850,
+        "center_lon": 92.0190,
+        "base_slope_deg": 44.5,
+        "base_elevation_m": 120,
+        "vulnerability_index": 0.90,
+        "soil_type": "Coarse Sandstone Talus & Boulder Scree",
+        "geology": "Sylhet Trap Basalt / Cretaceous Sandstone",
+        "key_roads": ["NH-206 (Dawki-Tamabil corridor)", "Dawki Bridge Road"],
+        "critical_facilities": 4,
+        "population_density": "High (Border Trade Zone)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.9950, 25.1680],
+          [92.0450, 25.1680],
+          [92.0500, 25.2050],
+          [92.0000, 25.2050],
+          [91.9950, 25.1680]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z06",
+        "name": "Laitkor Peak & Upper Shillong Ridge",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.5520,
+        "center_lon": 91.8680,
+        "base_slope_deg": 28.5,
+        "base_elevation_m": 1961,
+        "vulnerability_index": 0.65,
+        "soil_type": "Humus Rich Forest Soil over Quartzite",
+        "geology": "Shillong Plateau Meta-sediments",
+        "key_roads": ["Shillong Peak Road", "Upper Shillong-Elephanta Link"],
+        "critical_facilities": 6,
+        "population_density": "High (Suburban & Defense Bases)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.8450, 25.5350],
+          [91.8950, 25.5350],
+          [91.9000, 25.5700],
+          [91.8500, 25.5700],
+          [91.8450, 25.5350]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z07",
+        "name": "Elephant Falls & Upper Umshyrpi Ravine",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.5360,
+        "center_lon": 91.8260,
+        "base_slope_deg": 35.2,
+        "base_elevation_m": 1620,
+        "vulnerability_index": 0.76,
+        "soil_type": "Porphyritic Granite Saprolite & Silt",
+        "geology": "Mylliem Granite Intrusion",
+        "key_roads": ["Elephant Falls Access Road", "NH-106 link"],
+        "critical_facilities": 2,
+        "population_density": "Moderate (Eco-tourism)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.8050, 25.5200],
+          [91.8500, 25.5200],
+          [91.8550, 25.5550],
+          [91.8100, 25.5550],
+          [91.8050, 25.5200]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z08",
+        "name": "Cherra-Shella Heavy Limestone Ghats",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.1950,
+        "center_lon": 91.6420,
+        "base_slope_deg": 42.0,
+        "base_elevation_m": 350,
+        "vulnerability_index": 0.94,
+        "soil_type": "Steep Karst Scree & Thin Calcareous Soil",
+        "geology": "Sylhet Limestone Member",
+        "key_roads": ["Shella-Sohra Industrial Ghat Road", "Mawlong Mineral Route"],
+        "critical_facilities": 2,
+        "population_density": "Low (Mining & Plantation)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.6180, 25.1750],
+          [91.6680, 25.1750],
+          [91.6720, 25.2150],
+          [91.6220, 25.2150],
+          [91.6180, 25.1750]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z09",
+        "name": "Mawphlang Sacred Grove & Valley Slopes",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.4520,
+        "center_lon": 91.7580,
+        "base_slope_deg": 29.0,
+        "base_elevation_m": 1820,
+        "vulnerability_index": 0.62,
+        "soil_type": "Deep Humic Topsoil over Quartzite",
+        "geology": "Shillong Group Quartzites",
+        "key_roads": ["Mawphlang-Balat Road", "David Scott Trail Corridor"],
+        "critical_facilities": 2,
+        "population_density": "Low-Moderate"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.7350, 25.4350],
+          [91.7820, 25.4350],
+          [91.7860, 25.4700],
+          [91.7390, 25.4700],
+          [91.7350, 25.4350]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "EKH-Z10",
+        "name": "Mawlynnong - Wah Rymben Valley",
+        "district": "East Khasi Hills",
+        "state": "Meghalaya",
+        "center_lat": 25.2010,
+        "center_lon": 91.9160,
+        "base_slope_deg": 33.5,
+        "base_elevation_m": 480,
+        "vulnerability_index": 0.74,
+        "soil_type": "Lateritic Sandy Loam over Sandstone",
+        "geology": "Mahadek Formation",
+        "key_roads": ["Pynursla-Mawlynnong Eco-Road", "Nohwet Living Root Bridge Track"],
+        "critical_facilities": 3,
+        "population_density": "Moderate (Tourism village)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [91.8950, 25.1850],
+          [91.9400, 25.1850],
+          [91.9450, 25.2200],
+          [91.9000, 25.2200],
+          [91.8950, 25.1850]
+        ]]
+      }
+    }
+  ]
+}

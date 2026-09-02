@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DRISHTI Community Alert</string>
+    <string name="title_activity_main">DRISHTI Community Alert</string>
+    <string name="package_name">ai.drishti.landslide</string>
+    <string name="custom_url_scheme">ai.drishti.landslide</string>
+</resources>

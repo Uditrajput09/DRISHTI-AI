@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: sih26001-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./sih_landslide.db
+      - PILOT_DISTRICT_NAME=East Khasi Hills, Meghalaya
+      - PILOT_CENTER_LAT=25.5788
+      - PILOT_CENTER_LON=91.8933
+      - PILOT_BBOX=25.10,91.25,25.75,92.15
+      - RISK_ALERT_THRESHOLD=70
+      - ALERT_LANGUAGES=en,hi,kha,as
+      - ENVIRONMENT=production
+    volumes:
+      - ./data:/app/data
+      - sih_data:/app/backend/ml
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    container_name: sih26001-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sih_data:
