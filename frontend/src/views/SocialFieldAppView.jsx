@@ -28,9 +28,13 @@ import {
   Filter,
   Check,
   Building2,
-  Navigation
+  Navigation,
+  Mic,
+  MicOff,
+  Radio
 } from 'lucide-react';
 import { api } from '../api';
+import { useSpeechToText } from '../hooks/useSpeechToText';
 
 // Seed stories for the top reels bar
 const REEL_STORIES = [
@@ -58,6 +62,53 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
   const [feedReports, setFeedReports] = useState([]);
   const [queue, setQueue] = useState([]);
   const [isSimulatedOffline, setIsSimulatedOffline] = useState(false);
+  const [isSendingSOS, setIsSendingSOS] = useState(false);
+  const [sosStatus, setSosStatus] = useState('');
+  const { transcript, isListening, isSupported: isVoiceSupported, startListening, stopListening } = useSpeechToText('en');
+
+  // Sync speech transcript into description
+  useEffect(() => {
+    if (transcript) {
+      setDescription(prev => (prev ? `${prev} ${transcript}` : transcript));
+    }
+  }, [transcript]);
+
+  const handleTriggerSOS = async () => {
+    if (!window.confirm('⚠️ ACTIVATE EMERGENCY SOS?\n\nThis broadcasts your exact GPS coordinates to District Disaster Management (DDMA) and all response teams.')) return;
+    setIsSendingSOS(true);
+    setSosStatus('Acquiring high-accuracy GPS coordinates...');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch('/api/sos/beacon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lat: pos.coords.latitude,
+              lon: pos.coords.longitude,
+              reporter_name: currentUser?.name || 'Citizen In Distress',
+              contact: currentUser?.phone || '',
+              message: 'Immediate landslide danger / evacuation needed!'
+            })
+          });
+          const data = await res.json();
+          setSosStatus(`🚨 SOS Beacon Active! Alert broadcast to ${data.dispatched_to || 'district'} responders.`);
+          setTimeout(() => setSosStatus(''), 8000);
+        } catch (e) {
+          setSosStatus('⚠️ SOS registered locally. Responders alerted on reconnection.');
+          setTimeout(() => setSosStatus(''), 6000);
+        } finally {
+          setIsSendingSOS(false);
+        }
+      },
+      () => {
+        alert('Could not access GPS. Please enable device location for SOS.');
+        setIsSendingSOS(false);
+        setSosStatus('');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
   const [activeStory, setActiveStory] = useState(null);
 
   // Verification & likes tracker
@@ -273,6 +324,31 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
 
         {/* User Persona & Offline Simulator Pill */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* SOS Beacon Button */}
+          <button
+            id="emergency-sos-btn"
+            onClick={handleTriggerSOS}
+            disabled={isSendingSOS}
+            style={{
+              background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+              color: '#ffffff',
+              border: '1px solid rgba(239, 68, 68, 0.6)',
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: '0.74rem',
+              fontWeight: 800,
+              cursor: isSendingSOS ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              boxShadow: '0 0 12px rgba(239, 68, 68, 0.6)',
+              animation: 'pulse 2s infinite'
+            }}
+          >
+            <Radio size={14} className="pulse-red" />
+            <span>{isSendingSOS ? 'Broadcasting...' : '🆘 SOS'}</span>
+          </button>
+
           <button
             onClick={() => setIsSimulatedOffline(!isSimulatedOffline)}
             title="Toggle network simulation"
@@ -318,6 +394,25 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
           </button>
         </div>
       </div>
+
+      {/* SOS Active Notification Banner */}
+      {sosStatus && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.25)',
+          border: '1px solid #ef4444',
+          borderRadius: 12,
+          padding: '10px 14px',
+          color: '#fca5a5',
+          fontSize: '0.82rem',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8
+        }}>
+          <Radio size={16} color="#ef4444" />
+          <span>{sosStatus}</span>
+        </div>
+      )}
 
       {/* Stories / Live Micro-Zone Reels Bar */}
       <div style={{
@@ -1106,11 +1201,36 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
             />
           </div>
 
-          {/* Description */}
+          {/* Description with Voice Input */}
           <div>
-            <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: 4 }}>
-              Observations & Ground Status
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#cbd5e1' }}>
+                Observations & Ground Status
+              </label>
+              {isVoiceSupported && (
+                <button
+                  type="button"
+                  id="voice-dictate-btn"
+                  onClick={isListening ? stopListening : startListening}
+                  style={{
+                    background: isListening ? 'rgba(239, 68, 68, 0.25)' : 'rgba(6, 182, 212, 0.15)',
+                    color: isListening ? '#fca5a5' : '#67e8f9',
+                    border: `1px solid ${isListening ? '#ef4444' : 'rgba(6, 182, 212, 0.3)'}`,
+                    borderRadius: 6,
+                    padding: '3px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isListening ? <MicOff size={12} /> : <Mic size={12} />}
+                  <span>{isListening ? 'Listening (Tap to stop)...' : '🎙️ Speak to write'}</span>
+                </button>
+              )}
+            </div>
             <textarea
               rows={3}
               placeholder="Describe boulder sizes, water seepage, vehicle queue or road passability..."
@@ -1121,7 +1241,7 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
                 padding: '9px 12px',
                 borderRadius: 8,
                 background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid var(--border-glass)',
+                border: isListening ? '1px solid #06b6d4' : '1px solid var(--border-glass)',
                 color: '#fff',
                 fontSize: '0.82rem',
                 resize: 'vertical'

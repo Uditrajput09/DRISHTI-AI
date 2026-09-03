@@ -69,17 +69,45 @@ export default function GisMap({
   onSelectZone, 
   facilities = [], 
   roads = [], 
-  reports = [] 
+  reports = [],
+  historyPoints = []
 }) {
   const [activeBaseMap, setActiveBaseMap] = useState('satellite');
   const [visibleLayers, setVisibleLayers] = useState({
     zones: true,
     facilities: true,
     roads: true,
-    reports: true
+    reports: true,
+    radar: false,
+    flood: false
   });
+  const [sosEvents, setSosEvents] = useState([]);
+  const [floodZones, setFloodZones] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
+
+  // Poll active SOS events every 10 seconds
+  useEffect(() => {
+    const fetchSOS = () => {
+      fetch('/api/sos/active')
+        .then(r => r.json())
+        .then(data => Array.isArray(data) && setSosEvents(data))
+        .catch(() => {});
+    };
+    fetchSOS();
+    const iv = setInterval(fetchSOS, 10000);
+    return () => clearInterval(iv);
+  }, []);
+
+  // Fetch flood risk for all zones
+  useEffect(() => {
+    if (visibleLayers.flood) {
+      fetch('/api/flood/all-zones')
+        .then(r => r.json())
+        .then(data => Array.isArray(data) && setFloodZones(data))
+        .catch(() => {});
+    }
+  }, [visibleLayers.flood]);
 
   const handleLocateMe = useCallback(() => {
     if (!navigator.geolocation) return alert('Geolocation not supported by your browser.');
@@ -202,6 +230,14 @@ export default function GisMap({
             <input type="checkbox" checked={visibleLayers.reports} onChange={() => toggleLayer('reports')} />
             <span>Citizen Field Reports ({reports.length})</span>
           </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#67e8f9' }}>
+            <input type="checkbox" checked={visibleLayers.radar} onChange={() => toggleLayer('radar')} />
+            <span>🌧️ Live Rainfall Radar</span>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#93c5fd' }}>
+            <input type="checkbox" checked={visibleLayers.flood} onChange={() => toggleLayer('flood')} />
+            <span>🌊 Flash Flood Risk</span>
+          </label>
 
           {/* My Location Button */}
           <button
@@ -287,6 +323,15 @@ export default function GisMap({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             maxZoom={19}
+          />
+        )}
+
+        {/* Live Rainfall Radar Overlay */}
+        {visibleLayers.radar && (
+          <TileLayer
+            url="https://tilecache.rainviewer.com/v2/coverage/0/256/{z}/{x}/{y}/2/1_1.png"
+            opacity={0.6}
+            zIndex={400}
           />
         )}
 
@@ -466,6 +511,73 @@ export default function GisMap({
             />
           </>
         )}
+        {/* 6. Active Emergency SOS Beacon Distress Markers */}
+        {sosEvents.map(sos => (
+          <CircleMarker
+            key={`sos-${sos.id}`}
+            center={[sos.lat, sos.lon]}
+            radius={16}
+            pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.6, weight: 3 }}
+          >
+            <Popup>
+              <div style={{ color: '#fff', minWidth: 180 }}>
+                <div style={{ color: '#fca5a5', fontWeight: 900, fontSize: '0.9rem' }}>🆘 SOS DISTRESS BEACON</div>
+                <div style={{ fontSize: '0.8rem', marginTop: 4 }}><strong>By:</strong> {sos.reporter_name}</div>
+                {sos.contact && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Contact: {sos.contact}</div>}
+                <div style={{ fontSize: '0.78rem', color: '#f8fafc', margin: '4px 0' }}>{sos.message}</div>
+                <button
+                  onClick={() => {
+                    fetch(`/api/sos/beacon/${sos.id}/acknowledge`, { method: 'PUT' })
+                      .then(() => setSosEvents(prev => prev.filter(s => s.id !== sos.id)));
+                  }}
+                  style={{
+                    background: '#10b981', color: '#fff', border: 'none', borderRadius: 6,
+                    padding: '4px 8px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', width: '100%', marginTop: 4
+                  }}
+                >
+                  ✓ Acknowledge & Dispatch
+                </button>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
+
+        {/* 7. Flash Flood Risk Overlay Circles */}
+        {visibleLayers.flood && floodZones.map(fz => (
+          <CircleMarker
+            key={`flood-${fz.zone_id}`}
+            center={[fz.lat, fz.lon]}
+            radius={fz.flood_risk_score ? Math.max(12, fz.flood_risk_score / 3) : 15}
+            pathOptions={{
+              color: fz.flood_risk_level === 'Critical' ? '#2563eb' : '#60a5fa',
+              fillColor: '#3b82f6',
+              fillOpacity: 0.45,
+              weight: 2
+            }}
+          >
+            <Popup>
+              <div style={{ color: '#fff' }}>
+                <div style={{ fontWeight: 800, color: '#93c5fd' }}>🌊 Flash Flood Risk: {fz.zone_name}</div>
+                <div style={{ fontSize: '0.8rem', marginTop: 4 }}>Score: <strong>{fz.flood_risk_score}%</strong> ({fz.flood_risk_level})</div>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
+
+        {/* 8. Historical Heatmap Event Points */}
+        {historyPoints.map((hp, i) => (
+          <CircleMarker
+            key={`hp-${i}`}
+            center={[hp.lat, hp.lon]}
+            radius={8}
+            pathOptions={{
+              color: hp.intensity > 0.8 ? '#7c3aed' : '#f97316',
+              fillColor: hp.intensity > 0.8 ? '#a855f7' : '#fb923c',
+              fillOpacity: hp.intensity * 0.7,
+              weight: 1
+            }}
+          />
+        ))}
       </MapContainer>
     </div>
   );

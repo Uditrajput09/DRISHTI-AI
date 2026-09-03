@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RiskSummaryKPIs from '../components/RiskSummaryKPIs';
 import GisMap from '../components/GisMap';
 import ZoneInspector from '../components/ZoneInspector';
@@ -6,6 +6,8 @@ import ForecastChart from '../components/ForecastChart';
 import SimulationSandbox from '../components/SimulationSandbox';
 import AlertOutboxDrawer from '../components/AlertOutboxDrawer';
 import ZoneComparison from '../components/ZoneComparison';
+import HistoryTimelapse from '../components/HistoryTimelapse';
+import SurveyForm from '../components/SurveyForm';
 
 export default function DashboardView({
   summary,
@@ -18,6 +20,8 @@ export default function DashboardView({
   alerts,
   onRefreshAll
 }) {
+  const [historyPoints, setHistoryPoints] = useState([]);
+
   const handleSimulationComplete = (simResult) => {
     if (onRefreshAll) onRefreshAll();
   };
@@ -45,8 +49,12 @@ export default function DashboardView({
               facilities={facilities}
               roads={roads}
               reports={reports}
+              historyPoints={historyPoints}
             />
           </div>
+
+          {/* Historical Incident Heatmap Time-lapse Slider */}
+          <HistoryTimelapse onYearChange={(year, points) => setHistoryPoints(points)} />
 
           {/* Cloudburst & Rainfall Simulation Sandbox */}
           <SimulationSandbox
@@ -74,6 +82,9 @@ export default function DashboardView({
 
           {/* Zone Comparison Panel */}
           <ZoneComparison zones={zones} />
+
+          {/* Pre-Monsoon Field Vulnerability Survey */}
+          <SurveyForm zones={zones} currentUser={currentUser} onSurveySubmitted={onRefreshAll} />
         </div>
       </div>
     </div>

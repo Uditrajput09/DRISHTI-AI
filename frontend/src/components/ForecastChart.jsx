@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,10 +10,10 @@ import {
   Tooltip,
   Legend,
   Filler
-} from 'chart.js';
-import { Chart } from 'react-chartjs-2';
-import { CloudRain, TrendingUp } from 'lucide-react';
-import { api } from '../api';
+} from "chart.js";
+import { Chart } from "react-chartjs-2";
+import { CloudRain, TrendingUp, Calendar } from "lucide-react";
+import { api } from "../api";
 
 ChartJS.register(
   CategoryScale,
@@ -27,8 +27,16 @@ ChartJS.register(
   Filler
 );
 
-export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment' }) {
+const RISK_BADGE = {
+  Critical: { bg: "rgba(239, 68, 68, 0.2)", text: "#fca5a5", border: "rgba(239, 68, 68, 0.4)" },
+  High: { bg: "rgba(249, 115, 22, 0.2)", text: "#fdba74", border: "rgba(249, 115, 22, 0.4)" },
+  Medium: { bg: "rgba(245, 158, 11, 0.2)", text: "#fde68a", border: "rgba(245, 158, 11, 0.4)" },
+  Low: { bg: "rgba(16, 185, 129, 0.2)", text: "#6ee7b7", border: "rgba(16, 185, 129, 0.4)" },
+};
+
+export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment" }) {
   const [forecastData, setForecastData] = useState([]);
+  const [weeklyDays, setWeeklyDays] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,12 +44,16 @@ export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment
     async function loadForecast() {
       setLoading(true);
       try {
-        const res = await api.getZoneForecast(zoneId || 1);
+        const [res48h, res7d] = await Promise.all([
+          api.getZoneForecast(zoneId || 1),
+          fetch(`/api/forecast/weekly?zone_id=${zoneId || 1}`).then(r => r.json()).catch(() => ({ days: [] }))
+        ]);
         if (mounted) {
-          setForecastData(res.forecast_series || []);
+          setForecastData(res48h.forecast_series || []);
+          setWeeklyDays(res7d.days || []);
         }
       } catch (err) {
-        console.warn('Failed to load forecast series:', err);
+        console.warn("Failed to load forecast series:", err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -50,7 +62,6 @@ export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment
     return () => { mounted = false; };
   }, [zoneId]);
 
-  // Downsample to 24 slots (every 2 hours) for clean responsive rendering
   const sampled = forecastData.filter((_, i) => i % 2 === 0).slice(0, 24);
 
   const labels = sampled.map(item => {
@@ -69,24 +80,24 @@ export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment
     labels,
     datasets: [
       {
-        type: 'line',
-        label: 'Projected Landslide Risk (%)',
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+        type: "line",
+        label: "Projected Risk (%)",
+        borderColor: "#ef4444",
+        backgroundColor: "rgba(239, 68, 68, 0.15)",
         borderWidth: 2.5,
         fill: true,
         tension: 0.35,
         pointRadius: 2,
         pointHoverRadius: 5,
-        yAxisID: 'y1',
+        yAxisID: "y1",
         data: riskValues
       },
       {
-        type: 'bar',
-        label: 'Rainfall Forecast (mm/h)',
-        backgroundColor: 'rgba(6, 182, 212, 0.65)',
+        type: "bar",
+        label: "Rainfall (mm/h)",
+        backgroundColor: "rgba(6, 182, 212, 0.65)",
         borderRadius: 4,
-        yAxisID: 'y',
+        yAxisID: "y",
         data: rainfallValues
       }
     ]
@@ -96,46 +107,46 @@ export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
-      mode: 'index',
+      mode: "index",
       intersect: false,
     },
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
         labels: {
-          color: '#cbd5e1',
+          color: "#cbd5e1",
           font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: 600 }
         }
       },
       tooltip: {
-        backgroundColor: '#111827',
-        titleColor: '#f8fafc',
-        bodyColor: '#cbd5e1',
-        borderColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: "#111827",
+        titleColor: "#f8fafc",
+        bodyColor: "#cbd5e1",
+        borderColor: "rgba(255,255,255,0.1)",
         borderWidth: 1
       }
     },
     scales: {
       x: {
-        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-        ticks: { color: '#94a3b8', font: { size: 10 } }
+        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        ticks: { color: "#94a3b8", font: { size: 10 } }
       },
       y: {
-        type: 'linear',
+        type: "linear",
         display: true,
-        position: 'left',
-        title: { display: true, text: 'Precipitation (mm)', color: '#06b6d4', font: { size: 10, weight: 700 } },
-        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-        ticks: { color: '#94a3b8', font: { size: 10 } },
+        position: "left",
+        title: { display: true, text: "Rainfall (mm)", color: "#06b6d4", font: { size: 10, weight: 700 } },
+        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        ticks: { color: "#94a3b8", font: { size: 10 } },
         min: 0
       },
       y1: {
-        type: 'linear',
+        type: "linear",
         display: true,
-        position: 'right',
-        title: { display: true, text: 'Risk Index (%)', color: '#ef4444', font: { size: 10, weight: 700 } },
+        position: "right",
+        title: { display: true, text: "Risk (%)", color: "#ef4444", font: { size: 10, weight: 700 } },
         grid: { drawOnChartArea: false },
-        ticks: { color: '#ef4444', font: { size: 10 } },
+        ticks: { color: "#ef4444", font: { size: 10 } },
         min: 0,
         max: 100
       }
@@ -143,25 +154,57 @@ export default function ForecastChart({ zoneId = 1, zoneName = 'Sohra Escarpment
   };
 
   return (
-    <div className="glass-panel" style={{ padding: 18, height: 280, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc' }}>
+    <div className="glass-panel" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", fontWeight: 700, color: "#f8fafc" }}>
           <TrendingUp size={16} color="#ef4444" />
-          <span>48-Hour Rainfall & Risk Projection ({zoneName})</span>
+          <span>48-Hour & 7-Day Outlook ({zoneName})</span>
         </div>
-        <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 600, background: 'rgba(6, 182, 212, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
+        <span style={{ fontSize: "0.7rem", color: "#06b6d4", fontWeight: 600, background: "rgba(6, 182, 212, 0.1)", padding: "2px 8px", borderRadius: 999 }}>
           Open-Meteo Synced
         </span>
       </div>
-      <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+
+      <div style={{ height: 180, position: "relative" }}>
         {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)", fontSize: "0.8rem" }}>
             Loading forecast curve...
           </div>
         ) : (
           <Chart type="bar" data={chartData} options={options} />
         )}
       </div>
+
+      {weeklyDays.length > 0 && (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: "0.78rem", color: "#94a3b8", fontWeight: 600 }}>
+            <Calendar size={13} color="#06b6d4" />
+            <span>7-Day Landslide Outlook</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+            {weeklyDays.map((d, idx) => {
+              const badge = RISK_BADGE[d.risk_level] || RISK_BADGE.Low;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: badge.bg,
+                    border: `1px solid ${badge.border}`,
+                    borderRadius: 8,
+                    padding: "6px 4px",
+                    textAlign: "center",
+                    fontSize: "0.72rem"
+                  }}
+                >
+                  <div style={{ fontWeight: 700, color: "#f8fafc", marginBottom: 2 }}>{d.weekday}</div>
+                  <div style={{ fontSize: "0.82rem", fontWeight: 900, color: badge.text }}>{d.risk_score}%</div>
+                  <div style={{ fontSize: "0.65rem", color: "#94a3b8", marginTop: 2 }}>🌧️ {d.predicted_rain_mm}m</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

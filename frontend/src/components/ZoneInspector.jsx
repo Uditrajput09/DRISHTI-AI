@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { api } from '../api';
 import { exportZoneRiskPDF } from '../utils/pdfExport';
+import VulnerabilityCard from './VulnerabilityCard';
 import { FileDown } from 'lucide-react';
 
 export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] }) {
@@ -149,6 +150,9 @@ export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] 
           </div>
         </div>
       )}
+
+      {/* Village Vulnerability Index Section */}
+      <VulnerabilityCard zoneId={zone.id} />
 
       {/* Action Buttons Row */}
       <div style={{ marginTop: 4, display: 'flex', gap: 8 }}>
