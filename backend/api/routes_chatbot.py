@@ -1,11 +1,12 @@
 """
 backend/api/routes_chatbot.py
-DRISHTI-AI chatbot powered by Google Gemini Flash API with an
-intelligent local database-driven domain responder fallback.
+DRISHTI-AI chatbot powered by Google Gemini Flash with an
+instant database-driven domain responder fallback.
 """
 
 import os
 import json
+import urllib.request
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -13,6 +14,7 @@ from pydantic import BaseModel
 from typing import Optional
 from backend.database import get_db
 from backend.models import Zone, RiskScore, InfrastructureItem
+from backend.config import settings
 
 router = APIRouter(prefix="/api/chatbot", tags=["AI Chatbot"])
 
@@ -25,7 +27,7 @@ class ChatQuery(BaseModel):
 def generate_local_response(question: str, db: Session) -> str:
     """
     Intelligent local domain responder that queries live DB telemetry
-    to provide accurate answers even when GEMINI_API_KEY is not configured.
+    to provide accurate answers instantly.
     """
     q = question.lower()
     zones = db.query(Zone).all()
@@ -49,7 +51,7 @@ def generate_local_response(question: str, db: Session) -> str:
                 highest_zone = (z, latest)
 
     # 1. Which zone is most at risk?
-    if any(phrase in q for phrase in ["most at risk", "highest risk", "worst", "danger", "which zone"]):
+    if any(phrase in q for phrase in ["most at risk", "highest risk", "worst", "danger", "which zone", "highest"]):
         if highest_zone:
             z, r = highest_zone
             factors = json.loads(r.triggering_factors_json) if r.triggering_factors_json else {}
@@ -132,8 +134,7 @@ def generate_local_response(question: str, db: Session) -> str:
         f"• **Monitored Micro-Zones:** {len(zones)} across East Khasi Hills, Meghalaya\n"
         f"• **Active Alerts:** {crit_count} Critical, {high_count} High-risk areas\n"
         f"• **Highest Hazard:** {highest_zone[0].name if highest_zone else 'Sohra'} ({highest_score:.1f}%)\n\n"
-        f"💡 *Tip: You can ask about specific zones (e.g. 'How is Sohra today?'), evacuation protocols, or how to submit reports.*\n\n"
-        f"*(To enable unconstrained open-ended conversation, set GEMINI_API_KEY in your `.env` file.)*"
+        f"💡 *Tip: Ask about specific zones (e.g. 'How is Sohra today?'), evacuation protocols, or how to submit reports.*"
     )
 
 
@@ -141,30 +142,31 @@ def generate_local_response(question: str, db: Session) -> str:
 async def chatbot_query(payload: ChatQuery, db: Session = Depends(get_db)):
     """
     Answer natural-language questions about DRISHTI-AI.
-    Uses Gemini Flash when GEMINI_API_KEY is configured,
-    and falls back to intelligent local domain knowledge otherwise.
+    Uses Gemini API when configured, and falls back to the local telemetry engine.
     """
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    api_key = (os.getenv("GEMINI_API_KEY", "") or getattr(settings, "GEMINI_API_KEY", "")).strip()
 
     if api_key and api_key != "YOUR_GEMINI_API_KEY_HERE":
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-
-            zones = db.query(Zone).all()
-            lines = ["DRISHTI-AI Landslide Early Warning System Context (East Khasi Hills, Meghalaya):"]
-            for z in zones:
-                latest = db.query(RiskScore).filter(RiskScore.zone_id == z.id).order_by(desc(RiskScore.computed_at)).first()
-                if latest:
-                    lines.append(f"- {z.name} ({z.zone_code}): Risk={latest.risk_score}% [{latest.risk_level}], 24h Rain={latest.rainfall_24h}mm, Moisture={latest.soil_moisture}%")
-            lines.append("Answer the user concisely and factually as the DRISHTI-AI emergency assistant.")
-
-            prompt = "\n".join(lines) + f"\n\nUser: {payload.question}\n\nAssistant:"
-            response = model.generate_content(prompt)
-            return {"answer": response.text.strip(), "source": "gemini-flash"}
-        except Exception as e:
-            print(f"[Chatbot] Gemini call note: {e}, using local response engine")
+        for model in ["gemini-3.6-flash", "gemini-flash-latest", "gemini-2.5-flash"]:
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+                prompt = (
+                    "You are DRISHTI-AI assistant for landslide disaster early warning in East Khasi Hills, Meghalaya. "
+                    "Answer concisely, helpfully, and factually. "
+                    f"User question: {payload.question}"
+                )
+                body = {"contents": [{"parts": [{"text": prompt}]}]}
+                req = urllib.request.Request(
+                    url,
+                    data=json.dumps(body).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=7) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    answer = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    return {"answer": answer, "source": f"gemini ({model})"}
+            except Exception:
+                continue
 
     answer = generate_local_response(payload.question, db)
     return {"answer": answer, "source": "local-rag"}

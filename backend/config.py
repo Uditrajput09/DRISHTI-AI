@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Multilingual Translation
     LIBRETRANSLATE_URL: str = Field(default="https://libretranslate.com/translate")
     LIBRETRANSLATE_API_KEY: str = Field(default="")
+    GEMINI_API_KEY: str = Field(default="")
 
     # Alerts
     FAST2SMS_API_KEY: str = Field(default="")
