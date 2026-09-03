@@ -18,6 +18,7 @@ export default function DashboardView({
   roads,
   reports,
   alerts,
+  currentUser,
   onRefreshAll
 }) {
   const [historyPoints, setHistoryPoints] = useState([]);
