@@ -5,6 +5,7 @@ import ZoneInspector from '../components/ZoneInspector';
 import ForecastChart from '../components/ForecastChart';
 import SimulationSandbox from '../components/SimulationSandbox';
 import AlertOutboxDrawer from '../components/AlertOutboxDrawer';
+import ZoneComparison from '../components/ZoneComparison';
 
 export default function DashboardView({
   summary,
@@ -70,6 +71,9 @@ export default function DashboardView({
 
           {/* Multi-Lingual Alert Outbox Feed */}
           <AlertOutboxDrawer alerts={alerts} />
+
+          {/* Zone Comparison Panel */}
+          <ZoneComparison zones={zones} />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# 🎬 3-Minute Hackathon Demo Script — SIH26001
+# 🎬 3-Minute Demo Script — DRISHTI-AI
 
 *Use this exact script for presenting the live system to Smart India Hackathon jury and MDoNER evaluators.*
 
@@ -7,7 +7,7 @@
 ## ⏱️ Minute 0:00 – 0:45 | Problem Framing & Real-Time GIS Map
 
 1. **Opening Hook**:
-   > *"Good morning respected jury members. Landslides in the North Eastern Region are traditionally monitored reactively after roads are blocked and lives are endangered. For Problem Statement SIH26001, we present a proactive, AI-driven landslide early warning and risk monitoring platform focused on the high-vulnerability pilot district of East Khasi Hills, Meghalaya."*
+   > *"Good morning respected jury members. Landslides in the North Eastern Region are traditionally monitored reactively after roads are blocked and lives are endangered. With DRISHTI-AI, we present a proactive, AI-driven landslide early warning and risk monitoring platform focused on the high-vulnerability pilot district of East Khasi Hills, Meghalaya."*
 
 2. **Showcase the GIS Dashboard (`/dashboard`)**:
    - Point out the **Choropleth Risk Zones** over Sohra (Cherrapunji), Mawsynram, and Dawki.

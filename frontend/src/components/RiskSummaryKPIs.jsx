@@ -1,16 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   AlertOctagon, 
   AlertTriangle, 
   CloudRain, 
   ShieldCheck, 
   MapPin, 
-  Activity 
+  Activity,
+  Clock
 } from 'lucide-react';
+
 
 export default function RiskSummaryKPIs({ summary = {} }) {
   const isCritical = (summary.critical_count || 0) > 0;
   const isHigh = (summary.high_count || 0) > 0;
+  const [secondsAgo, setSecondsAgo] = useState(0);
+  const lastLoadRef = useRef(Date.now());
+
+  useEffect(() => {
+    lastLoadRef.current = Date.now();
+    setSecondsAgo(0);
+    const interval = setInterval(() => {
+      setSecondsAgo(Math.floor((Date.now() - lastLoadRef.current) / 1000));
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [summary.highest_risk_score, summary.critical_count]);
+
+  const formatAge = (s) => {
+    if (s < 60) return 'just now';
+    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+    return `${Math.floor(s / 3600)}h ago`;
+  };
+  const freshnessColor = secondsAgo < 120 ? '#10b981' : secondsAgo < 600 ? '#f59e0b' : '#ef4444';
+  const freshnessEmoji = secondsAgo < 120 ? '🟢' : secondsAgo < 600 ? '🟡' : '🔴';
 
   return (
     <div style={{
@@ -73,12 +94,12 @@ export default function RiskSummaryKPIs({ summary = {} }) {
         </div>
       </div>
 
-      {/* 4. Total Monitored Micro-Zones */}
+      {/* 4. Total Monitored Micro-Zones + Freshness */}
       <div className="glass-panel" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ background: 'rgba(99, 102, 241, 0.2)', padding: 10, borderRadius: 12 }}>
           <MapPin size={24} color="#6366f1" />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
             Micro-Zones Grid
           </div>
@@ -86,6 +107,12 @@ export default function RiskSummaryKPIs({ summary = {} }) {
             {summary.total_zones_monitored || 10} Polygons
             <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600, marginLeft: 6 }}>
               • 100% Ingested
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+            <Clock size={11} color={freshnessColor} />
+            <span style={{ fontSize: '0.68rem', color: freshnessColor, fontWeight: 600 }}>
+              {freshnessEmoji} Updated {formatAge(secondsAgo)}
             </span>
           </div>
         </div>

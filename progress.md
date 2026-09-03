@@ -1,4 +1,4 @@
-# Progress Tracker — SIH26001
+# Progress Tracker — DRISHTI-AI
 
 *Purpose: the living status of the build. Update this at the end of every coding session — what got done, what's next, what's blocked. This is the first file to read when resuming work.*
 
@@ -7,7 +7,7 @@
 ---
 
 ## Current Session Focus
-> ✅ Complete end-to-end implementation of SIH26001 MVP (East Khasi Hills, Meghalaya pilot) including FastAPI backend, ML prediction engine, React Leaflet GIS dashboard, offline-first field reporting app, multi-lingual alerts pipeline, Docker setup, and automated tests.
+> ✅ Complete end-to-end implementation of DRISHTI-AI MVP (East Khasi Hills, Meghalaya pilot) including FastAPI backend, ML prediction engine, React Leaflet GIS dashboard, offline-first field reporting app, multi-lingual alerts pipeline, Docker setup, and automated tests.
 
 ---
 
@@ -58,21 +58,21 @@
 - 2026-09-02: Fixed GIS map tile provider by replacing CartoDB with watermark-free Esri Satellite, Topographic Terrain, and OpenStreetMap layers.
 - 2026-09-02: Verified 100% automated test suite pass rate (10/10 passed, 0 failures) and clean Vite production builds.
 - 2026-09-02: Produced `README.md` and `DEMO_SCRIPT.md`.
+- 2026-09-03: Resolved port 8000 conflict, standardized branding, and transformed Field App into a functional PWA.
+- 2026-09-03: Implemented 20-Feature Expansion including Gemini AI Chatbot, Road Blockage Routing, and Multi-layer GIS overlays.
 
 ---
 
 ## In Progress
-- —
+- Connect remaining frontend UI tabs for Pre-monsoon Survey and Leaflet Heatmap / RainViewer radar animated tile overlay.
 
 ---
 
 ## Blockers / Open Questions
-- None. All files tested, fixed, and verified.
+- None.
 
 ---
 
 ## Next Session Starting Point
-1. Run `.\deploy.ps1` (or `python run_dev.py` / `start.bat`) to start both Backend (`http://127.0.0.1:8000`) and Frontend (`http://localhost:5173`).
+1. Run `.\run_dev.ps1` (or `python run_dev.py` / `.\deploy.ps1` / `start.bat`) to start both Backend (`http://127.0.0.1:8000`) and Frontend (`http://localhost:5173`).
 2. Follow `DEMO_SCRIPT.md` for hackathon jury presentations.
-
-

@@ -1,6 +1,6 @@
 """
 backend/config.py
-Configuration and environment variable management for SIH26001.
+Configuration and environment variable management for DRISHTI-AI.
 Reads from system environment and .env file with intelligent defaults.
 """
 

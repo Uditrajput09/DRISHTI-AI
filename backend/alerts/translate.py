@@ -15,28 +15,28 @@ CACHED_TEMPLATES = {
         "critical_header": "🚨 CRITICAL LANDSLIDE RED ALERT",
         "high_header": "⚠️ HIGH LANDSLIDE WARNING",
         "moderate_header": "⚡ MODERATE RISK ADVISORY",
-        "body": "SIH26001 Early Warning: {zone_name} has exceeded critical threshold (Risk: {risk_score}% | Rain: {rainfall_24h}mm). High probability of slope failure/rockfall. Avoid hillside roads and move to designated shelters.",
+        "body": "DRISHTI-AI Early Warning: {zone_name} has exceeded critical threshold (Risk: {risk_score}% | Rain: {rainfall_24h}mm). High probability of slope failure/rockfall. Avoid hillside roads and move to designated shelters.",
         "action": "Immediate evacuation advisory active. Dial 1070/112 for DDMA Meghalaya Rescue."
     },
     "hi": {
         "critical_header": "🚨 अत्यंत गंभीर भूस्खलन चेतावनी (RED ALERT)",
         "high_header": "⚠️ उच्च भूस्खलन चेतावनी (HIGH RISK)",
         "moderate_header": "⚡ मध्यम जोखिम परामर्श",
-        "body": "SIH26001 पूर्व चेतावनी: {zone_name} में भूस्खलन का अत्यधिक खतरा (जोखिम: {risk_score}% | 24 घंटे वर्षा: {rainfall_24h}mm)। पहाड़ी मार्गों पर यात्रा से बचें और सुरक्षित राहत शिविरों में जाएं।",
+        "body": "DRISHTI-AI पूर्व चेतावनी: {zone_name} में भूस्खलन का अत्यधिक खतरा (जोखिम: {risk_score}% | 24 घंटे वर्षा: {rainfall_24h}mm)। पहाड़ी मार्गों पर यात्रा से बचें और सुरक्षित राहत शिविरों में जाएं।",
         "action": "तुरंत सुरक्षित स्थान पर जाएं। आपातकालीन सहायता के लिए 1070 / 112 डायल करें।"
     },
     "kha": {
         "critical_header": "🚨 KA JINGMA BA JUR NA KA JINGTWAD KHYNDEW (RED ALERT)",
         "high_header": "⚠️ KA JINGMA BA HEH NA KA JINGTWAD KHYNDEW",
         "moderate_header": "⚡ KA JINGMA BA MAR-PDENG",
-        "body": "SIH26001 Jingma Mynshuwa: Ha {zone_name} ka don ka jingma ba jur na ka jingtwad khyndew (Jingma: {risk_score}% | Jinghap slap: {rainfall_24h}mm). Kiat na ki surok lum bad leit sha ki jaka ba shngain.",
+        "body": "DRISHTI-AI Jingma Mynshuwa: Ha {zone_name} ka don ka jingma ba jur na ka jingtwad khyndew (Jingma: {risk_score}% | Jinghap slap: {rainfall_24h}mm). Kiat na ki surok lum bad leit sha ki jaka ba shngain.",
         "action": "Sngewbha leit mardor sha ki Shelter. Phone sha 1070/112 na ka bynta ka jingiarap."
     },
     "as": {
         "critical_header": "🚨 জৰুৰী ভূস্খলন সতৰ্কবাৰ্তা (RED ALERT)",
         "high_header": "⚠️ উচ্চ ভূস্খলন সতৰ্কতা (HIGH RISK)",
         "moderate_header": "⚡ মধ্যম বিপদৰ জাননী",
-        "body": "SIH26001 পূৰ্ব সতৰ্কবাৰ্তা: {zone_name} অঞ্চলত প্ৰচণ্ড ভূমিস্খলনৰ সম্ভাৱনা (বিপদৰ মাত্ৰা: {risk_score}% | ২৪ ঘণ্টাত বৰষুণ: {rainfall_24h}mm)। পাহাৰীয়া পথ এৰাই চলক আৰু নিৰাপদ আশ্ৰয়স্থললৈ যাওক।",
+        "body": "DRISHTI-AI পূৰ্ব সতৰ্কবাৰ্তা: {zone_name} অঞ্চলত প্ৰচণ্ড ভূমিস্খলনৰ সম্ভাৱনা (বিপদৰ মাত্ৰা: {risk_score}% | ২৪ ঘণ্টাত বৰষুণ: {rainfall_24h}mm)। পাহাৰীয়া পথ এৰাই চলক আৰু নিৰাপদ আশ্ৰয়স্থললৈ যাওক।",
         "action": "অবিলম্বে সুৰক্ষিত স্থানলৈ যাওক। জৰুৰীকালীন সহায়ৰ বাবে 1070 / 112 নম্বৰত যোগাযোগ কৰক।"
     }
 }

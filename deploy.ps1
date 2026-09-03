@@ -1,6 +1,6 @@
 # ==============================================================================
-# deploy.ps1 — Automated Deployment & Verification Script for SIH26001
-# Smart India Hackathon 2026: AI-Based Landslide Early Warning System
+# deploy.ps1 — Automated Deployment & Verification Script for DRISHTI-AI
+# AI-Based Landslide Early Warning System
 # ==============================================================================
 
 [CmdletBinding()]
@@ -84,7 +84,7 @@ $NpmCmd = if (Get-Command "npm.cmd" -ErrorAction SilentlyContinue) {
     "npm.cmd"
 }
 
-Write-Header "SIH26001 Landslide Early Warning System - Deployment Pipeline"
+Write-Header "DRISHTI-AI Landslide Early Warning System - Deployment Pipeline"
 Write-Host "Selected Mode   : $Mode" -ForegroundColor Cyan
 Write-Host "Pilot District  : East Khasi Hills, Meghalaya" -ForegroundColor Cyan
 Write-Host "Target Directory: $ScriptRoot" -ForegroundColor Cyan

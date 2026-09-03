@@ -1,4 +1,4 @@
-# AGENTS.md — Workspace Rules for SIH26001
+# AGENTS.md — Workspace Rules for DRISHTI-AI
 
 *This file is auto-loaded by Antigravity (and other AGENTS.md-compatible tools) at the start of every session — you don't need to paste it in manually. Keep it short and concrete; put longer context in brain.md / architecture.md / progress.md instead of growing this file.*
 
@@ -7,7 +7,7 @@ Read, in this order: `brain.md` → `architecture.md` → `progress.md`.
 At the end of the session, update `progress.md` (move finished items, note blockers, set the "next session starting point").
 
 ## Project
-AI-based landslide early warning system for SIH26001 (hackathon MVP, deadline 20 Sept 2026). Full context lives in `brain.md`.
+AI-based landslide early warning system (DRISHTI-AI MVP, deadline 20 Sept 2026). Full context lives in `brain.md`.
 
 ## Tech Stack
 - Backend: Python + FastAPI

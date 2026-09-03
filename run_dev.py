@@ -1,6 +1,6 @@
 """
 run_dev.py
-Unified development launcher for SIH26001 Landslide Early Warning System.
+Unified development launcher for DRISHTI-AI Landslide Early Warning System.
 Launches FastAPI backend (port 8000) and React frontend (port 5173) concurrently.
 """
 
@@ -16,7 +16,7 @@ FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 
 def main():
     print("=" * 70)
-    print("  🚀 SIH26001 AI Landslide Early Warning System — Dev Launcher")
+    print("  🚀 DRISHTI-AI Landslide Early Warning System — Dev Launcher")
     print("  Pilot Region: East Khasi Hills, Meghalaya")
     print("=" * 70)
 
@@ -30,7 +30,18 @@ def main():
         print(f"⚠️ Database seed note: {e}")
 
     # 2. Launch FastAPI Backend
-    print("\n[2/3] Starting FastAPI Backend on http://127.0.0.1:8000 ...")
+    from backend.config import settings
+    port = settings.PORT
+
+    # Check if port is already occupied
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        if s.connect_ex(("127.0.0.1", port)) == 0:
+            print(f"⚠️ Warning: Port {port} is already in use by an active process.")
+            print(f"   If you experience HTTP 404 or connection conflicts, stop any background server using port {port}.")
+
+    print(f"\n[2/3] Starting FastAPI Backend on http://127.0.0.1:{port} ...")
     backend_cmd = [
         sys.executable,
         "-m",
@@ -39,7 +50,7 @@ def main():
         "--host",
         "0.0.0.0",
         "--port",
-        "8000",
+        str(port),
         "--reload"
     ]
     backend_proc = subprocess.Popen(

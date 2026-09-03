@@ -14,14 +14,18 @@ import {
   UserCheck
 } from 'lucide-react';
 import { api } from '../api';
+import { useTranslation } from '../hooks/useTranslation';
 
-export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefreshing, currentUser, onOpenAuth, onOpenAndroidModal }) {
+export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefreshing, currentUser, onOpenAuth, onOpenAndroidModal, onLangChange }) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [queueCount, setQueueCount] = useState(api.getOfflineQueue().length);
   const [isSyncingQueue, setIsSyncingQueue] = useState(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState('');
   const [isAlertDrawerOpen, setIsAlertDrawerOpen] = useState(false);
   const [alertList, setAlertList] = useState([]);
+  const { lang, setLang } = useTranslation();
+
+  const handleSetLang = (l) => { setLang(l); if (onLangChange) onLangChange(l); };
 
   const loadAlerts = async () => {
     try {
@@ -138,7 +142,7 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 padding: '2px 8px',
                 borderRadius: 999
               }}>
-                SIH26001
+                AI EARLY WARNING
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -207,7 +211,7 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
             }}
           >
             <Smartphone size={16} />
-            <span>📱 Get Android Citizen App (APK)</span>
+            <span>📱 Citizen Mobile App (Android)</span>
           </button>
         </div>
 
@@ -250,6 +254,28 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
               <span>{syncSuccessMsg}</span>
             </div>
           )}
+
+          {/* Language Toggle */}
+          <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.06)', padding: 3, borderRadius: 8, border: '1px solid var(--border-glass)' }}>
+            {[{code:'en', label:'EN'}, {code:'hi', label:'हि'}, {code:'kha', label:'Ka'}].map(l => (
+              <button
+                key={l.code}
+                id={`lang-btn-${l.code}`}
+                onClick={() => handleSetLang(l.code)}
+                style={{
+                  padding: '4px 9px',
+                  borderRadius: 6,
+                  border: 'none',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  background: lang === l.code ? 'linear-gradient(135deg, #0284c7, #06b6d4)' : 'transparent',
+                  color: lang === l.code ? '#fff' : '#94a3b8',
+                  transition: 'all 0.15s'
+                }}
+              >{l.label}</button>
+            ))}
+          </div>
 
           {/* Refresh Data button */}
           <button

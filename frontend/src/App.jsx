@@ -4,6 +4,7 @@ import DashboardView from './views/DashboardView';
 import SocialFieldAppView from './views/SocialFieldAppView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
+import ChatbotPanel from './components/ChatbotPanel';
 import { api } from './api';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   // Check if opened directly on Mobile / Android Webview or standalone URL
   const [isMobileMode, setIsMobileMode] = useState(() => {
@@ -180,6 +182,41 @@ export default function App() {
         onClose={() => setIsAndroidModalOpen(false)}
         onLaunchMobilePreview={() => setIsMobileMode(true)}
       />
+
+      {/* AI Chatbot FAB Button */}
+      <button
+        id="chatbot-fab-btn"
+        onClick={() => setIsChatbotOpen(p => !p)}
+        title="Open DRISHTI-AI Assistant"
+        style={{
+          position: 'fixed',
+          bottom: 28,
+          right: 28,
+          zIndex: 1999,
+          width: 52,
+          height: 52,
+          borderRadius: '50%',
+          background: isChatbotOpen
+            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+            : 'linear-gradient(135deg, #0284c7, #06b6d4)',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: isChatbotOpen
+            ? '0 8px 24px rgba(239,68,68,0.5)'
+            : '0 8px 24px rgba(6,182,212,0.5)',
+          fontSize: '1.4rem',
+          transition: 'all 0.2s'
+        }}
+      >
+        {isChatbotOpen ? '✕' : '🤖'}
+      </button>
+
+      {isChatbotOpen && (
+        <ChatbotPanel zones={zones} onClose={() => setIsChatbotOpen(false)} />
+      )}
     </div>
   );
 }

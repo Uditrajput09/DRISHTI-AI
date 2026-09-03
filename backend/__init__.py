@@ -1,5 +1,5 @@
 """
-SIH26001 Landslide Early Warning & Risk Monitoring System
+DRISHTI-AI Landslide Early Warning & Risk Monitoring System
 Backend Package Root
 """
 

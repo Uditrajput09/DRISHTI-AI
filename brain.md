@@ -3,7 +3,7 @@
 *Purpose: the single source of truth for "why" behind this project. Read this first in every new session before touching code. Update it whenever a real decision is made — don't let it go stale.*
 
 ## What This Is
-An AI-powered landslide early warning and risk monitoring platform for Smart India Hackathon 2026, Problem Statement **SIH26001**, sponsored by the Ministry of Development of North Eastern Region (MDoNER).
+An AI-powered landslide early warning and risk monitoring platform sponsored by the Ministry of Development of North Eastern Region (MDoNER).
 
 ## Problem Summary
 The North Eastern Region (NER) of India regularly faces landslides, flash floods, road blockages, and slope failures from heavy rainfall, fragile terrain, and unplanned hill cutting. Monitoring today is reactive and manual. We're building a real-time AI prediction + alert + field-reporting system to change that.

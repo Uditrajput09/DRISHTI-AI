@@ -83,6 +83,7 @@ class WeatherReading(Base):
     temperature_c = Column(Float, default=20.0)
     humidity_pct = Column(Float, default=80.0)
     wind_speed_kmh = Column(Float, default=5.0)
+    river_discharge_m3s = Column(Float, default=0.0)  # m3/s from Open-Meteo Flood API
     source = Column(String(50), default="Open-Meteo")  # Open-Meteo, IMD, Simulation
     is_forecast = Column(Boolean, default=False)
 
@@ -166,3 +167,36 @@ class Subscriber(Base):
     zone_id = Column(String(50), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class SOSEvent(Base):
+    """Citizen SOS emergency beacon — GPS distress signal with broadcast status."""
+    __tablename__ = "sos_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lat = Column(Float, nullable=False)
+    lon = Column(Float, nullable=False)
+    reporter_name = Column(String(100), default="Anonymous")
+    contact = Column(String(100), nullable=True)
+    message = Column(Text, nullable=True)
+    acknowledged = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class AnnualSurvey(Base):
+    """Pre-monsoon annual slope vulnerability survey by field officers."""
+    __tablename__ = "annual_surveys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    zone_id = Column(Integer, ForeignKey("zones.id"), nullable=False, index=True)
+    officer_name = Column(String(100), nullable=False)
+    survey_year = Column(Integer, nullable=False)
+    crack_count = Column(Integer, default=0)
+    toe_erosion_severity = Column(String(50), default="None")
+    slope_stability_rating = Column(Integer, default=3)
+    vegetation_cover_pct = Column(Float, default=60.0)
+    drainage_condition = Column(String(50), default="Good")
+    notes = Column(Text, nullable=True)
+    computed_vulnerability_delta = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+

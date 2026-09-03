@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sliders, 
   Play, 
@@ -19,6 +19,31 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
   const [isSimulating, setIsSimulating] = useState(false);
   const [simResult, setSimResult] = useState(null);
   const [simError, setSimError] = useState(null);
+  const [notifPermission, setNotifPermission] = useState('default');
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotifPermission(Notification.permission);
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(p => setNotifPermission(p));
+      }
+    }
+  }, []);
+
+  const fireRiskNotification = (zone_name, risk_level, risk_score, zone_id) => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SHOW_RISK_NOTIFICATION',
+        zone_name, risk_level, risk_score, zone_id
+      });
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(`⚠️ DRISHTI-AI: ${risk_level} Risk — ${zone_name}`, {
+        body: `Risk Index: ${risk_score}% | Immediate attention required.`,
+        icon: '/icon-192.png'
+      });
+    }
+  };
 
   const setPreset = (rain, hrs, sm, name) => {
     setHourlyRain(rain);
@@ -38,6 +63,12 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
       });
       setSimResult(res);
       if (onSimulationComplete) onSimulationComplete(res);
+      // Fire OS push notification for high/critical zones
+      const alertZones = (res.results || []).filter(r => r.risk_level === 'Critical' || r.risk_level === 'High');
+      if (alertZones.length > 0) {
+        const top = alertZones[0];
+        fireRiskNotification(top.zone_name || 'Zone', top.risk_level, top.risk_score, top.zone_id);
+      }
     } catch (err) {
       setSimError(err?.message || 'Simulation failed. Please try again.');
     } finally {

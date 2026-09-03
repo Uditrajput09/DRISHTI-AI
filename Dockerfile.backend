@@ -1,4 +1,4 @@
-# Dockerfile.backend — SIH26001 FastAPI Backend
+# Dockerfile.backend — DRISHTI-AI FastAPI Backend
 FROM python:3.11-slim
 
 WORKDIR /app

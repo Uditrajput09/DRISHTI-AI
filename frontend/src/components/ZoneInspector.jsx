@@ -10,10 +10,13 @@ import {
   Zap 
 } from 'lucide-react';
 import { api } from '../api';
+import { exportZoneRiskPDF } from '../utils/pdfExport';
+import { FileDown } from 'lucide-react';
 
-export default function ZoneInspector({ zone, onAlertDispatched }) {
+export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] }) {
   const [isDispatching, setIsDispatching] = useState(false);
   const [dispatchSuccess, setDispatchSuccess] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!zone) {
     return (
@@ -48,6 +51,17 @@ export default function ZoneInspector({ zone, onAlertDispatched }) {
       alert('Alert dispatch failed: ' + err.message);
     } finally {
       setIsDispatching(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      await exportZoneRiskPDF(zone, alertLogs);
+    } catch (err) {
+      alert('PDF export failed: ' + err.message);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -136,13 +150,13 @@ export default function ZoneInspector({ zone, onAlertDispatched }) {
         </div>
       )}
 
-      {/* Trigger Manual Multi-Lingual Alert Broadcast */}
-      <div style={{ marginTop: 4 }}>
+      {/* Action Buttons Row */}
+      <div style={{ marginTop: 4, display: 'flex', gap: 8 }}>
         <button
           onClick={handleManualAlert}
           disabled={isDispatching}
           style={{
-            width: '100%',
+            flex: 1,
             background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
             color: '#ffffff',
             border: 'none',
@@ -159,8 +173,32 @@ export default function ZoneInspector({ zone, onAlertDispatched }) {
           }}
         >
           <Send size={16} />
-          <span>{isDispatching ? 'Broadcasting to All Channels...' : 'Broadcast Emergency Alert (SMS + Push)'}</span>
+          <span>{isDispatching ? 'Broadcasting...' : 'Broadcast Emergency Alert'}</span>
         </button>
+
+        <button
+          id="export-pdf-btn"
+          onClick={handleExportPDF}
+          disabled={isExporting}
+          title="Export zone risk report as PDF"
+          style={{
+            background: 'rgba(6, 182, 212, 0.15)',
+            color: '#06b6d4',
+            border: '1px solid rgba(6, 182, 212, 0.4)',
+            borderRadius: 10,
+            padding: '10px 14px',
+            fontSize: '0.86rem',
+            fontWeight: 700,
+            cursor: isExporting ? 'wait' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+        >
+          <FileDown size={16} />
+          <span>{isExporting ? '...' : 'PDF'}</span>
+        </button>
+      </div>
 
         {dispatchSuccess && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#34d399', fontSize: '0.78rem', fontWeight: 600, marginTop: 8, justifyContent: 'center' }}>
@@ -168,7 +206,7 @@ export default function ZoneInspector({ zone, onAlertDispatched }) {
             <span>{dispatchSuccess}</span>
           </div>
         )}
-      </div>
     </div>
   );
 }
+

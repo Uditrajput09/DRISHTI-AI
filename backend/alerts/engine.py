@@ -16,7 +16,7 @@ from backend.alerts.push import push_service
 
 
 class AlertDispatchEngine:
-    """Core alert orchestration engine for SIH26001."""
+    """Core alert orchestration engine for DRISHTI-AI."""
 
     def __init__(self):
         self.threshold = settings.RISK_ALERT_THRESHOLD

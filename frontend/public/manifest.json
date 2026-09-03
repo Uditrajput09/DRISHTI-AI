@@ -1,0 +1,25 @@
+{
+  "short_name": "DRISHTI-AI",
+  "name": "DRISHTI-AI Landslide Early Warning & Citizen Reporting",
+  "description": "AI-Based Landslide Early Warning and Disaster Field Reporting System",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/?mode=mobile",
+  "background_color": "#090d16",
+  "theme_color": "#0284c7",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["weather", "government", "utilities"]
+}

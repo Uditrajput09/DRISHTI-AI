@@ -1,4 +1,4 @@
-# Dockerfile.frontend — SIH26001 React GIS Frontend
+# Dockerfile.frontend — DRISHTI-AI React GIS Frontend
 # Build Stage
 FROM node:20-alpine AS build
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   MapContainer, 
   TileLayer, 
@@ -7,7 +7,8 @@ import {
   Popup, 
   Polyline, 
   CircleMarker, 
-  LayersControl 
+  LayersControl,
+  useMap
 } from 'react-leaflet';
 import L from 'leaflet';
 import { 
@@ -18,8 +19,18 @@ import {
   Eye, 
   Layers, 
   CheckCircle, 
-  Radio
+  Radio,
+  LocateFixed
 } from 'lucide-react';
+
+// Sub-component that imperatively controls the map (must be inside MapContainer)
+function MapController({ userLocation }) {
+  const map = useMap();
+  if (userLocation) {
+    map.setView([userLocation.lat, userLocation.lon], Math.max(map.getZoom(), 13));
+  }
+  return null;
+}
 
 // Custom Map Marker Icons using HTML DivIcons
 const createCustomIcon = (bgColor, iconText) => {
@@ -67,6 +78,21 @@ export default function GisMap({
     roads: true,
     reports: true
   });
+  const [userLocation, setUserLocation] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
+
+  const handleLocateMe = useCallback(() => {
+    if (!navigator.geolocation) return alert('Geolocation not supported by your browser.');
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setIsLocating(false);
+      },
+      (err) => { alert('Location access denied or unavailable.'); setIsLocating(false); },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }, []);
 
   const toggleLayer = (layerName) => {
     setVisibleLayers(prev => ({ ...prev, [layerName]: !prev[layerName] }));
@@ -176,6 +202,25 @@ export default function GisMap({
             <input type="checkbox" checked={visibleLayers.reports} onChange={() => toggleLayer('reports')} />
             <span>Citizen Field Reports ({reports.length})</span>
           </label>
+
+          {/* My Location Button */}
+          <button
+            id="locate-me-btn"
+            onClick={handleLocateMe}
+            disabled={isLocating}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              marginTop: 4,
+              background: userLocation ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255,255,255,0.06)',
+              color: userLocation ? '#06b6d4' : '#94a3b8',
+              border: `1px solid ${userLocation ? 'rgba(6,182,212,0.4)' : 'var(--border-glass)'}`,
+              borderRadius: 8, padding: '5px 10px',
+              fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', width: '100%'
+            }}
+          >
+            <LocateFixed size={13} />
+            <span>{isLocating ? 'Locating...' : userLocation ? '📍 Location Found' : '📍 My Location'}</span>
+          </button>
         </div>
       </div>
 
@@ -222,6 +267,7 @@ export default function GisMap({
         style={{ width: '100%', height: '100%' }}
         zoomControl={false}
       >
+        <MapController userLocation={userLocation} />
         {activeBaseMap === 'satellite' && (
           <TileLayer
             attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
@@ -400,6 +446,26 @@ export default function GisMap({
             </Marker>
           );
         })}
+        {/* 5. My Location Pin */}
+        {userLocation && (
+          <>
+            <CircleMarker
+              center={[userLocation.lat, userLocation.lon]}
+              radius={10}
+              pathOptions={{ color: '#06b6d4', fillColor: '#06b6d4', fillOpacity: 0.35, weight: 3 }}
+            >
+              <Popup>
+                <div style={{ color: '#fff', fontWeight: 700 }}>📍 You are here</div>
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{userLocation.lat.toFixed(5)}, {userLocation.lon.toFixed(5)}</div>
+              </Popup>
+            </CircleMarker>
+            <CircleMarker
+              center={[userLocation.lat, userLocation.lon]}
+              radius={18}
+              pathOptions={{ color: '#06b6d4', fillColor: 'transparent', fillOpacity: 0, weight: 1.5, dashArray: '4,4' }}
+            />
+          </>
+        )}
       </MapContainer>
     </div>
   );

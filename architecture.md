@@ -1,4 +1,4 @@
-# Architecture — SIH26001 Landslide Early Warning System
+# Architecture — DRISHTI-AI Landslide Early Warning System
 
 *Purpose: the technical map of the system. Keep this in sync with what's actually built — if code diverges from this doc, update the doc, don't let it rot.*
 

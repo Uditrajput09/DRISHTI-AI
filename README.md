@@ -1,13 +1,13 @@
-# SIH26001: AI-Based Early Warning & Landslide Risk Monitoring Platform for the North Eastern Region (NER) of India
+# DRISHTI-AI: AI-Based Early Warning & Landslide Risk Monitoring Platform for the North Eastern Region (NER) of India
 
-[![SIH 2026](https://img.shields.io/badge/Smart%20India%20Hackathon-2026-orange.svg)](https://sih.gov.in)
+[![AI Warning](https://img.shields.io/badge/Disaster%20Management-Early%20Warning-orange.svg)](#)
 [![MDoNER](https://img.shields.io/badge/Sponsor-MDoNER-blue.svg)](https://mdoner.gov.in)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Leaflet-61dafb.svg)](https://react.dev)
 [![ML](https://img.shields.io/badge/ML%20Model-Random%20Forest%20(ROC--AUC%200.99)-success.svg)](https://scikit-learn.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An end-to-end, real-time AI-powered landslide susceptibility classifier, interactive GIS monitoring dashboard, offline-first citizen incident reporting app, and multi-lingual emergency alerting pipeline designed for Smart India Hackathon 2026, Problem Statement **SIH26001**, sponsored by the **Ministry of Development of North Eastern Region (MDoNER)**.
+An end-to-end, real-time AI-powered landslide susceptibility classifier, interactive GIS monitoring dashboard, offline-first citizen incident reporting app, and multi-lingual emergency alerting pipeline sponsored by the **Ministry of Development of North Eastern Region (MDoNER)**.
 
 ---
 
@@ -113,8 +113,8 @@ flowchart TD
 
 ### 1. Clone & Configure Environment
 ```bash
-git clone https://github.com/your-team/sih26001-landslide-early-warning.git
-cd sih26001-landslide-early-warning
+git clone https://github.com/Uditrajput09/DRISHTI-AI.git
+cd DRISHTI-AI
 
 # Copy example environment configuration
 cp env.example .env

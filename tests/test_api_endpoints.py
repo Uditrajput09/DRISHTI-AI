@@ -1,6 +1,6 @@
 """
 tests/test_api_endpoints.py
-Automated end-to-end API and ML validation tests for SIH26001.
+Automated end-to-end API and ML validation tests for DRISHTI-AI.
 """
 
 import pytest
@@ -15,7 +15,7 @@ def test_root_endpoint():
     resp = client.get("/")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["project"] == "SIH26001 AI Landslide Early Warning System"
+    assert data["project"] == "DRISHTI-AI Landslide Early Warning System"
     assert "East Khasi Hills" in data["pilot_district"]
 
 
