@@ -5,9 +5,28 @@ import SocialFieldAppView from './views/SocialFieldAppView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import ChatbotPanel from './components/ChatbotPanel';
+import LoginView from './views/LoginView';
+import HomeFeedView from './views/HomeFeedView';
+import ProfileView from './views/ProfileView';
+import { authService } from './services/authService';
 import { api } from './api';
+import { ArrowLeft } from 'lucide-react';
 
 export default function App() {
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState(() => {
+    return authService.getCurrentUser();
+  });
+
+  // Navigation / Route State: default to '/app' (Original GIS Dashboard Command Center)
+  const [currentPath, setCurrentPath] = useState(() => {
+    const p = window.location.pathname;
+    if (p === '/home') return '/home';
+    if (p === '/profile') return '/profile';
+    if (p === '/login') return '/login';
+    return '/app';
+  });
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [summary, setSummary] = useState({});
   const [zones, setZones] = useState([]);
@@ -26,21 +45,23 @@ export default function App() {
     return window.location.search.includes('mode=mobile') || window.location.hash.includes('mobile');
   });
 
-  // User Authentication / Persona State
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('drishti_current_user');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {
-      role: 'citizen',
-      name: 'Community Responder',
-      phone: '+91-8630868896',
-      district: 'East Khasi Hills',
-      language: 'en',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'
+  const navigateTo = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const p = window.location.pathname;
+      if (['/home', '/profile', '/app', '/login'].includes(p)) {
+        setCurrentPath(p);
+      } else {
+        setCurrentPath('/app');
+      }
     };
-  });
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const loadAllData = async () => {
     try {
@@ -61,7 +82,6 @@ export default function App() {
       setAlerts(alertRes);
 
       if (zonesRes.length > 0 && !selectedZone) {
-        // Select highest risk zone by default
         const highest = [...zonesRes].sort((a, b) => b.risk_score - a.risk_score)[0];
         setSelectedZone(highest || zonesRes[0]);
       }
@@ -72,7 +92,6 @@ export default function App() {
 
   useEffect(() => {
     loadAllData();
-    // Background refresh every 30 seconds
     const interval = setInterval(loadAllData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -93,7 +112,6 @@ export default function App() {
   if (isMobileMode) {
     return (
       <div style={{ minHeight: '100vh', background: '#090d16', padding: '10px 0' }}>
-        {/* Top Exit Banner for Desktop Testers */}
         <div style={{
           maxWidth: 720,
           margin: '0 auto 10px',
@@ -142,8 +160,82 @@ export default function App() {
     );
   }
 
+  // Router Dispatching
+  if (currentPath === '/login') {
+    return (
+      <LoginView
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          navigateTo('/app');
+        }}
+        onNavigate={navigateTo}
+      />
+    );
+  }
+
+  if (currentPath === '/home') {
+    return (
+      <HomeFeedView
+        currentUser={currentUser}
+        onNavigate={navigateTo}
+        summary={summary}
+        zones={zones}
+        selectedZone={selectedZone}
+        setSelectedZone={setSelectedZone}
+        facilities={facilities}
+        roads={roads}
+        reports={reports}
+        alerts={alerts}
+        onRefreshAll={handleRefreshAll}
+      />
+    );
+  }
+
+  if (currentPath === '/profile') {
+    return (
+      <ProfileView
+        currentUser={currentUser}
+        setCurrentUser={setCurrentUser}
+        onNavigate={navigateTo}
+      />
+    );
+  }
+
+  // '/app' -> EXISTING SentinelWatch GIS Dashboard Command Center
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Shortcut bar to switch back to Social App Feed */}
+      <div style={{
+        backgroundColor: '#060608',
+        borderBottom: '1px solid rgba(255, 110, 199, 0.2)',
+        padding: '6px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '0.78rem'
+      }}>
+        <button
+          onClick={() => navigateTo('/home')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#FF6EC7',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontWeight: 600
+          }}
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Social Feed & Community Updates</span>
+        </button>
+
+        <span style={{ color: '#4FD8EA', fontWeight: 600 }}>
+          GIS Command Center Mode
+        </span>
+      </div>
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}

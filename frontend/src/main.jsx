@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 
 // Register PWA Service Worker for offline support & mobile installation
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+if ('serviceWorker' in navigator && (import.meta.env?.PROD || (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production'))) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch((err) => {
       console.log('SW registration note:', err);
