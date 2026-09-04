@@ -15,7 +15,7 @@ const METRICS = [
 ];
 
 const LEVEL_COLOR = {
-  Critical: "#ef4444", High: "#f97316", Medium: "#f59e0b", Low: "#10b981",
+  Critical: "#FF6EC7", High: "#7873F5", Medium: "#4FD8EA", Low: "#52D199",
 };
 
 export default function ZoneComparison({ zones = [] }) {
@@ -27,14 +27,15 @@ export default function ZoneComparison({ zones = [] }) {
   const zoneB = zones.find((z) => String(z.id) === zoneBId);
 
   const selectStyle = {
-    background: "rgba(15, 23, 42, 0.8)",
-    color: "#e2e8f0",
-    border: "1px solid var(--border-glass)",
-    borderRadius: 8,
+    background: "rgba(20, 20, 30, 0.85)",
+    color: "#f8fafc",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: 10,
     padding: "6px 10px",
     fontSize: "0.8rem",
     flex: 1,
     cursor: "pointer",
+    fontFamily: "Space Grotesk, sans-serif"
   };
 
   return (

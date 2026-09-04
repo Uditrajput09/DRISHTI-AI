@@ -8,6 +8,7 @@ import ChatbotPanel from './components/ChatbotPanel';
 import LoginView from './views/LoginView';
 import HomeFeedView from './views/HomeFeedView';
 import ProfileView from './views/ProfileView';
+import HoloNavbar from './components/HoloNavbar';
 import { authService } from './services/authService';
 import { api } from './api';
 import { ArrowLeft } from 'lucide-react';
@@ -111,35 +112,34 @@ export default function App() {
   // If in Standalone Mobile Mode (Android App Simulation)
   if (isMobileMode) {
     return (
-      <div style={{ minHeight: '100vh', background: '#090d16', padding: '10px 0' }}>
+      <div style={{ minHeight: '100vh', background: '#060608', padding: '12px 0 90px' }}>
         <div style={{
           maxWidth: 720,
-          margin: '0 auto 10px',
-          padding: '8px 16px',
+          margin: '0 auto 14px',
+          padding: '10px 18px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'rgba(6, 182, 212, 0.15)',
-          border: '1px solid rgba(6, 182, 212, 0.3)',
-          borderRadius: 12
+          background: 'rgba(15, 15, 20, 0.85)',
+          backgroundImage: 'linear-gradient(rgba(15,15,20,0.85), rgba(15,15,20,0.85)), linear-gradient(90deg, #FF6EC7, #7873F5, #4FD8EA)',
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'padding-box, border-box',
+          border: '1px solid transparent',
+          borderRadius: 14,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
         }}>
-          <span style={{ fontSize: '0.78rem', color: '#67e8f9', fontWeight: 700 }}>
-            📱 Standalone Android App (APK Simulation)
+          <span style={{ fontSize: '0.82rem', color: '#4FD8EA', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span className="holo-live-dot" /> 📱 Standalone Citizen App (APK Simulation)
           </span>
           <button
             onClick={() => setIsMobileMode(false)}
+            className="holo-btn-primary"
             style={{
-              background: '#0284c7',
-              border: 'none',
-              color: '#fff',
               fontSize: '0.74rem',
-              fontWeight: 700,
-              padding: '4px 10px',
-              borderRadius: 6,
-              cursor: 'pointer'
+              padding: '6px 14px'
             }}
           >
-            Switch to Desktop GIS Command Center 🖥️
+            Switch to GIS Command 🖥️
           </button>
         </div>
 
@@ -201,41 +201,9 @@ export default function App() {
     );
   }
 
-  // '/app' -> EXISTING SentinelWatch GIS Dashboard Command Center
+  // '/app' -> Unified SentinelWatch GIS Dashboard Command Center
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Shortcut bar to switch back to Social App Feed */}
-      <div style={{
-        backgroundColor: '#060608',
-        borderBottom: '1px solid rgba(255, 110, 199, 0.2)',
-        padding: '6px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        fontSize: '0.78rem'
-      }}>
-        <button
-          onClick={() => navigateTo('/home')}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#FF6EC7',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontWeight: 600
-          }}
-        >
-          <ArrowLeft size={14} />
-          <span>Back to Social Feed & Community Updates</span>
-        </button>
-
-        <span style={{ color: '#4FD8EA', fontWeight: 600 }}>
-          GIS Command Center Mode
-        </span>
-      </div>
-
+    <div style={{ minHeight: '100vh', backgroundColor: '#060608', display: 'flex', flexDirection: 'column', paddingBottom: 90 }}>
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -262,6 +230,14 @@ export default function App() {
         />
       </main>
 
+      {/* Bottom Sticky Navigation Bar matching Home Feed */}
+      <HoloNavbar
+        currentPath="/app"
+        onNavigate={navigateTo}
+        currentUser={currentUser}
+        onlyBottomNav={true}
+      />
+
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -275,32 +251,32 @@ export default function App() {
         onLaunchMobilePreview={() => setIsMobileMode(true)}
       />
 
-      {/* AI Chatbot FAB Button */}
+      {/* AI Chatbot FAB Button floating smoothly above bottom nav */}
       <button
         id="chatbot-fab-btn"
         onClick={() => setIsChatbotOpen(p => !p)}
         title="Open DRISHTI-AI Assistant"
         style={{
           position: 'fixed',
-          bottom: 28,
-          right: 28,
+          bottom: 74,
+          right: 24,
           zIndex: 1999,
-          width: 52,
-          height: 52,
+          width: 50,
+          height: 50,
           borderRadius: '50%',
           background: isChatbotOpen
-            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-            : 'linear-gradient(135deg, #0284c7, #06b6d4)',
-          border: 'none',
+            ? 'linear-gradient(135deg, #FF6EC7, #7873F5)'
+            : 'linear-gradient(135deg, #7873F5, #4FD8EA)',
+          border: '2px solid rgba(255, 255, 255, 0.25)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: isChatbotOpen
-            ? '0 8px 24px rgba(239,68,68,0.5)'
-            : '0 8px 24px rgba(6,182,212,0.5)',
-          fontSize: '1.4rem',
-          transition: 'all 0.2s'
+            ? '0 8px 24px rgba(255, 110, 199, 0.5)'
+            : '0 8px 24px rgba(120, 115, 245, 0.5)',
+          fontSize: '1.3rem',
+          transition: 'all 0.25s ease'
         }}
       >
         {isChatbotOpen ? '✕' : '🤖'}

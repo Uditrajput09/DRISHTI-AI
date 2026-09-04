@@ -97,13 +97,18 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
 
   return (
     <header style={{
-      background: 'rgba(11, 17, 30, 0.95)',
-      backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid var(--border-glass)',
       position: 'sticky',
       top: 0,
       zIndex: 1000,
-      padding: '12px 24px'
+      backgroundColor: '#060608',
+      backgroundImage: 'linear-gradient(rgba(15,15,20,0.88), rgba(15,15,20,0.88)), linear-gradient(90deg, rgba(255,110,199,0.35), rgba(120,115,245,0.35), rgba(79,216,234,0.35))',
+      backgroundOrigin: 'border-box',
+      backgroundClip: 'padding-box, border-box',
+      borderBottom: '1px solid transparent',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      padding: '12px 24px',
+      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.6)'
     }}>
       <div style={{
         maxWidth: 1600,
@@ -117,46 +122,34 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
         {/* Left: Brand & Pilot Region */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
-            width: 44,
-            height: 44,
+            background: 'linear-gradient(135deg, #FF6EC7, #7873F5, #4FD8EA)',
+            width: 42,
+            height: 42,
             borderRadius: 12,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)'
+            boxShadow: '0 0 16px rgba(120, 115, 245, 0.5)'
           }}>
-            <Mountain size={24} color="#ffffff" strokeWidth={2.5} />
+            <ShieldAlert size={22} color="#ffffff" strokeWidth={2.5} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
-                DRISHTI_Ai <span style={{ color: '#06b6d4', fontWeight: 600 }}>Landslide Warning</span>
+              <h1 className="holo-gradient-text" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
+                DRISHTI_Ai <span style={{ color: '#4FD8EA', fontWeight: 600 }}>• SentinelWatch</span>
               </h1>
-              <span style={{
-                background: 'rgba(6, 182, 212, 0.15)',
-                color: '#67e8f9',
-                border: '1px solid rgba(6, 182, 212, 0.4)',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: 999
-              }}>
+              <span className="holo-badge-critical" style={{ fontSize: '0.68rem', padding: '2px 8px' }}>
                 AI EARLY WARNING
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              <span>📍 Pilot: <strong style={{ color: '#e2e8f0' }}>East Khasi Hills, Meghalaya</strong></span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: '#94a3b8' }}>
+              <span>📍 Pilot: <strong style={{ color: '#f8fafc' }}>East Khasi Hills, Meghalaya</strong></span>
               <span>•</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <span style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  background: isOnline ? '#10b981' : '#f59e0b',
-                  boxShadow: isOnline ? '0 0 8px #10b981' : '0 0 8px #f59e0b'
-                }}></span>
-                {isOnline ? 'Real-Time Telemetry' : 'Offline Mode (Local Engine)'}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <span className={isOnline ? 'holo-live-dot' : ''} style={!isOnline ? { width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' } : {}} />
+                <span style={{ color: isOnline ? '#4FD8EA' : '#f59e0b' }}>
+                  {isOnline ? 'Real-Time Telemetry' : 'Offline Mode (Local Engine)'}
+                </span>
               </span>
             </div>
           </div>
@@ -167,10 +160,10 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          background: 'rgba(17, 24, 39, 0.8)',
+          background: 'rgba(255, 255, 255, 0.04)',
           padding: 4,
-          borderRadius: 12,
-          border: '1px solid var(--border-glass)'
+          borderRadius: 14,
+          border: '1px solid rgba(255, 255, 255, 0.08)'
         }}>
           <button
             onClick={() => setActiveTab('dashboard')}
@@ -179,39 +172,36 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
               alignItems: 'center',
               gap: 8,
               padding: '8px 18px',
-              borderRadius: 8,
+              borderRadius: 10,
               border: 'none',
               cursor: 'pointer',
+              fontFamily: 'Space Grotesk, sans-serif',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.86rem',
               transition: 'all 0.2s',
-              background: activeTab === 'dashboard' ? 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)' : 'transparent',
-              color: activeTab === 'dashboard' ? '#ffffff' : 'var(--text-secondary)'
+              background: activeTab === 'dashboard' ? 'linear-gradient(120deg, #FF6EC7, #7873F5)' : 'transparent',
+              color: activeTab === 'dashboard' ? '#ffffff' : '#94a3b8',
+              boxShadow: activeTab === 'dashboard' ? '0 0 16px rgba(120, 115, 245, 0.4)' : 'none'
             }}
           >
-            <Map size={18} />
-            <span>GIS Risk Command Center</span>
+            <Map size={17} />
+            <span>GIS Risk Command</span>
           </button>
 
           <button
             onClick={onOpenAndroidModal}
+            className="holo-btn-secondary"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
               padding: '8px 16px',
-              borderRadius: 8,
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              transition: 'all 0.2s',
-              background: 'rgba(16, 185, 129, 0.15)',
-              color: '#34d399'
+              borderRadius: 10,
+              fontSize: '0.82rem'
             }}
           >
-            <Smartphone size={16} />
-            <span>📱 Citizen Mobile App (Android)</span>
+            <Smartphone size={16} color="#4FD8EA" />
+            <span>📱 Citizen App (Android)</span>
           </button>
         </div>
 
@@ -226,11 +216,11 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                background: 'rgba(245, 158, 11, 0.2)',
-                color: '#fbbf24',
-                border: '1px solid rgba(245, 158, 11, 0.5)',
+                background: 'rgba(79, 216, 234, 0.15)',
+                color: '#7EE8F5',
+                border: '1px solid rgba(79, 216, 234, 0.4)',
                 padding: '6px 12px',
-                borderRadius: 8,
+                borderRadius: 10,
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 cursor: isOnline ? 'pointer' : 'not-allowed'
@@ -246,7 +236,7 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
               display: 'flex',
               alignItems: 'center',
               gap: 5,
-              color: '#34d399',
+              color: '#6EE7B7',
               fontSize: '0.8rem',
               fontWeight: 600
             }}>
@@ -256,7 +246,7 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
           )}
 
           {/* Language Toggle */}
-          <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.06)', padding: 3, borderRadius: 8, border: '1px solid var(--border-glass)' }}>
+          <div style={{ display: 'flex', gap: 2, background: 'rgba(255, 255, 255, 0.05)', padding: 3, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
             {[{code:'en', label:'EN'}, {code:'hi', label:'हि'}, {code:'kha', label:'Ka'}].map(l => (
               <button
                 key={l.code}
@@ -264,13 +254,15 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 onClick={() => handleSetLang(l.code)}
                 style={{
                   padding: '4px 9px',
-                  borderRadius: 6,
+                  borderRadius: 8,
                   border: 'none',
                   fontSize: '0.78rem',
+                  fontFamily: 'Space Grotesk, sans-serif',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  background: lang === l.code ? 'linear-gradient(135deg, #0284c7, #06b6d4)' : 'transparent',
-                  color: lang === l.code ? '#fff' : '#94a3b8',
+                  background: lang === l.code ? 'linear-gradient(120deg, #FF6EC7, #7873F5)' : 'transparent',
+                  color: lang === l.code ? '#ffffff' : '#94a3b8',
+                  boxShadow: lang === l.code ? '0 0 10px rgba(120, 115, 245, 0.4)' : 'none',
                   transition: 'all 0.15s'
                 }}
               >{l.label}</button>
@@ -282,22 +274,19 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
             onClick={onRefreshAll}
             disabled={isRefreshing}
             title="Poll live Open-Meteo & IMD data"
+            className="holo-btn-secondary"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              background: 'rgba(255, 255, 255, 0.06)',
-              color: '#e2e8f0',
-              border: '1px solid var(--border-glass)',
               padding: '7px 14px',
-              borderRadius: 8,
+              borderRadius: 10,
               fontSize: '0.82rem',
-              fontWeight: 500,
               cursor: isRefreshing ? 'wait' : 'pointer'
             }}
           >
             <RefreshCw size={14} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
-            <span>{isRefreshing ? 'Polling APIs...' : 'Refresh Live'}</span>
+            <span>{isRefreshing ? 'Polling...' : 'Refresh Live'}</span>
           </button>
 
           {/* DDMA Helpline */}
@@ -305,12 +294,13 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            background: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#fca5a5',
+            background: 'rgba(255, 110, 199, 0.15)',
+            border: '1px solid rgba(255, 110, 199, 0.4)',
+            color: '#FF9AD7',
             padding: '6px 12px',
-            borderRadius: 8,
+            borderRadius: 10,
             fontSize: '0.8rem',
+            fontFamily: 'Space Grotesk, sans-serif',
             fontWeight: 700
           }}>
             <PhoneCall size={14} />
@@ -328,9 +318,9 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 justifyContent: 'center',
                 width: 38,
                 height: 38,
-                background: isAlertDrawerOpen ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.06)',
-                color: isAlertDrawerOpen ? '#ef4444' : '#f8fafc',
-                border: isAlertDrawerOpen ? '1px solid #ef4444' : '1px solid var(--border-glass)',
+                background: isAlertDrawerOpen ? 'rgba(255, 110, 199, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                color: isAlertDrawerOpen ? '#FF6EC7' : '#f8fafc',
+                border: isAlertDrawerOpen ? '1px solid #FF6EC7' : '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: 10,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -368,11 +358,11 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 right: 0,
                 width: 380,
                 maxHeight: 520,
-                background: 'rgba(15, 23, 42, 0.98)',
+                background: 'rgba(12, 12, 18, 0.98)',
                 backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
-                borderRadius: 14,
-                boxShadow: '0 16px 36px rgba(0, 0, 0, 0.6)',
+                border: '1px solid rgba(255, 110, 199, 0.4)',
+                borderRadius: 16,
+                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px rgba(255, 110, 199, 0.2)',
                 zIndex: 2000,
                 display: 'flex',
                 flexDirection: 'column',
@@ -381,26 +371,19 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 {/* Drawer Header */}
                 <div style={{
                   padding: '12px 16px',
-                  borderBottom: '1px solid var(--border-glass)',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  background: 'rgba(239, 68, 68, 0.1)'
+                  background: 'linear-gradient(90deg, rgba(255, 110, 199, 0.2), rgba(120, 115, 245, 0.2))'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <ShieldAlert size={18} color="#ef4444" />
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc' }}>
+                    <ShieldAlert size={18} color="#FF6EC7" />
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc', fontFamily: 'Space Grotesk, sans-serif' }}>
                       Disaster Alerts & Push Center
                     </span>
                   </div>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    background: 'rgba(16, 185, 129, 0.2)',
-                    color: '#34d399',
-                    padding: '2px 6px',
-                    borderRadius: 6
-                  }}>
+                  <span className="holo-badge-moderate" style={{ fontSize: '0.68rem', padding: '2px 8px' }}>
                     FCM & SMS Ready
                   </span>
                 </div>
@@ -421,17 +404,18 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                   ) : (
                     alertList.map((item, idx) => (
                       <div key={idx} style={{
-                        background: 'rgba(30, 41, 59, 0.7)',
-                        border: item.risk_level === 'Critical' ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-glass)',
-                        borderRadius: 10,
+                        background: 'rgba(20, 20, 30, 0.75)',
+                        border: item.risk_level === 'Critical' ? '1px solid rgba(255, 110, 199, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: 12,
                         padding: '10px 12px'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                           <span style={{
                             fontSize: '0.72rem',
                             fontWeight: 800,
-                            color: item.risk_level === 'Critical' ? '#ef4444' : '#f59e0b',
-                            textTransform: 'uppercase'
+                            color: item.risk_level === 'Critical' ? '#FF9AD7' : '#7EE8F5',
+                            textTransform: 'uppercase',
+                            fontFamily: 'Space Grotesk, sans-serif'
                           }}>
                             {item.risk_level || 'ALERT'} • {item.zone_name || 'East Khasi Hills'}
                           </span>
@@ -454,8 +438,8 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                 {/* Drawer Footer Actions */}
                 <div style={{
                   padding: '10px 14px',
-                  borderTop: '1px solid var(--border-glass)',
-                  background: 'rgba(15, 23, 42, 0.95)',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'rgba(15, 15, 20, 0.95)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center'
@@ -469,29 +453,20 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
                         console.error(e);
                       }
                     }}
+                    className="holo-btn-primary"
                     style={{
-                      background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
-                      border: 'none',
-                      borderRadius: 6,
-                      color: '#ffffff',
-                      padding: '5px 10px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
+                      padding: '6px 14px',
+                      fontSize: '0.75rem'
                     }}
                   >
                     ⚡ Trigger Test Broadcast
                   </button>
                   <button
                     onClick={() => setIsAlertDrawerOpen(false)}
+                    className="holo-btn-secondary"
                     style={{
-                      background: 'transparent',
-                      border: '1px solid var(--border-glass)',
-                      borderRadius: 6,
-                      color: '#94a3b8',
-                      padding: '5px 10px',
-                      fontSize: '0.75rem',
-                      cursor: 'pointer'
+                      padding: '5px 12px',
+                      fontSize: '0.75rem'
                     }}
                   >
                     Close
@@ -508,37 +483,35 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              background: currentUser?.role === 'official' 
-                ? 'rgba(2, 132, 199, 0.15)' 
-                : 'rgba(16, 185, 129, 0.15)',
-              border: currentUser?.role === 'official'
-                ? '1px solid rgba(6, 182, 212, 0.4)'
-                : '1px solid rgba(16, 185, 129, 0.4)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(120, 115, 245, 0.4)',
               padding: '4px 12px 4px 6px',
               borderRadius: 24,
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
           >
-            <img
-              src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-              alt="User Avatar"
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '2px solid rgba(255, 255, 255, 0.2)'
-              }}
-            />
+            <div className="avatar-ring-gradient" style={{ padding: 1.5 }}>
+              <img
+                src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                alt="User Avatar"
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  display: 'block'
+                }}
+              />
+            </div>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.1, fontFamily: 'Space Grotesk, sans-serif' }}>
                 {currentUser?.name ? currentUser.name.split(' ')[0] : 'Sign In'}
               </div>
               <div style={{
                 fontSize: '0.62rem',
                 fontWeight: 700,
-                color: currentUser?.role === 'official' ? '#38bdf8' : '#34d399',
+                color: currentUser?.role === 'official' ? '#7EE8F5' : '#6EE7B7',
                 textTransform: 'uppercase'
               }}>
                 {currentUser?.role === 'official' ? 'DDMA Official' : 'Citizen'}

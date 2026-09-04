@@ -45,19 +45,16 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(5, 10, 20, 0.85)',
-      backdropFilter: 'blur(16px)',
+      background: 'rgba(6, 6, 8, 0.88)',
+      backdropFilter: 'blur(20px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 3500,
       padding: 16
     }}>
-      <div style={{
-        background: 'rgba(15, 23, 42, 0.98)',
-        border: '1px solid rgba(6, 182, 212, 0.4)',
-        borderRadius: 20,
-        boxShadow: '0 24px 64px rgba(0, 0, 0, 0.75)',
+      <div className="holo-card" style={{
+        boxShadow: '0 24px 64px rgba(0, 0, 0, 0.8), 0 0 32px rgba(120, 115, 245, 0.25)',
         width: '100%',
         maxWidth: 540,
         overflow: 'hidden',
@@ -66,29 +63,30 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
         {/* Modal Header */}
         <div style={{
           padding: '18px 24px 14px',
-          borderBottom: '1px solid var(--border-glass)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(2, 132, 199, 0.05) 100%)'
+          background: 'linear-gradient(90deg, rgba(255, 110, 199, 0.15), rgba(120, 115, 245, 0.15))'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 38,
               height: 38,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #FF6EC7, #7873F5, #4FD8EA)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              boxShadow: '0 0 12px rgba(120, 115, 245, 0.4)'
             }}>
               <Smartphone size={20} color="#ffffff" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
                 DRISHTI_Ai Citizen Mobile App
               </h2>
-              <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.72rem', color: '#4FD8EA', fontWeight: 700 }}>
                 Installable Android App & Citizen Field Reporter
               </span>
             </div>
@@ -115,8 +113,8 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
         {/* Mode Selector Tabs */}
         <div style={{
           display: 'flex',
-          background: 'rgba(15, 23, 42, 0.8)',
-          borderBottom: '1px solid var(--border-glass)',
+          background: 'rgba(15, 15, 22, 0.8)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           padding: '6px 20px 0'
         }}>
           <button
@@ -125,9 +123,10 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
               padding: '8px 14px',
               background: 'none',
               border: 'none',
-              borderBottom: activeView === 'pwa' ? '2px solid #06b6d4' : '2px solid transparent',
-              color: activeView === 'pwa' ? '#38bdf8' : '#94a3b8',
+              borderBottom: activeView === 'pwa' ? '2px solid #FF6EC7' : '2px solid transparent',
+              color: activeView === 'pwa' ? '#FF9AD7' : '#94a3b8',
               fontWeight: 700,
+              fontFamily: 'Space Grotesk, sans-serif',
               fontSize: '0.8rem',
               cursor: 'pointer',
               display: 'flex',
@@ -144,9 +143,10 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
               padding: '8px 14px',
               background: 'none',
               border: 'none',
-              borderBottom: activeView === 'gradle' ? '2px solid #06b6d4' : '2px solid transparent',
-              color: activeView === 'gradle' ? '#38bdf8' : '#94a3b8',
+              borderBottom: activeView === 'gradle' ? '2px solid #FF6EC7' : '2px solid transparent',
+              color: activeView === 'gradle' ? '#FF9AD7' : '#94a3b8',
               fontWeight: 700,
+              fontFamily: 'Space Grotesk, sans-serif',
               fontSize: '0.8rem',
               cursor: 'pointer',
               display: 'flex',
@@ -304,20 +304,14 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
                   onClick={() => {
                     window.open(mobileUrl, '_blank');
                   }}
+                  className="holo-btn-primary"
                   style={{
-                    background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 10,
-                    padding: '10px 14px',
+                    padding: '11px 14px',
                     fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8,
-                    boxShadow: '0 4px 16px rgba(6, 182, 212, 0.35)'
+                    gap: 8
                   }}
                 >
                   <ExternalLink size={15} />
@@ -329,23 +323,18 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
                     onClose();
                     onLaunchMobilePreview();
                   }}
+                  className="holo-btn-secondary"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    color: '#f8fafc',
-                    border: '1px solid var(--border-glass-bright)',
-                    borderRadius: 10,
-                    padding: '10px 14px',
+                    padding: '11px 14px',
                     fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8
                   }}
                 >
-                  <Play size={15} color="#34d399" />
-                  <span>Interactive Frame Preview</span>
+                  <Smartphone size={15} color="#4FD8EA" />
+                  <span>Interactive Emulator</span>
                 </button>
               </div>
             </>

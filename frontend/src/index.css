@@ -19,12 +19,12 @@
   --risk-low-text: #6EE7B7;
   --risk-low-bg: rgba(52, 211, 153, 0.15);
 
-  --bg-card: rgba(17, 24, 39, 0.82);
-  --bg-card-hover: rgba(31, 41, 55, 0.9);
-  --bg-surface: #111827;
-  --bg-glass: rgba(15, 23, 42, 0.75);
+  --bg-card: rgba(15, 15, 22, 0.9);
+  --bg-card-hover: rgba(22, 22, 32, 0.95);
+  --bg-surface: #0a0a0f;
+  --bg-glass: rgba(15, 15, 22, 0.85);
   --border-glass: rgba(255, 255, 255, 0.08);
-  --border-glass-bright: rgba(255, 255, 255, 0.15);
+  --border-glass-bright: rgba(120, 115, 245, 0.35);
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -32,7 +32,7 @@
 
   --font-heading-holo: 'Space Grotesk', sans-serif;
   --font-body-holo: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -42,8 +42,8 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --shadow-glow-red: 0 0 25px rgba(239, 68, 68, 0.4);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  --shadow-glow-red: 0 0 25px rgba(255, 110, 199, 0.45);
   --shadow-glow-orange: 0 0 25px rgba(249, 115, 22, 0.35);
   --shadow-glow-cyan: 0 0 25px rgba(79, 216, 234, 0.4);
   --shadow-glow-gradient: 0 4px 20px rgba(120, 115, 245, 0.4);
@@ -65,7 +65,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+  font-family: var(--font-heading-holo);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -76,55 +76,66 @@ h1, h2, h3, h4, h5, h6 {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: #060608;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.5);
+  background: rgba(120, 115, 245, 0.35);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.8);
+  background: rgba(255, 110, 199, 0.6);
 }
 
 /* ─── Glassmorphism Containers ──────────────────────────────── */
 .glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  background-color: var(--bg-glass-holo);
+  background-image: linear-gradient(rgba(15, 15, 22, 0.92), rgba(15, 15, 22, 0.92)), linear-gradient(120deg, rgba(255, 110, 199, 0.3), rgba(120, 115, 245, 0.3), rgba(79, 216, 234, 0.3));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
 .glass-panel-interactive {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .glass-panel-interactive:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-glass-bright);
   transform: translateY(-2px);
+  background-image: linear-gradient(rgba(20, 20, 30, 0.95), rgba(20, 20, 30, 0.95)), linear-gradient(120deg, rgba(255, 110, 199, 0.55), rgba(120, 115, 245, 0.55), rgba(79, 216, 234, 0.55));
+  box-shadow: 0 12px 36px rgba(120, 115, 245, 0.28);
 }
 
 /* ─── Status Badges ─────────────────────────────────────────── */
 .badge-critical {
-  background: rgba(239, 68, 68, 0.18);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #FF9AD7;
+  background: rgba(255, 110, 199, 0.15);
+  border: 1px solid rgba(255, 110, 199, 0.45);
+  border-radius: 9999px;
+  font-family: var(--font-heading-holo);
 }
 .badge-high {
-  background: rgba(249, 115, 22, 0.18);
-  color: #fdba74;
-  border: 1px solid rgba(249, 115, 22, 0.45);
+  color: #A5A6F6;
+  background: rgba(120, 115, 245, 0.15);
+  border: 1px solid rgba(120, 115, 245, 0.45);
+  border-radius: 9999px;
+  font-family: var(--font-heading-holo);
 }
 .badge-medium {
-  background: rgba(245, 158, 11, 0.18);
-  color: #fde68a;
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #7EE8F5;
+  background: rgba(79, 216, 234, 0.15);
+  border: 1px solid rgba(79, 216, 234, 0.45);
+  border-radius: 9999px;
+  font-family: var(--font-heading-holo);
 }
 .badge-low {
-  background: rgba(16, 185, 129, 0.18);
-  color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6EE7B7;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  border-radius: 9999px;
+  font-family: var(--font-heading-holo);
 }
 
 /* ─── Pulsing Animations ────────────────────────────────────── */

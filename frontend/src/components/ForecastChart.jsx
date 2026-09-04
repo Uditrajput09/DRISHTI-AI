@@ -28,10 +28,10 @@ ChartJS.register(
 );
 
 const RISK_BADGE = {
-  Critical: { bg: "rgba(239, 68, 68, 0.2)", text: "#fca5a5", border: "rgba(239, 68, 68, 0.4)" },
-  High: { bg: "rgba(249, 115, 22, 0.2)", text: "#fdba74", border: "rgba(249, 115, 22, 0.4)" },
-  Medium: { bg: "rgba(245, 158, 11, 0.2)", text: "#fde68a", border: "rgba(245, 158, 11, 0.4)" },
-  Low: { bg: "rgba(16, 185, 129, 0.2)", text: "#6ee7b7", border: "rgba(16, 185, 129, 0.4)" },
+  Critical: { bg: "rgba(255, 110, 199, 0.15)", text: "#FF9AD7", border: "rgba(255, 110, 199, 0.4)" },
+  High: { bg: "rgba(120, 115, 245, 0.15)", text: "#A5A6F6", border: "rgba(120, 115, 245, 0.4)" },
+  Medium: { bg: "rgba(79, 216, 234, 0.15)", text: "#7EE8F5", border: "rgba(79, 216, 234, 0.4)" },
+  Low: { bg: "rgba(52, 211, 153, 0.15)", text: "#6EE7B7", border: "rgba(52, 211, 153, 0.4)" },
 };
 
 export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment" }) {
@@ -82,8 +82,8 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
       {
         type: "line",
         label: "Projected Risk (%)",
-        borderColor: "#ef4444",
-        backgroundColor: "rgba(239, 68, 68, 0.15)",
+        borderColor: "#FF6EC7",
+        backgroundColor: "rgba(255, 110, 199, 0.15)",
         borderWidth: 2.5,
         fill: true,
         tension: 0.35,
@@ -95,7 +95,7 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
       {
         type: "bar",
         label: "Rainfall (mm/h)",
-        backgroundColor: "rgba(6, 182, 212, 0.65)",
+        backgroundColor: "rgba(79, 216, 234, 0.65)",
         borderRadius: 4,
         yAxisID: "y",
         data: rainfallValues
@@ -114,16 +114,18 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
       legend: {
         position: "top",
         labels: {
-          color: "#cbd5e1",
-          font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: 600 }
+          color: "#94a3b8",
+          font: { size: 11, family: "'Space Grotesk', sans-serif", weight: 600 }
         }
       },
       tooltip: {
-        backgroundColor: "#111827",
+        backgroundColor: "#0d0d14",
         titleColor: "#f8fafc",
         bodyColor: "#cbd5e1",
-        borderColor: "rgba(255,255,255,0.1)",
-        borderWidth: 1
+        borderColor: "rgba(120, 115, 245, 0.35)",
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 8
       }
     },
     scales: {
@@ -135,7 +137,7 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
         type: "linear",
         display: true,
         position: "left",
-        title: { display: true, text: "Rainfall (mm)", color: "#06b6d4", font: { size: 10, weight: 700 } },
+        title: { display: true, text: "Rainfall (mm)", color: "#4FD8EA", font: { size: 10, weight: 700 } },
         grid: { color: "rgba(255, 255, 255, 0.05)" },
         ticks: { color: "#94a3b8", font: { size: 10 } },
         min: 0
@@ -144,9 +146,9 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
         type: "linear",
         display: true,
         position: "right",
-        title: { display: true, text: "Risk (%)", color: "#ef4444", font: { size: 10, weight: 700 } },
+        title: { display: true, text: "Risk (%)", color: "#FF6EC7", font: { size: 10, weight: 700 } },
         grid: { drawOnChartArea: false },
-        ticks: { color: "#ef4444", font: { size: 10 } },
+        ticks: { color: "#FF6EC7", font: { size: 10 } },
         min: 0,
         max: 100
       }
@@ -156,11 +158,11 @@ export default function ForecastChart({ zoneId = 1, zoneName = "Sohra Escarpment
   return (
     <div className="glass-panel" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", fontWeight: 700, color: "#f8fafc" }}>
-          <TrendingUp size={16} color="#ef4444" />
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", fontWeight: 700, color: "#f8fafc", fontFamily: "Space Grotesk, sans-serif" }}>
+          <TrendingUp size={16} color="#FF6EC7" />
           <span>48-Hour & 7-Day Outlook ({zoneName})</span>
         </div>
-        <span style={{ fontSize: "0.7rem", color: "#06b6d4", fontWeight: 600, background: "rgba(6, 182, 212, 0.1)", padding: "2px 8px", borderRadius: 999 }}>
+        <span className="holo-badge-moderate" style={{ fontSize: "0.68rem", padding: "2px 8px" }}>
           Open-Meteo Synced
         </span>
       </div>

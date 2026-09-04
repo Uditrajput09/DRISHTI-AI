@@ -95,15 +95,7 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
             </div>
           </div>
         </div>
-        <span style={{
-          background: 'rgba(239, 68, 68, 0.15)',
-          color: '#fca5a5',
-          fontSize: '0.72rem',
-          fontWeight: 700,
-          padding: '3px 8px',
-          borderRadius: 6,
-          border: '1px solid rgba(239, 68, 68, 0.3)'
-        }}>
+        <span className="holo-badge-critical">
           Simulated 24h: {calculated24h} mm
         </span>
       </div>
@@ -112,45 +104,40 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button
           onClick={() => setPreset(12, 6, 60, 'Normal')}
+          className="holo-btn-secondary"
           style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            color: '#6ee7b7',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            padding: '5px 10px',
-            borderRadius: 6,
+            color: '#6EE7B7',
+            borderColor: 'rgba(52, 211, 153, 0.3)',
+            padding: '6px 12px',
             fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
+            borderRadius: 10
           }}
         >
           🌦️ Normal Rain (12 mm/h)
         </button>
         <button
           onClick={() => setPreset(60, 6, 85, 'Heavy')}
+          className="holo-btn-secondary"
           style={{
-            background: 'rgba(249, 115, 22, 0.15)',
-            color: '#fdba74',
-            border: '1px solid rgba(249, 115, 22, 0.3)',
-            padding: '5px 10px',
-            borderRadius: 6,
+            color: '#A5A6F6',
+            borderColor: 'rgba(120, 115, 245, 0.3)',
+            padding: '6px 12px',
             fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: 'pointer'
+            borderRadius: 10
           }}
         >
           ⛈️ Heavy Downpour (60 mm/h)
         </button>
         <button
           onClick={() => setPreset(125, 8, 96, 'Cloudburst')}
+          className="holo-btn-secondary"
           style={{
-            background: 'rgba(239, 68, 68, 0.2)',
-            color: '#fca5a5',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            padding: '5px 10px',
-            borderRadius: 6,
+            color: '#FF9AD7',
+            borderColor: 'rgba(255, 110, 199, 0.4)',
+            padding: '6px 12px',
             fontSize: '0.75rem',
             fontWeight: 700,
-            cursor: 'pointer'
+            borderRadius: 10
           }}
         >
           🚨 Extreme Cloudburst (125 mm/h)
@@ -160,10 +147,10 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
       {/* Sliders Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 16 }}>
         {/* Rainfall Intensity Slider */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-glass)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#cbd5e1', marginBottom: 6 }}>
+        <div style={{ background: 'rgba(20, 20, 30, 0.75)', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94a3b8', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
             <span>Precipitation Rate</span>
-            <strong style={{ color: '#06b6d4' }}>{hourlyRain} mm/h</strong>
+            <strong style={{ color: '#4FD8EA' }}>{hourlyRain} mm/h</strong>
           </div>
           <input
             type="range"
@@ -176,10 +163,10 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
         </div>
 
         {/* Duration Slider */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-glass)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#cbd5e1', marginBottom: 6 }}>
+        <div style={{ background: 'rgba(20, 20, 30, 0.75)', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94a3b8', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
             <span>Storm Duration</span>
-            <strong style={{ color: '#38bdf8' }}>{duration} Hours</strong>
+            <strong style={{ color: '#7873F5' }}>{duration} Hours</strong>
           </div>
           <input
             type="range"
@@ -192,10 +179,10 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
         </div>
 
         {/* Soil Moisture Saturation */}
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-glass)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#cbd5e1', marginBottom: 6 }}>
+        <div style={{ background: 'rgba(20, 20, 30, 0.75)', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94a3b8', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
             <span>Initial Soil Moisture</span>
-            <strong style={{ color: '#a855f7' }}>{soilMoisture}%</strong>
+            <strong style={{ color: '#FF6EC7' }}>{soilMoisture}%</strong>
           </div>
           <input
             type="range"
@@ -210,7 +197,7 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
 
       {/* Action Controls */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: '#e2e8f0', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: '#94a3b8', cursor: 'pointer' }}>
           <input
             type="checkbox"
             checked={triggerAlerts}
@@ -222,19 +209,14 @@ export default function SimulationSandbox({ zones = [], onSimulationComplete }) 
         <button
           onClick={handleRunSimulation}
           disabled={isSimulating}
+          className="holo-btn-primary"
           style={{
-            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-            color: '#fff',
-            border: 'none',
             padding: '10px 22px',
-            borderRadius: 10,
             fontSize: '0.88rem',
-            fontWeight: 700,
-            cursor: isSimulating ? 'wait' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            boxShadow: '0 4px 16px rgba(6, 182, 212, 0.4)'
+            cursor: isSimulating ? 'wait' : 'pointer'
           }}
         >
           <Play size={16} />

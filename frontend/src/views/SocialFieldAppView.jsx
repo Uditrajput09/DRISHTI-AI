@@ -284,39 +284,31 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderRadius: 16,
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)'
+        borderRadius: 16
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 42,
             height: 42,
             borderRadius: 12,
-            background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
+            background: 'linear-gradient(135deg, #FF6EC7, #7873F5, #4FD8EA)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(6, 182, 212, 0.4)'
+            boxShadow: '0 0 16px rgba(120, 115, 245, 0.4)'
           }}>
             <Flame size={22} color="#ffffff" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
                 DRISHTI_Ai Community Pulse
               </h2>
-              <span style={{
-                background: 'rgba(239, 68, 68, 0.2)',
-                color: '#fca5a5',
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                padding: '1px 6px',
-                borderRadius: 999
-              }}>
+              <span className="holo-badge-critical" style={{ fontSize: '0.68rem', padding: '1px 8px' }}>
                 LIVE FEED
               </span>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
               Citizen ground truth & landslide hazard awareness
             </p>
           </div>

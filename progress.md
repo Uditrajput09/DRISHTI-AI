@@ -65,6 +65,7 @@
 - 2026-09-03: Fixed `/app` GIS Command Center navigation crash (`currentUser` parameter in `DashboardView.jsx`), restored Risk Summary KPIs, interactive Map Preview, 48h Forecast Chart, and AI Prediction Inspector into Home Feed (`/home`), and added Instagram/WhatsApp style "+ Add Story" feature with 24h status badge and photo uploader.
 - 2026-09-03: Restored original DRISHTI-AI GIS Dashboard Command Center (`DashboardView`) as the default main landing page on `http://localhost:5173/` without requiring initial login.
 - 2026-09-04: Synchronized and merged collaborator changes (`origin/main`), resolved conflict markers in `frontend/src/main.jsx` and `frontend/src/views/DashboardView.jsx`, and verified clean Vite builds and automated tests.
+- 2026-09-04: Unified visual aesthetic across all DRISHTI-AI pages and GIS dashboard components to match the obsidian holographic dark theme of the Home Feed (`#060608` deep dark space, animated iridescent gradient borders `#FF6EC7` / `#7873F5` / `#4FD8EA`, `.holo-card` & `.glass-panel` elevation, Space Grotesk typography, neon KPI status glows, holographic buttons & inputs, and unified navigation tabs). Verified clean Vite build (0 errors) and 10/10 backend test pass rate.
 
 ---
 

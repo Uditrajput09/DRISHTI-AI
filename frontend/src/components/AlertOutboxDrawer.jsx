@@ -19,26 +19,26 @@ export default function AlertOutboxDrawer({ alerts = [] }) {
 
   const getLangBadge = (lang) => {
     switch (lang.toLowerCase()) {
-      case 'kha': return { label: 'Khasi (Regional)', color: '#38bdf8' };
-      case 'as': return { label: 'Assamese (Regional)', color: '#a855f7' };
-      case 'hi': return { label: 'Hindi (National)', color: '#f59e0b' };
-      default: return { label: 'English (Official)', color: '#10b981' };
+      case 'kha': return { label: 'Khasi (Regional)', color: '#4FD8EA' };
+      case 'as': return { label: 'Assamese (Regional)', color: '#7873F5' };
+      case 'hi': return { label: 'Hindi (National)', color: '#FF9AD7' };
+      default: return { label: 'English (Official)', color: '#6EE7B7' };
     }
   };
 
   return (
     <div className="glass-panel" style={{ padding: 18, display: 'flex', flexDirection: 'column', height: '100%', maxHeight: 560 }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, borderBottom: '1px solid var(--border-glass)', paddingBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: 6, borderRadius: 8 }}>
-            <Bell size={18} color="#ef4444" />
+          <div style={{ background: 'linear-gradient(135deg, #FF6EC7, #7873F5)', padding: 7, borderRadius: 10 }}>
+            <Bell size={18} color="#ffffff" />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc', fontFamily: 'Space Grotesk, sans-serif' }}>
               Multi-Lingual Emergency Alert Outbox
             </h3>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
               Fast2SMS & Firebase FCM Dispatched Broadcasts
             </div>
           </div>
@@ -49,7 +49,7 @@ export default function AlertOutboxDrawer({ alerts = [] }) {
       </div>
 
       {/* Language Filter Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
         {[
           { id: 'all', label: 'All Feeds' },
           { id: 'kha', label: 'Khasi' },
@@ -61,14 +61,16 @@ export default function AlertOutboxDrawer({ alerts = [] }) {
             key={tab.id}
             onClick={() => setSelectedLang(tab.id)}
             style={{
-              padding: '4px 10px',
-              borderRadius: 6,
+              padding: '5px 12px',
+              borderRadius: 8,
               border: 'none',
               fontSize: '0.72rem',
-              fontWeight: 600,
+              fontWeight: 700,
+              fontFamily: 'Space Grotesk, sans-serif',
               cursor: 'pointer',
-              background: selectedLang === tab.id ? '#0284c7' : 'rgba(255,255,255,0.06)',
-              color: selectedLang === tab.id ? '#ffffff' : 'var(--text-secondary)',
+              background: selectedLang === tab.id ? 'linear-gradient(120deg, #FF6EC7, #7873F5)' : 'rgba(255,255,255,0.06)',
+              color: selectedLang === tab.id ? '#ffffff' : '#94a3b8',
+              boxShadow: selectedLang === tab.id ? '0 0 10px rgba(120, 115, 245, 0.35)' : 'none',
               transition: 'all 0.15s'
             }}
           >
@@ -80,7 +82,7 @@ export default function AlertOutboxDrawer({ alerts = [] }) {
       {/* Alert Feed Scroll Container */}
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 4 }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', padding: 20 }}>
+          <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', padding: 20 }}>
             No alerts dispatched in this language channel.
           </div>
         ) : (
@@ -90,9 +92,9 @@ export default function AlertOutboxDrawer({ alerts = [] }) {
               <div
                 key={alert.id}
                 style={{
-                  background: 'rgba(15, 23, 42, 0.75)',
-                  border: '1px solid var(--border-glass)',
-                  borderRadius: 10,
+                  background: 'rgba(20, 20, 30, 0.75)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: 12,
                   padding: '10px 12px',
                   display: 'flex',
                   flexDirection: 'column',

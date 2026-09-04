@@ -51,19 +51,16 @@ export default function AuthModal({ isOpen, onClose, currentUser, onLogin }) {
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(5, 10, 20, 0.85)',
-      backdropFilter: 'blur(16px)',
+      background: 'rgba(6, 6, 8, 0.88)',
+      backdropFilter: 'blur(20px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 3000,
       padding: 16
     }}>
-      <div style={{
-        background: 'rgba(15, 23, 42, 0.96)',
-        border: '1px solid var(--border-glass-bright)',
-        borderRadius: 20,
-        boxShadow: '0 24px 64px rgba(0, 0, 0, 0.7)',
+      <div className="holo-card" style={{
+        boxShadow: '0 24px 64px rgba(0, 0, 0, 0.8), 0 0 32px rgba(120, 115, 245, 0.25)',
         width: '100%',
         maxWidth: 480,
         overflow: 'hidden',
@@ -72,20 +69,20 @@ export default function AuthModal({ isOpen, onClose, currentUser, onLogin }) {
         {/* Modal Header */}
         <div style={{
           padding: '20px 24px 16px',
-          borderBottom: '1px solid var(--border-glass)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)'
+          background: 'linear-gradient(90deg, rgba(255, 110, 199, 0.15), rgba(120, 115, 245, 0.15))'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sparkles size={18} color="#06b6d4" />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+              <Sparkles size={18} color="#FF6EC7" />
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
                 DRISHTI_Ai Portal Sign In
               </h2>
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
               Select your persona to access tailored early warning features
             </p>
           </div>
@@ -315,26 +312,16 @@ export default function AuthModal({ isOpen, onClose, currentUser, onLogin }) {
           {/* Submit Button */}
           <button
             type="submit"
+            className="holo-btn-primary"
             style={{
               marginTop: 6,
               padding: '13px 20px',
-              borderRadius: 12,
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 800,
               fontSize: '0.92rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
-              background: role === 'official' 
-                ? 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)' 
-                : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-              color: '#ffffff',
-              boxShadow: role === 'official'
-                ? '0 6px 20px rgba(6, 182, 212, 0.35)'
-                : '0 6px 20px rgba(16, 185, 129, 0.35)',
-              transition: 'transform 0.15s ease'
+              width: '100%'
             }}
           >
             {successAnim ? (

@@ -7,11 +7,14 @@ export default function HoloNavbar({
   currentUser,
   searchQuery = '',
   onSearchChange,
-  unreadCount = 3
+  unreadCount = 3,
+  onlyBottomNav = false,
+  hideTopHeader = false
 }) {
   return (
     <>
       {/* Top Navbar */}
+      {!onlyBottomNav && !hideTopHeader && (
       <header style={{
         position: 'sticky',
         top: 0,
@@ -112,6 +115,7 @@ export default function HoloNavbar({
           </div>
         </div>
       </header>
+      )}
 
       {/* Bottom Sticky Navigation Bar for Mobile & Desktop consistency */}
       <nav style={{
