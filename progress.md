@@ -60,6 +60,10 @@
 - 2026-09-02: Produced `README.md` and `DEMO_SCRIPT.md`.
 - 2026-09-03: Resolved port 8000 conflict, standardized branding, and transformed Field App into a functional PWA.
 - 2026-09-03: Implemented 20-Feature Expansion including Gemini AI Chatbot, Road Blockage Routing, and Multi-layer GIS overlays.
+- 2026-09-03: Built 3-Page Holographic Iridescent Auth & Social App Flow (`/login`, `/home`, `/profile`, `/app`) with animated iridescent gradient headings, dark glass cards, Instagram-style stories radar row, citizen/official post feed, report modal, and profile settings.
+- 2026-09-03: Fixed Vite `Uncaught ReferenceError: process is not defined` in `main.jsx` and updated initial route handling for direct `/app` GIS Command Center navigation.
+- 2026-09-03: Fixed `/app` GIS Command Center navigation crash (`currentUser` parameter in `DashboardView.jsx`), restored Risk Summary KPIs, interactive Map Preview, 48h Forecast Chart, and AI Prediction Inspector into Home Feed (`/home`), and added Instagram/WhatsApp style "+ Add Story" feature with 24h status badge and photo uploader.
+- 2026-09-03: Restored original DRISHTI-AI GIS Dashboard Command Center (`DashboardView`) as the default main landing page on `http://localhost:5173/` without requiring initial login.
 
 ---
 

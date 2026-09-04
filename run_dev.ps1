@@ -9,11 +9,14 @@ $ScriptRoot = $PSScriptRoot
 # Locate valid python executable
 $PythonCmd = if (Test-Path "$ScriptRoot\.venv\Scripts\python.exe") {
     "$ScriptRoot\.venv\Scripts\python.exe"
-} elseif (Get-Command "python" -ErrorAction SilentlyContinue) {
+}
+elseif (Get-Command "python" -ErrorAction SilentlyContinue) {
     "python"
-} elseif (Get-Command "py" -ErrorAction SilentlyContinue) {
+}
+elseif (Get-Command "py" -ErrorAction SilentlyContinue) {
     "py"
-} else {
+}
+else {
     "python"
 }
 

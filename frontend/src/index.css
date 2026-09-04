@@ -1,6 +1,24 @@
 /* ─── Modern Theme & Design Tokens ───────────────────────── */
 :root {
-  --bg-main: #0a0e17;
+  --bg-main: #060608;
+  --bg-dark-solid: #060608;
+  --bg-glass-holo: rgba(255, 255, 255, 0.025);
+  --bg-card-inner: rgba(15, 15, 20, 0.9);
+  
+  --accent-pink: #FF6EC7;
+  --accent-violet: #7873F5;
+  --accent-indigo: #7873F5;
+  --accent-cyan: #4FD8EA;
+
+  --risk-critical-text: #FF9AD7;
+  --risk-critical-bg: rgba(255, 110, 199, 0.15);
+  --risk-high-text: #A5A6F6;
+  --risk-high-bg: rgba(120, 115, 245, 0.15);
+  --risk-moderate-text: #7EE8F5;
+  --risk-moderate-bg: rgba(79, 216, 234, 0.15);
+  --risk-low-text: #6EE7B7;
+  --risk-low-bg: rgba(52, 211, 153, 0.15);
+
   --bg-card: rgba(17, 24, 39, 0.82);
   --bg-card-hover: rgba(31, 41, 55, 0.9);
   --bg-surface: #111827;
@@ -12,16 +30,8 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
-  --risk-critical: #ef4444;
-  --risk-high: #f97316;
-  --risk-medium: #f59e0b;
-  --risk-low: #10b981;
-
-  --accent-cyan: #06b6d4;
-  --accent-blue: #3b82f6;
-  --accent-indigo: #6366f1;
-  --accent-purple: #8b5cf6;
-
+  --font-heading-holo: 'Space Grotesk', sans-serif;
+  --font-body-holo: 'Inter', sans-serif;
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -35,7 +45,8 @@
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   --shadow-glow-red: 0 0 25px rgba(239, 68, 68, 0.4);
   --shadow-glow-orange: 0 0 25px rgba(249, 115, 22, 0.35);
-  --shadow-glow-cyan: 0 0 25px rgba(6, 182, 212, 0.35);
+  --shadow-glow-cyan: 0 0 25px rgba(79, 216, 234, 0.4);
+  --shadow-glow-gradient: 0 4px 20px rgba(120, 115, 245, 0.4);
 }
 
 * {
@@ -200,3 +211,172 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 0 10px #06b6d4;
   border: 2px solid #ffffff;
 }
+
+/* ─── Holographic Iridescent Theme Utilities ─────────────────── */
+@keyframes iridescentShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.holo-gradient-text {
+  background: linear-gradient(90deg, #FF6EC7, #7873F5, #4FD8EA, #FF6EC7);
+  background-size: 300% auto;
+  animation: iridescentShift 6s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-family: var(--font-heading-holo);
+}
+
+.holo-heading {
+  font-family: var(--font-heading-holo);
+  letter-spacing: -0.02em;
+}
+
+.holo-body {
+  font-family: var(--font-body-holo);
+}
+
+.holo-card {
+  background-color: var(--bg-glass-holo);
+  background-image: linear-gradient(rgba(15,15,20,0.9), rgba(15,15,20,0.9)), linear-gradient(120deg, #FF6EC7, #7873F5, #4FD8EA);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.holo-card-interactive {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.holo-card-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(120, 115, 245, 0.25);
+}
+
+.holo-btn-primary {
+  background: linear-gradient(120deg, #FF6EC7, #7873F5);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-heading-holo);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(120, 115, 245, 0.45);
+  transition: all 0.25s ease;
+}
+.holo-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(255, 110, 199, 0.55);
+  opacity: 0.96;
+}
+
+.holo-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  font-family: var(--font-heading-holo);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.holo-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(79, 216, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.holo-input {
+  background: rgba(15, 15, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: var(--font-body-holo);
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.holo-input:focus {
+  border-color: #4FD8EA;
+  box-shadow: 0 0 12px rgba(79, 216, 234, 0.35);
+}
+
+.holo-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4FD8EA;
+  box-shadow: 0 0 8px #4FD8EA;
+  display: inline-block;
+}
+
+.holo-badge-critical {
+  color: #FF9AD7;
+  background: rgba(255, 110, 199, 0.15);
+  border: 1px solid rgba(255, 110, 199, 0.4);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-heading-holo);
+}
+
+.holo-badge-high {
+  color: #A5A6F6;
+  background: rgba(120, 115, 245, 0.15);
+  border: 1px solid rgba(120, 115, 245, 0.4);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-heading-holo);
+}
+
+.holo-badge-moderate {
+  color: #7EE8F5;
+  background: rgba(79, 216, 234, 0.15);
+  border: 1px solid rgba(79, 216, 234, 0.4);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-heading-holo);
+}
+
+.holo-badge-low {
+  color: #6EE7B7;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-heading-holo);
+}
+
+.avatar-ring-pink {
+  padding: 2px;
+  background: linear-gradient(135deg, #FF6EC7, #ff9ad7);
+  border-radius: 50%;
+}
+.avatar-ring-violet {
+  padding: 2px;
+  background: linear-gradient(135deg, #7873F5, #a5a6f6);
+  border-radius: 50%;
+}
+.avatar-ring-cyan {
+  padding: 2px;
+  background: linear-gradient(135deg, #4FD8EA, #7ee8f5);
+  border-radius: 50%;
+}
+.avatar-ring-gradient {
+  padding: 2.5px;
+  background: linear-gradient(120deg, #FF6EC7, #7873F5, #4FD8EA);
+  border-radius: 50%;
+}
+
