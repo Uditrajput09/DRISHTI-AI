@@ -1,34 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
+import TopNavigation from './components/TopNavigation';
+import BottomNavigation from './components/BottomNavigation';
 import DashboardView from './views/DashboardView';
-import SocialFieldAppView from './views/SocialFieldAppView';
+import RiskIntelligenceView from './views/RiskIntelligenceView';
+import ForecastView from './views/ForecastView';
+import IncidentsView from './views/IncidentsView';
+import AlertsView from './views/AlertsView';
+import FieldReportsView from './views/FieldReportsView';
+import ProfileView from './views/ProfileView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import ChatbotPanel from './components/ChatbotPanel';
-import LoginView from './views/LoginView';
-import HomeFeedView from './views/HomeFeedView';
-import ProfileView from './views/ProfileView';
-import HoloNavbar from './components/HoloNavbar';
 import { authService } from './services/authService';
 import { api } from './api';
-import { ArrowLeft } from 'lucide-react';
 
 export default function App() {
-  // User Authentication State
-  const [currentUser, setCurrentUser] = useState(() => {
-    return authService.getCurrentUser();
+  // Current user authentication
+  const [currentUser, setCurrentUser] = useState(() => authService.getCurrentUser());
+
+  // Primary Application Section: Default to 'gis' (GIS Command Center)
+  const [activeSection, setActiveSection] = useState(() => {
+    const path = window.location.pathname;
+    if (path === '/risk') return 'risk';
+    if (path === '/forecast') return 'forecast';
+    if (path === '/incidents') return 'incidents';
+    if (path === '/alerts') return 'alerts';
+    if (path === '/reports') return 'reports';
+    if (path === '/profile') return 'profile';
+    return 'gis';
   });
 
-  // Navigation / Route State: default to '/app' (Original GIS Dashboard Command Center)
-  const [currentPath, setCurrentPath] = useState(() => {
-    const p = window.location.pathname;
-    if (p === '/home') return '/home';
-    if (p === '/profile') return '/profile';
-    if (p === '/login') return '/login';
-    return '/app';
-  });
-
-  const [activeTab, setActiveTab] = useState('dashboard');
+  // Data states
   const [summary, setSummary] = useState({});
   const [zones, setZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
@@ -37,33 +39,33 @@ export default function App() {
   const [reports, setReports] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Modals & Panels
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
-  // Check if opened directly on Mobile / Android Webview or standalone URL
-  const [isMobileMode, setIsMobileMode] = useState(() => {
-    return window.location.search.includes('mode=mobile') || window.location.hash.includes('mobile');
-  });
-
-  const navigateTo = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentPath(path);
+  // Handle URL history state
+  const handleSelectSection = (sectionId) => {
+    setActiveSection(sectionId);
+    const newPath = sectionId === 'gis' ? '/app' : `/${sectionId}`;
+    window.history.pushState({}, '', newPath);
   };
 
   useEffect(() => {
     const handlePopState = () => {
-      const p = window.location.pathname;
-      if (['/home', '/profile', '/app', '/login'].includes(p)) {
-        setCurrentPath(p);
+      const p = window.location.pathname.replace('/', '');
+      if (['gis', 'risk', 'forecast', 'incidents', 'alerts', 'reports', 'profile'].includes(p)) {
+        setActiveSection(p);
       } else {
-        setCurrentPath('/app');
+        setActiveSection('gis');
       }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Fetch all backend telemetry
   const loadAllData = async () => {
     try {
       const [sumRes, zonesRes, facRes, roadsRes, repRes, alertRes] = await Promise.all([
@@ -75,19 +77,20 @@ export default function App() {
         api.getAlertHistory()
       ]);
 
-      setSummary(sumRes);
-      setZones(zonesRes);
-      setFacilities(facRes);
-      setRoads(roadsRes);
-      setReports(repRes);
-      setAlerts(alertRes);
+      setSummary(sumRes || {});
+      setZones(zonesRes || []);
+      setFacilities(facRes || []);
+      setRoads(roadsRes || []);
+      setReports(repRes || []);
+      setAlerts(alertRes || []);
 
-      if (zonesRes.length > 0 && !selectedZone) {
-        const highest = [...zonesRes].sort((a, b) => b.risk_score - a.risk_score)[0];
+      if (zonesRes && zonesRes.length > 0 && !selectedZone) {
+        // Pick the zone with highest risk score as initial selected
+        const highest = [...zonesRes].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))[0];
         setSelectedZone(highest || zonesRes[0]);
       }
     } catch (err) {
-      console.warn('Error loading initial data:', err);
+      console.warn('Telemetry polling error:', err);
     }
   };
 
@@ -103,180 +106,156 @@ export default function App() {
       await api.refreshWeather();
       await loadAllData();
     } catch (err) {
-      console.error('Refresh failed:', err);
+      console.error('Refresh error:', err);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // If in Standalone Mobile Mode (Android App Simulation)
-  if (isMobileMode) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#060608', padding: '12px 0 90px' }}>
-        <div style={{
-          maxWidth: 720,
-          margin: '0 auto 14px',
-          padding: '10px 18px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          background: 'rgba(15, 15, 20, 0.85)',
-          backgroundImage: 'linear-gradient(rgba(15,15,20,0.85), rgba(15,15,20,0.85)), linear-gradient(90deg, #FF6EC7, #7873F5, #4FD8EA)',
-          backgroundOrigin: 'border-box',
-          backgroundClip: 'padding-box, border-box',
-          border: '1px solid transparent',
-          borderRadius: 14,
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
-        }}>
-          <span style={{ fontSize: '0.82rem', color: '#4FD8EA', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
-            <span className="holo-live-dot" /> 📱 Standalone Citizen App (APK Simulation)
-          </span>
-          <button
-            onClick={() => setIsMobileMode(false)}
-            className="holo-btn-primary"
-            style={{
-              fontSize: '0.74rem',
-              padding: '6px 14px'
-            }}
-          >
-            Switch to GIS Command 🖥️
-          </button>
-        </div>
+  // Cross-navigation helpers
+  const handleViewZoneOnGIS = (target) => {
+    let targetZone = null;
+    if (target?.zone_id) {
+      targetZone = zones.find(z => z.id === target.zone_id);
+    } else if (target?.id) {
+      targetZone = zones.find(z => z.id === target.id);
+    } else if (target?.zone_name) {
+      targetZone = zones.find(z => z.name === target.zone_name);
+    }
+    if (targetZone) {
+      setSelectedZone(targetZone);
+    }
+    handleSelectSection('gis');
+  };
 
-        <SocialFieldAppView
-          currentUser={currentUser}
-          onOpenAuth={() => setIsAuthModalOpen(true)}
-          facilities={facilities}
-          onReportSubmitted={loadAllData}
-        />
-
-        <AuthModal
-          isOpen={isAuthModalOpen}
-          onClose={() => setIsAuthModalOpen(false)}
-          currentUser={currentUser}
-          onLogin={(user) => setCurrentUser(user)}
-        />
-      </div>
-    );
-  }
-
-  // Router Dispatching
-  if (currentPath === '/login') {
-    return (
-      <LoginView
-        onLoginSuccess={(user) => {
-          setCurrentUser(user);
-          navigateTo('/app');
-        }}
-        onNavigate={navigateTo}
-      />
-    );
-  }
-
-  if (currentPath === '/home') {
-    return (
-      <HomeFeedView
-        currentUser={currentUser}
-        onNavigate={navigateTo}
-        summary={summary}
-        zones={zones}
-        selectedZone={selectedZone}
-        setSelectedZone={setSelectedZone}
-        facilities={facilities}
-        roads={roads}
-        reports={reports}
-        alerts={alerts}
-        onRefreshAll={handleRefreshAll}
-      />
-    );
-  }
-
-  if (currentPath === '/profile') {
-    return (
-      <ProfileView
-        currentUser={currentUser}
-        setCurrentUser={setCurrentUser}
-        onNavigate={navigateTo}
-      />
-    );
-  }
-
-  // '/app' -> Unified SentinelWatch GIS Dashboard Command Center
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#060608', display: 'flex', flexDirection: 'column', paddingBottom: 90 }}>
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onRefreshAll={handleRefreshAll}
-        isRefreshing={isRefreshing}
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#070A10',
+        color: '#F4F6FB',
+        display: 'flex',
+        flexDirection: 'column',
+        paddingBottom: 70
+      }}
+    >
+      {/* Top Desktop Command Navigation Bar */}
+      <TopNavigation
+        activeSection={activeSection}
+        onSelectSection={handleSelectSection}
+        unreadAlertCount={alerts.length > 0 ? alerts.length : 3}
+        onOpenAlerts={() => handleSelectSection('alerts')}
+        onOpenProfile={() => handleSelectSection('profile')}
         currentUser={currentUser}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
-        onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+        onRefreshData={handleRefreshAll}
+        isRefreshing={isRefreshing}
       />
 
-      <main style={{ flex: 1, paddingBottom: 32 }}>
-        <DashboardView
-          summary={summary}
-          zones={zones}
-          selectedZone={selectedZone}
-          setSelectedZone={setSelectedZone}
-          facilities={facilities}
-          roads={roads}
-          reports={reports}
-          alerts={alerts}
-          currentUser={currentUser}
-          onOpenAuth={() => setIsAuthModalOpen(true)}
-          onRefreshAll={handleRefreshAll}
-        />
+      {/* Main Section Content Router */}
+      <main style={{ flex: 1 }}>
+        {/* 1. GIS Command Center (Default View) */}
+        {activeSection === 'gis' && (
+          <DashboardView
+            summary={summary}
+            zones={zones}
+            selectedZone={selectedZone}
+            setSelectedZone={setSelectedZone}
+            facilities={facilities}
+            roads={roads}
+            reports={reports}
+            alerts={alerts}
+            onRefreshAll={handleRefreshAll}
+            isRefreshing={isRefreshing}
+            onNavigateToSection={handleSelectSection}
+          />
+        )}
+
+        {/* 2. Risk Intelligence Section */}
+        {activeSection === 'risk' && (
+          <RiskIntelligenceView
+            zones={zones}
+            onSelectZone={setSelectedZone}
+            onNavigateToGIS={() => handleSelectSection('gis')}
+          />
+        )}
+
+        {/* 3. 48-Hour Forecast Section */}
+        {activeSection === 'forecast' && (
+          <ForecastView
+            zones={zones}
+            selectedZone={selectedZone}
+            onSelectZone={setSelectedZone}
+          />
+        )}
+
+        {/* 4. Live Incident Feed Section */}
+        {activeSection === 'incidents' && (
+          <IncidentsView
+            reports={reports}
+            onNavigateToReport={() => handleSelectSection('reports')}
+            onLocateOnMap={handleViewZoneOnGIS}
+          />
+        )}
+
+        {/* 5. Emergency Alerts Center */}
+        {activeSection === 'alerts' && (
+          <AlertsView
+            alerts={alerts}
+            onViewZone={handleViewZoneOnGIS}
+            onRefreshAlerts={loadAllData}
+          />
+        )}
+
+        {/* 6. Field Reporting Interface */}
+        {activeSection === 'reports' && (
+          <FieldReportsView
+            onReportSubmitted={loadAllData}
+          />
+        )}
+
+        {/* 7. User Profile / Settings */}
+        {activeSection === 'profile' && (
+          <ProfileView
+            currentUser={currentUser}
+            setCurrentUser={setCurrentUser}
+            onNavigate={handleSelectSection}
+          />
+        )}
       </main>
 
-      {/* Bottom Sticky Navigation Bar matching Home Feed */}
-      <HoloNavbar
-        currentPath="/app"
-        onNavigate={navigateTo}
-        currentUser={currentUser}
-        onlyBottomNav={true}
+      {/* Bottom Navigation for Mobile Devices */}
+      <BottomNavigation
+        activeSection={activeSection}
+        onSelectSection={handleSelectSection}
+        unreadAlertCount={alerts.length > 0 ? alerts.length : 3}
       />
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        currentUser={currentUser}
-        onLogin={(user) => setCurrentUser(user)}
-      />
-
-      <AndroidAppModal
-        isOpen={isAndroidModalOpen}
-        onClose={() => setIsAndroidModalOpen(false)}
-        onLaunchMobilePreview={() => setIsMobileMode(true)}
-      />
-
-      {/* AI Chatbot FAB Button floating smoothly above bottom nav */}
+      {/* Floating AI Chatbot Assistant */}
       <button
-        id="chatbot-fab-btn"
-        onClick={() => setIsChatbotOpen(p => !p)}
-        title="Open DRISHTI-AI Assistant"
+        id="drishti-chatbot-fab"
+        onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+        title="Open DRISHTI-AI Intelligence Assistant"
         style={{
           position: 'fixed',
           bottom: 74,
-          right: 24,
+          right: 20,
           zIndex: 1999,
-          width: 50,
-          height: 50,
+          width: 48,
+          height: 48,
           borderRadius: '50%',
           background: isChatbotOpen
-            ? 'linear-gradient(135deg, #FF6EC7, #7873F5)'
-            : 'linear-gradient(135deg, #7873F5, #4FD8EA)',
+            ? 'linear-gradient(135deg, #FF4DB8, #8B6CFF)'
+            : 'linear-gradient(135deg, #35D8FF, #8B6CFF)',
           border: '2px solid rgba(255, 255, 255, 0.25)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: isChatbotOpen
-            ? '0 8px 24px rgba(255, 110, 199, 0.5)'
-            : '0 8px 24px rgba(120, 115, 245, 0.5)',
-          fontSize: '1.3rem',
-          transition: 'all 0.25s ease'
+            ? '0 6px 22px rgba(255, 77, 184, 0.45)'
+            : '0 6px 22px rgba(53, 216, 255, 0.45)',
+          fontSize: '1.25rem',
+          transition: 'all 0.2s ease'
         }}
       >
         {isChatbotOpen ? '✕' : '🤖'}
@@ -285,6 +264,21 @@ export default function App() {
       {isChatbotOpen && (
         <ChatbotPanel zones={zones} onClose={() => setIsChatbotOpen(false)} />
       )}
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onLogin={(user) => setCurrentUser(user)}
+      />
+
+      {/* Standalone Android App Modal */}
+      <AndroidAppModal
+        isOpen={isAndroidModalOpen}
+        onClose={() => setIsAndroidModalOpen(false)}
+        onLaunchMobilePreview={() => handleSelectSection('reports')}
+      />
     </div>
   );
 }
