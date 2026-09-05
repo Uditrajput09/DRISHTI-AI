@@ -223,6 +223,9 @@ def simulate_landslide_risk(req: RiskSimulationRequest, db: Session = Depends(ge
             "risk_score": new_score,
             "risk_level": new_level,
             "probability": pred["probability"],
+            "confidence_score": pred.get("confidence_score"),
+            "uncertainty_band": pred.get("uncertainty_band"),
+            "model_std": pred.get("model_std"),
             "triggering_factors": pred["triggering_factors"],
             "alerts_triggered": len(alert_dispatches) > 0,
             "alerts_count": len(alert_dispatches)

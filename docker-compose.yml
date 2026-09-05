@@ -9,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite:///./sih_landslide.db
+      - DATABASE_URL=sqlite:///./drishti_landslide.db
       - PILOT_DISTRICT_NAME=East Khasi Hills, Meghalaya
       - PILOT_CENTER_LAT=25.5788
       - PILOT_CENTER_LON=91.8933
@@ -19,7 +19,7 @@ services:
       - ENVIRONMENT=production
     volumes:
       - ./data:/app/data
-      - sih_data:/app/backend/ml
+      - drishti_data:/app/backend/ml
     restart: unless-stopped
 
   frontend:
@@ -34,4 +34,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  sih_data:
+  drishti_data:

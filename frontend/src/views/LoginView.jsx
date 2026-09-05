@@ -1,50 +1,63 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Lock, Mail, Phone, User, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { authService } from '../services/authService';
+import { 
+  Lock, 
+  Mail, 
+  Phone, 
+  Eye, 
+  EyeOff, 
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  ShieldCheck,
+  User,
+  Sparkles,
+  ChevronRight
+} from 'lucide-react';
+import { authService, PRESET_USERS } from '../services/authService';
 
-export default function LoginView({ onLoginSuccess, onNavigate }) {
+export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup'
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Login Form state
-  const [loginField, setLoginField] = useState('responder@drishti.ai');
-  const [loginPassword, setLoginPassword] = useState('drishti2026');
+  // Login form states — default to Citizen Scientist Volunteer
+  const [emailOrPhone, setEmailOrPhone] = useState('responder@drishti.ai');
+  const [password, setPassword] = useState('drishti2026');
 
-  // Sign Up Form state
-  const [fullName, setFullName] = useState('');
+  // Sign up form states
+  const [signupName, setSignupName] = useState('');
+  const [signupRole, setSignupRole] = useState('Citizen Scientist');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
-  // Forgot password modal state
-  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetSuccess, setResetSuccess] = useState(false);
+  const navigateToGIS = (user) => {
+    if (onLoginSuccess && user) {
+      onLoginSuccess(user);
+    } else if (onNavigate) {
+      onNavigate('gis');
+    } else {
+      window.location.href = '/app';
+    }
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-
-    if (!loginField.trim()) {
-      setErrorMsg('Please enter your email or phone number.');
-      return;
-    }
-    if (!loginPassword) {
-      setErrorMsg('Please enter your password.');
-      return;
-    }
-
+    setSuccessMsg('');
     try {
       setLoading(true);
-      const user = await authService.login(loginField, loginPassword);
-      if (onLoginSuccess) onLoginSuccess(user);
-      if (onNavigate) onNavigate('/home');
+      const user = await authService.login(emailOrPhone, password);
+      setSuccessMsg(`Authenticated as ${user.name} (${user.role}). Redirecting...`);
+      setTimeout(() => {
+        navigateToGIS(user);
+      }, 400);
     } catch (err) {
-      setErrorMsg(err.message || 'Login failed. Please check credentials.');
-    } finally {
+      setErrorMsg(err.message || 'Login failed. Please check your credentials.');
       setLoading(false);
     }
   };
@@ -52,494 +65,692 @@ export default function LoginView({ onLoginSuccess, onNavigate }) {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setSuccessMsg('');
 
-    if (!fullName.trim()) {
-      setErrorMsg('Full name is required.');
-      return;
-    }
-    if (!signupEmail.trim() || !signupEmail.includes('@')) {
-      setErrorMsg('Please provide a valid email address.');
-      return;
-    }
-    if (!signupPassword || signupPassword.length < 6) {
-      setErrorMsg('Password must be at least 6 characters long.');
-      return;
-    }
-    if (signupPassword !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
+    if (signupPassword !== signupConfirmPassword) {
+      setErrorMsg('Passwords do not match. Please re-enter.');
       return;
     }
 
     try {
       setLoading(true);
       const user = await authService.signup({
-        name: fullName,
+        name: signupName,
         email: signupEmail,
         phone: signupPhone,
-        password: signupPassword
+        password: signupPassword,
+        role: signupRole
       });
-      if (onLoginSuccess) onLoginSuccess(user);
-      if (onNavigate) onNavigate('/home');
+      setSuccessMsg(`Account created for ${user.name}! Redirecting to Command Center...`);
+      setTimeout(() => {
+        navigateToGIS(user);
+      }, 500);
     } catch (err) {
-      setErrorMsg(err.message || 'Account creation failed.');
-    } finally {
+      setErrorMsg(err.message || 'Sign up failed. Please check your details.');
       setLoading(false);
     }
   };
 
-  const handleGuestLogin = () => {
-    const user = authService.loginAsGuest();
-    if (onLoginSuccess) onLoginSuccess(user);
-    if (onNavigate) onNavigate('/home');
+  const handleSocialLogin = (provider = 'google') => {
+    try {
+      setLoading(true);
+      const user = authService.loginAsGuest(provider);
+      setSuccessMsg(`Signed in as ${user.name}! Redirecting to Command Center...`);
+      setTimeout(() => {
+        navigateToGIS(user);
+      }, 400);
+    } catch (err) {
+      setErrorMsg(err.message || 'Social login failed.');
+      setLoading(false);
+    }
   };
 
-  const handleResetSubmit = (e) => {
-    e.preventDefault();
-    if (!resetEmail || !resetEmail.includes('@')) {
-      return;
+  const handleQuickFill = (type) => {
+    setErrorMsg('');
+    if (type === 'responder') {
+      setEmailOrPhone(PRESET_USERS.responder.email);
+      setPassword(PRESET_USERS.responder.password);
+      setSuccessMsg('Loaded preset: Community Responder (Citizen Scientist).');
+    } else if (type === 'officer') {
+      setEmailOrPhone(PRESET_USERS.officer.email);
+      setPassword(PRESET_USERS.officer.password);
+      setSuccessMsg('Loaded preset: SDMA Operations Officer (Official Admin).');
+    } else if (type === 'sdrf') {
+      setEmailOrPhone(PRESET_USERS.sdrf.email);
+      setPassword(PRESET_USERS.sdrf.password);
+      setSuccessMsg('Loaded preset: SDRF Quick Response Lead (Field Responder).');
     }
-    setResetSuccess(true);
-    setTimeout(() => {
-      setResetSuccess(false);
-      setIsForgotModalOpen(false);
-      setResetEmail('');
-    }, 2500);
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#060608',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px 16px',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Background Subtle Holographic Glow Elements */}
-      <div style={{
-        position: 'absolute',
-        top: '-15%',
-        left: '-10%',
-        width: '50vw',
-        height: '50vw',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(255, 110, 199, 0.12) 0%, rgba(0,0,0,0) 70%)',
-        pointerEvents: 'none'
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-15%',
-        right: '-10%',
-        width: '50vw',
-        height: '50vw',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(79, 216, 234, 0.12) 0%, rgba(0,0,0,0) 70%)',
-        pointerEvents: 'none'
-      }} />
-
-      {/* Main Centered Holographic Card */}
-      <div className="holo-card" style={{
+    <div
+      style={{
+        minHeight: '100vh',
         width: '100%',
-        maxWidth: 440,
-        padding: '36px 32px',
-        position: 'relative',
-        zIndex: 10
-      }}>
-        {/* App Logo & Header */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            width: 64,
-            height: 64,
-            margin: '0 auto 16px',
-            borderRadius: 20,
-            background: 'linear-gradient(135deg, #FF6EC7, #7873F5, #4FD8EA)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 28px rgba(120, 115, 245, 0.6)'
-          }}>
-            <ShieldAlert size={34} color="#ffffff" />
-          </div>
-          <h1 className="holo-gradient-text" style={{ fontSize: '1.85rem', margin: '0 0 6px' }}>
-            NER SentinelWatch
-          </h1>
-          <p className="holo-body" style={{ fontSize: '0.86rem', color: '#94a3b8', margin: 0 }}>
-            AI-Powered Landslide Early Warning System
-          </p>
-        </div>
-
-        {/* Tab Switch: Login vs Sign Up */}
-        <div style={{
+        backgroundColor: '#070A10',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '24px 16px',
+        overflowY: 'auto',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* Top Bar with "Back to GIS Command Center" and optional Active User Pill */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 960,
           display: 'flex',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          marginBottom: 28,
-          position: 'relative'
-        }}>
-          <button
-            onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              background: 'none',
-              border: 'none',
-              color: activeTab === 'login' ? '#ffffff' : '#94a3b8',
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.98rem',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'color 0.2s ease'
-            }}
-          >
-            Log In
-            {activeTab === 'login' && (
-              <div style={{
-                position: 'absolute',
-                bottom: -1,
-                left: 0,
-                right: 0,
-                height: 3,
-                background: 'linear-gradient(90deg, #FF6EC7, #4FD8EA)',
-                borderRadius: '3px 3px 0 0',
-                boxShadow: '0 0 10px #FF6EC7'
-              }} />
-            )}
-          </button>
-
-          <button
-            onClick={() => { setActiveTab('signup'); setErrorMsg(''); }}
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              background: 'none',
-              border: 'none',
-              color: activeTab === 'signup' ? '#ffffff' : '#94a3b8',
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.98rem',
-              cursor: 'pointer',
-              position: 'relative',
-              transition: 'color 0.2s ease'
-            }}
-          >
-            Create Account
-            {activeTab === 'signup' && (
-              <div style={{
-                position: 'absolute',
-                bottom: -1,
-                left: 0,
-                right: 0,
-                height: 3,
-                background: 'linear-gradient(90deg, #FF6EC7, #4FD8EA)',
-                borderRadius: '3px 3px 0 0',
-                boxShadow: '0 0 10px #4FD8EA'
-              }} />
-            )}
-          </button>
-        </div>
-
-        {/* Error Banner */}
-        {errorMsg && (
-          <div style={{
-            background: 'rgba(255, 110, 199, 0.15)',
-            border: '1px solid rgba(255, 110, 199, 0.4)',
-            borderRadius: 12,
-            padding: '10px 14px',
-            marginBottom: 20,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 16,
+          zIndex: 10,
+          flexWrap: 'wrap',
+          gap: 12
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => navigateToGIS(currentUser)}
+          style={{
+            background: 'rgba(16, 21, 33, 0.85)',
+            border: '1px solid rgba(120, 140, 180, 0.3)',
+            borderRadius: 8,
+            padding: '8px 14px',
+            color: '#CBD5E1',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            fontFamily: 'Space Grotesk, sans-serif',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
-            color: '#FF9AD7',
-            fontSize: '0.84rem'
-          }}>
-            <AlertCircle size={18} style={{ flexShrink: 0 }} />
-            <span>{errorMsg}</span>
+            gap: 8,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = '#35D8FF'; e.currentTarget.style.color = '#35D8FF'; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(120, 140, 180, 0.3)'; e.currentTarget.style.color = '#CBD5E1'; }}
+        >
+          <ArrowLeft size={15} />
+          <span>Back to GIS Command Center</span>
+        </button>
+
+        {currentUser && (
+          <div
+            style={{
+              background: 'rgba(53, 216, 255, 0.08)',
+              border: '1px solid rgba(53, 216, 255, 0.3)',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: '0.74rem',
+              color: '#CBD5E1',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}
+          >
+            <span style={{ color: '#9AA5B8' }}>Active User:</span>
+            <strong style={{ color: '#FFFFFF' }}>{currentUser.name}</strong>
+            <span style={{ color: '#35D8FF', fontWeight: 700 }}>• {currentUser.role}</span>
           </div>
         )}
-
-        {/* TAB 1: LOGIN FORM */}
-        {activeTab === 'login' ? (
-          <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Email or Mobile Number
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} color="#7873F5" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="text"
-                  placeholder="responder@drishti.ai or +91..."
-                  value={loginField}
-                  onChange={(e) => setLoginField(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 500 }}>
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsForgotModalOpen(true)}
-                  style={{ background: 'none', border: 'none', color: '#4FD8EA', fontSize: '0.78rem', cursor: 'pointer' }}
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} color="#7873F5" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42, paddingRight: 42 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(p => !p)}
-                  style={{
-                    position: 'absolute',
-                    right: 14,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="holo-btn-primary"
-              style={{
-                width: '100%',
-                padding: '14px',
-                fontSize: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                marginTop: 6
-              }}
-            >
-              <span>{loading ? 'Authenticating...' : 'Log In'}</span>
-              <ArrowRight size={18} />
-            </button>
-          </form>
-        ) : (
-          /* TAB 2: SIGN UP FORM */
-          <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Full Name
-              </label>
-              <div style={{ position: 'relative' }}>
-                <User size={18} color="#FF6EC7" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="text"
-                  placeholder="e.g. Daphishisha Kharbhih"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Email Address
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} color="#7873F5" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="email"
-                  placeholder="name@domain.com"
-                  value={signupEmail}
-                  onChange={(e) => setSignupEmail(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Mobile Number (SMS Alerts)
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Phone size={18} color="#4FD8EA" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={signupPhone}
-                  onChange={(e) => setSignupPhone(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} color="#7873F5" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="password"
-                  placeholder="At least 6 characters"
-                  value={signupPassword}
-                  onChange={(e) => setSignupPassword(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>
-                Confirm Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} color="#7873F5" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="password"
-                  placeholder="Re-enter password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="holo-input"
-                  style={{ width: '100%', paddingLeft: 42 }}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="holo-btn-primary"
-              style={{
-                width: '100%',
-                padding: '14px',
-                fontSize: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                marginTop: 6
-              }}
-            >
-              <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
-              <ArrowRight size={18} />
-            </button>
-          </form>
-        )}
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0 18px' }}>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255, 255, 255, 0.1)' }} />
-          <span style={{ fontSize: '0.74rem', color: '#64748b', textTransform: 'uppercase' }}>or</span>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255, 255, 255, 0.1)' }} />
-        </div>
-
-        {/* Continue as Guest Button */}
-        <button
-          onClick={handleGuestLogin}
-          className="holo-btn-secondary"
-          style={{
-            width: '100%',
-            padding: '12px',
-            fontSize: '0.88rem'
-          }}
-        >
-          Continue as Guest
-        </button>
       </div>
 
-      {/* Forgot Password Modal */}
-      {isForgotModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 2000,
-          backgroundColor: 'rgba(6, 6, 8, 0.85)',
-          backdropFilter: 'blur(12px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16
-        }}>
-          <div className="holo-card" style={{ width: '100%', maxWidth: 400, padding: 28 }}>
-            <h3 className="holo-gradient-text" style={{ fontSize: '1.25rem', marginBottom: 10 }}>
-              Reset Password
-            </h3>
-            <p style={{ fontSize: '0.84rem', color: '#94a3b8', marginBottom: 20 }}>
-              Enter your registered email address to receive a secure password reset link.
-            </p>
-
-            {resetSuccess ? (
-              <div style={{
-                background: 'rgba(52, 211, 153, 0.15)',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
-                borderRadius: 12,
-                padding: '14px',
-                textAlign: 'center',
-                color: '#6EE7B7'
-              }}>
-                <CheckCircle2 size={24} style={{ margin: '0 auto 8px' }} />
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>
-                  Reset link sent to email!
-                </p>
+      {/* Centered Split-Screen Container matching Screen 8 */}
+      <div className="login-split-card" style={{ margin: 'auto 0' }}>
+        {/* LEFT COLUMN: Rainy Mountain Landscape & Ministry Credentials */}
+        <div className="login-visual-panel">
+          {/* Top DRISHTI AI Branding Over Image */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, rgba(53, 216, 255, 0.3), rgba(139, 108, 255, 0.35))',
+                border: '1px solid rgba(53, 216, 255, 0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 20px rgba(53, 216, 255, 0.4)'
+              }}
+            >
+              <Lock size={20} color="#35D8FF" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', fontFamily: 'Space Grotesk, sans-serif' }}>
+                  DRISHTI <span style={{ color: '#35D8FF' }}>AI</span>
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#35D8FF', background: 'rgba(53, 216, 255, 0.12)', border: '1px solid rgba(53, 216, 255, 0.35)', padding: '1px 6px', borderRadius: 4, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+                  MEGHALAYA
+                </span>
               </div>
-            ) : (
-              <form onSubmit={handleResetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    className="holo-input"
-                    style={{ width: '100%' }}
-                    required
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotModalOpen(false)}
-                    className="holo-btn-secondary"
-                    style={{ flex: 1, padding: '10px' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="holo-btn-primary"
-                    style={{ flex: 1, padding: '10px' }}
-                  >
-                    Send Link
-                  </button>
-                </div>
-              </form>
-            )}
+              <div style={{ fontSize: '0.66rem', color: '#CBD5E1', fontWeight: 600, letterSpacing: '0.02em', marginTop: 2 }}>
+                Landslide Early Warning & Risk Intelligence Platform
+              </div>
+            </div>
+          </div>
+
+          {/* Overlaid Bottom Items matching Screen 8 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* 4 Core Value Bullets */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.8rem', color: '#FFFFFF', fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#35D8FF', boxShadow: '0 0 8px #35D8FF' }} />
+                <span>AI-Powered Monitoring</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF3B6B', boxShadow: '0 0 8px #FF3B6B' }} />
+                <span>Real-time Alerts</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B6CFF', boxShadow: '0 0 8px #8B6CFF' }} />
+                <span>Multi-language Support</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#39D98A', boxShadow: '0 0 8px #39D98A' }} />
+                <span>Offline First</span>
+              </div>
+            </div>
+
+            {/* MDoNER Ministry Badge matching Screen 8 */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: 'rgba(7, 10, 16, 0.82)',
+                backdropFilter: 'blur(12px)',
+                padding: '10px 14px',
+                borderRadius: 8,
+                border: '1px solid rgba(120, 140, 180, 0.25)',
+                marginTop: 4
+              }}
+            >
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: '50%',
+                  background: 'rgba(255, 216, 77, 0.15)',
+                  border: '1px solid rgba(255, 216, 77, 0.45)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.05rem',
+                  flexShrink: 0
+                }}
+              >
+                🏛️
+              </div>
+              <div>
+                <span style={{ fontSize: '0.88rem', fontWeight: 900, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif' }}>
+                  MDoNER
+                </span>
+                <span style={{ fontSize: '0.64rem', color: '#9AA5B8', display: 'block', lineHeight: 1.25 }}>
+                  Ministry of Development of North Eastern Region, India
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* RIGHT COLUMN: Modern Glass Card matching Screen 8 */}
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            padding: '36px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: 16
+          }}
+        >
+          {/* Active Session shortcut if already logged in */}
+          {currentUser && (
+            <div
+              style={{
+                background: 'rgba(53, 216, 255, 0.08)',
+                border: '1px solid rgba(53, 216, 255, 0.3)',
+                borderRadius: 8,
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.74rem' }}>
+                <CheckCircle2 size={16} color="#35D8FF" />
+                <div>
+                  <span style={{ color: '#9AA5B8' }}>Logged in as: </span>
+                  <strong style={{ color: '#FFFFFF' }}>{currentUser.name}</strong>
+                  <span style={{ color: '#35D8FF', marginLeft: 4 }}>({currentUser.role})</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigateToGIS(currentUser)}
+                style={{
+                  background: '#35D8FF',
+                  color: '#070A10',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '5px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <span>Continue</span>
+                <ChevronRight size={12} />
+              </button>
+            </div>
+          )}
+
+          {/* Tabs: Login | Sign Up with underline matching Screen 8 */}
+          <div
+            style={{
+              display: 'flex',
+              borderBottom: '1px solid rgba(120, 140, 180, 0.2)',
+              position: 'relative'
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                background: 'transparent',
+                border: 'none',
+                color: activeTab === 'login' ? '#FFFFFF' : '#9AA5B8',
+                fontSize: '0.88rem',
+                fontWeight: 800,
+                fontFamily: 'Space Grotesk, sans-serif',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
+              Login
+              {activeTab === 'login' && (
+                <div style={{ position: 'absolute', bottom: -1, left: '25%', right: '25%', height: 2.5, background: 'linear-gradient(90deg, #8B6CFF, #35D8FF)', boxShadow: '0 0 10px #8B6CFF' }} />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setActiveTab('signup'); setErrorMsg(''); setSuccessMsg(''); }}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                background: 'transparent',
+                border: 'none',
+                color: activeTab === 'signup' ? '#FFFFFF' : '#9AA5B8',
+                fontSize: '0.88rem',
+                fontWeight: 800,
+                fontFamily: 'Space Grotesk, sans-serif',
+                cursor: 'pointer',
+                position: 'relative'
+              }}
+            >
+              Sign Up
+              {activeTab === 'signup' && (
+                <div style={{ position: 'absolute', bottom: -1, left: '25%', right: '25%', height: 2.5, background: 'linear-gradient(90deg, #FF4DB8, #8B6CFF)', boxShadow: '0 0 10px #FF4DB8' }} />
+              )}
+            </button>
+          </div>
+
+          {/* Feedback banners */}
+          {errorMsg && (
+            <div style={{ background: 'rgba(255, 59, 107, 0.15)', border: '1px solid rgba(255, 59, 107, 0.45)', borderRadius: 6, padding: '8px 12px', color: '#FF3B6B', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <AlertCircle size={14} />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div style={{ background: 'rgba(57, 217, 138, 0.15)', border: '1px solid rgba(57, 217, 138, 0.45)', borderRadius: 6, padding: '8px 12px', color: '#39D98A', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 size={14} />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* TAB 1: LOGIN FORM matching Screen 8 */}
+          {activeTab === 'login' && (
+            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 5 }}>
+                  Email / Phone
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={emailOrPhone}
+                  onChange={(e) => setEmailOrPhone(e.target.value)}
+                  className="command-input"
+                  placeholder="Enter email or phone"
+                  style={{ fontSize: '0.78rem', padding: '9px 12px' }}
+                />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                  <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600 }}>
+                    Password
+                  </label>
+                  <span
+                    onClick={() => setSuccessMsg('Quick Demo Access: Click the Quick Fill buttons below or use password "drishti2026".')}
+                    style={{ fontSize: '0.7rem', color: '#35D8FF', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Forgot Password?
+                  </span>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="command-input"
+                    placeholder="Enter password"
+                    style={{ fontSize: '0.78rem', padding: '9px 36px 9px 12px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: 10, top: 10, background: 'none', border: 'none', color: '#5C677D', cursor: 'pointer' }}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.74rem', color: '#CBD5E1', cursor: 'pointer', userSelect: 'none' }}>
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  style={{ accentColor: '#8B6CFF', width: 14, height: 14 }}
+                />
+                <span>Remember me</span>
+              </label>
+
+              {/* [ Login ] Button matching Screen 8 */}
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #8B6CFF 0%, #FF4DB8 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  fontFamily: 'Space Grotesk, sans-serif',
+                  letterSpacing: '0.04em',
+                  cursor: loading ? 'wait' : 'pointer',
+                  boxShadow: '0 4px 20px rgba(255, 77, 184, 0.45)',
+                  marginTop: 4,
+                  transition: 'transform 0.15s ease',
+                  opacity: loading ? 0.8 : 1
+                }}
+                onMouseOver={(e) => { if (!loading) e.currentTarget.style.transform = 'scale(1.02)'; }}
+                onMouseOut={(e) => { if (!loading) e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                {loading ? 'Authenticating...' : 'Login'}
+              </button>
+
+              {/* Demo Quick Fill Presets (3 Roles) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginTop: 2 }}>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('responder')}
+                  style={{
+                    background: 'rgba(53, 216, 255, 0.08)',
+                    border: '1px solid rgba(53, 216, 255, 0.25)',
+                    borderRadius: 6,
+                    padding: '6px 4px',
+                    fontSize: '0.66rem',
+                    color: '#35D8FF',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    textAlign: 'center'
+                  }}
+                  title="Login as Citizen Scientist volunteer"
+                >
+                  ⚡ Volunteer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('officer')}
+                  style={{
+                    background: 'rgba(255, 157, 61, 0.08)',
+                    border: '1px solid rgba(255, 157, 61, 0.25)',
+                    borderRadius: 6,
+                    padding: '6px 4px',
+                    fontSize: '0.66rem',
+                    color: '#FF9D3D',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    textAlign: 'center'
+                  }}
+                  title="Login as SDMA Emergency Official"
+                >
+                  ⚡ SDMA Officer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('sdrf')}
+                  style={{
+                    background: 'rgba(57, 217, 138, 0.08)',
+                    border: '1px solid rgba(57, 217, 138, 0.25)',
+                    borderRadius: 6,
+                    padding: '6px 4px',
+                    fontSize: '0.66rem',
+                    color: '#39D98A',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    textAlign: 'center'
+                  }}
+                  title="Login as SDRF Field Responder"
+                >
+                  ⚡ SDRF Lead
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 2: SIGN UP FORM */}
+          {activeTab === 'signup' && (
+            <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={signupName}
+                  onChange={(e) => setSignupName(e.target.value)}
+                  className="command-input"
+                  placeholder="e.g. Lee Montaria"
+                  style={{ fontSize: '0.78rem', padding: '8px 12px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                  Role & Sector
+                </label>
+                <select
+                  value={signupRole}
+                  onChange={(e) => setSignupRole(e.target.value)}
+                  className="command-input"
+                  style={{ fontSize: '0.78rem', padding: '8px 12px' }}
+                >
+                  <option value="Citizen Scientist">Citizen Scientist (Early Warning Volunteer)</option>
+                  <option value="Field Responder">Field Responder (ASDMA / SDRF Team)</option>
+                  <option value="Official Admin">SDMA Emergency Operations Center Official</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    className="command-input"
+                    placeholder="name@drishti.ai"
+                    style={{ fontSize: '0.78rem', padding: '8px 10px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={signupPhone}
+                    onChange={(e) => setSignupPhone(e.target.value)}
+                    className="command-input"
+                    placeholder="+91-XXXXXXXXXX"
+                    style={{ fontSize: '0.78rem', padding: '8px 10px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    className="command-input"
+                    placeholder="Min. 6 chars"
+                    style={{ fontSize: '0.78rem', padding: '8px 10px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                    Confirm
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={signupConfirmPassword}
+                    onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                    className="command-input"
+                    placeholder="Re-enter"
+                    style={{ fontSize: '0.78rem', padding: '8px 10px' }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '11px 0',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #FF4DB8 0%, #8B6CFF 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '0.86rem',
+                  fontWeight: 800,
+                  fontFamily: 'Space Grotesk, sans-serif',
+                  letterSpacing: '0.04em',
+                  cursor: loading ? 'wait' : 'pointer',
+                  boxShadow: '0 4px 18px rgba(255, 77, 184, 0.4)',
+                  marginTop: 6,
+                  opacity: loading ? 0.8 : 1
+                }}
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </button>
+            </form>
+          )}
+
+          {/* Social login divider matching Screen 8 */}
+          <div style={{ textAlign: 'center', position: 'relative', marginTop: 4 }}>
+            <div style={{ borderTop: '1px solid rgba(120, 140, 180, 0.18)', position: 'absolute', top: '50%', left: 0, right: 0 }} />
+            <span style={{ background: 'var(--bg-surface)', padding: '0 10px', fontSize: '0.7rem', color: '#5C677D', position: 'relative' }}>
+              or continue with
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 14 }}>
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('google')}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid rgba(120, 140, 180, 0.25)',
+                color: '#FFFFFF',
+                fontSize: '1rem',
+                fontWeight: 800,
+                fontFamily: 'Space Grotesk, sans-serif',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease'
+              }}
+              title="Sign in with Google"
+              onMouseOver={(e) => { e.currentTarget.style.borderColor = '#35D8FF'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(120, 140, 180, 0.25)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              G
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('phone')}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid rgba(120, 140, 180, 0.25)',
+                color: '#35D8FF',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease'
+              }}
+              title="Sign in with Phone (SMS OTP)"
+              onMouseOver={(e) => { e.currentTarget.style.borderColor = '#8B6CFF'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(120, 140, 180, 0.25)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <Phone size={17} />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -136,7 +136,7 @@ export default function Header({ activeTab, setActiveTab, onRefreshAll, isRefres
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h1 className="holo-gradient-text" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
-                DRISHTI_Ai <span style={{ color: '#4FD8EA', fontWeight: 600 }}>• SentinelWatch</span>
+                DRISHTI AI <span style={{ color: '#35D8FF', fontWeight: 600 }}>• NER Intelligence</span>
               </h1>
               <span className="holo-badge-critical" style={{ fontSize: '0.68rem', padding: '2px 8px' }}>
                 AI EARLY WARNING

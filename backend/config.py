@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     """Application configuration settings loaded from environment or .env."""
 
     # Database
-    DATABASE_URL: str = Field(default="sqlite:///./sih_landslide.db")
+    DATABASE_URL: str = Field(default="sqlite:///./drishti_landslide.db")
 
     # Pilot District (Default: East Khasi Hills, Meghalaya)
     PILOT_DISTRICT_NAME: str = Field(default="East Khasi Hills, Meghalaya")

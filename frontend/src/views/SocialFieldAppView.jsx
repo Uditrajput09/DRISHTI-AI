@@ -302,7 +302,7 @@ export default function SocialFieldAppView({ currentUser, onOpenAuth, facilities
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
-                DRISHTI_Ai Community Pulse
+                DRISHTI AI Community Pulse
               </h2>
               <span className="holo-badge-critical" style={{ fontSize: '0.68rem', padding: '1px 8px' }}>
                 LIVE FEED

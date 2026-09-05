@@ -51,7 +51,7 @@ export default function HoloNavbar({
           </div>
           <div>
             <h1 className="holo-gradient-text" style={{ fontSize: '1.25rem', margin: 0, lineHeight: 1.2 }}>
-              NER SentinelWatch
+              DRISHTI AI
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.7rem', color: '#94a3b8' }}>
               <span className="holo-live-dot" />

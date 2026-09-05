@@ -1,35 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldAlert, 
   Map, 
-  ShieldCheck, 
   TrendingUp, 
   Radio, 
   BellRing, 
   Smartphone, 
   User, 
   Eye, 
-  RefreshCw 
+  RefreshCw,
+  Search,
+  Sliders,
+  PanelLeft,
+  Lock
 } from 'lucide-react';
-import StatusIndicator from './StatusIndicator';
 
 export default function TopNavigation({
   activeSection = 'gis',
   onSelectSection,
-  unreadAlertCount = 3,
+  unreadAlertCount = 6,
   onOpenAlerts,
   onOpenProfile,
   currentUser,
   onRefreshData,
-  isRefreshing
+  isRefreshing,
+  showSidebar = false,
+  onToggleSidebar
 }) {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const navItems = [
     { id: 'gis', label: 'GIS Command', icon: Map },
     { id: 'risk', label: 'Risk Intelligence', icon: ShieldAlert },
     { id: 'forecast', label: 'Forecast', icon: TrendingUp },
     { id: 'incidents', label: 'Incidents', icon: Radio },
     { id: 'alerts', label: 'Alerts', icon: BellRing, badge: unreadAlertCount },
-    { id: 'reports', label: 'Field Reports', icon: Smartphone }
+    { id: 'reports', label: 'Reports', icon: Smartphone },
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'simulation', label: 'Simulation', icon: Sliders }
   ];
 
   return (
@@ -37,51 +45,78 @@ export default function TopNavigation({
       style={{
         position: 'sticky',
         top: 0,
-        zIndex: 1000,
+        zIndex: 1100,
         height: 64,
-        background: 'rgba(7, 10, 16, 0.95)',
-        backdropFilter: 'blur(16px)',
+        background: 'rgba(7, 10, 16, 0.96)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(120, 140, 180, 0.22)',
         padding: '0 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.6)'
+        gap: 16,
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.75)'
       }}
     >
-      {/* Brand & Regional Identification */}
+      {/* Left: DRISHTI AI logo + East Khasi Hills • Live Monitoring */}
       <div
-        onClick={() => onSelectSection('gis')}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 12,
           cursor: 'pointer',
-          userSelect: 'none'
+          userSelect: 'none',
+          flexShrink: 0
         }}
       >
-        {/* Shield / Eye minimal logo */}
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            title="Toggle EOC Sidebar"
+            className="desktop-nav"
+            style={{
+              background: showSidebar ? 'rgba(53, 216, 255, 0.15)' : 'rgba(21, 27, 41, 0.8)',
+              border: `1px solid ${showSidebar ? 'rgba(53, 216, 255, 0.4)' : 'rgba(120, 140, 180, 0.25)'}`,
+              borderRadius: 6,
+              width: 32,
+              height: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: showSidebar ? '#35D8FF' : '#9AA5B8',
+              cursor: 'pointer',
+              marginRight: 4
+            }}
+          >
+            <PanelLeft size={16} />
+          </button>
+        )}
+
+        {/* Brand Shield Logo with glowing ring */}
         <div
+          onClick={() => onSelectSection('gis')}
           style={{
             width: 38,
             height: 38,
             borderRadius: 10,
-            background: 'linear-gradient(135deg, rgba(53, 216, 255, 0.2), rgba(139, 108, 255, 0.2))',
-            border: '1px solid rgba(53, 216, 255, 0.45)',
+            background: 'linear-gradient(135deg, rgba(53, 216, 255, 0.22), rgba(139, 108, 255, 0.25))',
+            border: '1px solid rgba(53, 216, 255, 0.5)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 16px rgba(53, 216, 255, 0.3)'
+            boxShadow: '0 0 16px rgba(53, 216, 255, 0.35)',
+            flexShrink: 0
           }}
         >
           <Eye size={20} color="#35D8FF" />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div onClick={() => onSelectSection('gis')} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span
               style={{
-                fontSize: '1.15rem',
+                fontSize: '1.18rem',
                 fontWeight: 900,
                 letterSpacing: '0.04em',
                 color: '#FFFFFF',
@@ -94,25 +129,26 @@ export default function TopNavigation({
               style={{
                 fontSize: '0.62rem',
                 color: '#35D8FF',
-                background: 'rgba(53, 216, 255, 0.1)',
-                border: '1px solid rgba(53, 216, 255, 0.3)',
+                background: 'rgba(53, 216, 255, 0.12)',
+                border: '1px solid rgba(53, 216, 255, 0.35)',
                 padding: '1px 6px',
                 borderRadius: 4,
                 fontWeight: 800,
-                letterSpacing: '0.06em'
+                letterSpacing: '0.06em',
+                fontFamily: 'Space Grotesk, sans-serif'
               }}
             >
-              NER • INDIA
+              PILOT
             </span>
           </div>
-          <span style={{ fontSize: '0.66rem', color: '#9AA5B8', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600 }}>
-            AI Early Warning & Risk Intelligence
+          <span style={{ fontSize: '0.64rem', color: '#9AA5B8', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>
+            East Khasi Hills • Live Monitoring
           </span>
         </div>
       </div>
 
-      {/* Desktop Navigation Links */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }} className="desktop-nav">
+      {/* Center: Desktop Navigation Links */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
         {navItems.map(item => {
           const isActive = activeSection === item.id;
           const IconComponent = item.icon;
@@ -121,50 +157,129 @@ export default function TopNavigation({
               key={item.id}
               onClick={() => onSelectSection(item.id)}
               style={{
-                background: isActive ? 'rgba(53, 216, 255, 0.12)' : 'transparent',
+                background: isActive ? 'linear-gradient(135deg, rgba(53, 216, 255, 0.12) 0%, rgba(139, 108, 255, 0.12) 100%)' : 'transparent',
                 color: isActive ? '#35D8FF' : '#9AA5B8',
-                border: `1px solid ${isActive ? 'rgba(53, 216, 255, 0.45)' : 'transparent'}`,
+                border: `1px solid ${isActive ? 'rgba(53, 216, 255, 0.55)' : 'transparent'}`,
                 borderRadius: 8,
-                padding: '7px 12px',
+                padding: '7px 11px',
                 fontSize: '0.78rem',
-                fontWeight: 700,
+                fontWeight: isActive ? 800 : 600,
                 fontFamily: 'Space Grotesk, sans-serif',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 7,
+                gap: 6,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
-                position: 'relative'
+                position: 'relative',
+                boxShadow: isActive ? '0 0 14px rgba(53, 216, 255, 0.22)' : 'none'
               }}
             >
-              <IconComponent size={15} color={isActive ? '#35D8FF' : '#9AA5B8'} />
+              <IconComponent size={14} color={isActive ? '#35D8FF' : '#9AA5B8'} />
               <span>{item.label}</span>
               {item.badge > 0 && (
                 <span
                   style={{
                     background: '#FF3B6B',
                     color: '#FFFFFF',
-                    fontSize: '0.64rem',
+                    fontSize: '0.62rem',
                     fontWeight: 900,
                     borderRadius: 10,
                     padding: '1px 6px',
-                    marginLeft: 2
+                    marginLeft: 2,
+                    boxShadow: '0 0 6px #FF3B6B'
                   }}
                 >
                   {item.badge}
                 </span>
+              )}
+
+              {/* Active Indicator Line */}
+              {isActive && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: -5,
+                    left: '25%',
+                    right: '25%',
+                    height: 2,
+                    background: '#35D8FF',
+                    borderRadius: '2px 2px 0 0',
+                    boxShadow: '0 0 8px #35D8FF'
+                  }}
+                />
               )}
             </button>
           );
         })}
       </nav>
 
-      {/* Top-Right: Live System Status, Refresh, Alerts Bell, Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {/* Live System Status Indicator */}
-        <StatusIndicator isOnline={navigator.onLine} />
+      {/* Right: Live Status, Search, Refresh, Alerts Bell, Profile Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        {/* Quick Search */}
+        <div style={{ position: 'relative', width: 140 }} className="desktop-nav">
+          <Search size={13} color="#5C677D" style={{ position: 'absolute', left: 9, top: 10 }} />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="command-input"
+            style={{
+              padding: '6px 8px 6px 28px',
+              fontSize: '0.74rem',
+              borderRadius: 6,
+              height: 32
+            }}
+          />
+        </div>
 
-        {/* Notification Bell */}
+        {/* Live System Status Pill */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'rgba(57, 217, 138, 0.12)',
+            border: '1px solid rgba(57, 217, 138, 0.35)',
+            padding: '4px 9px',
+            borderRadius: 6,
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            color: '#39D98A',
+            fontFamily: 'Space Grotesk, sans-serif'
+          }}
+        >
+          <span className="live-indicator-dot" />
+          <span>LIVE</span>
+        </div>
+
+        {/* Refresh Button with Spin Animation */}
+        <button
+          onClick={onRefreshData}
+          disabled={isRefreshing}
+          title="Refresh All Telemetry"
+          style={{
+            background: 'rgba(16, 21, 33, 0.8)',
+            border: '1px solid rgba(120, 140, 180, 0.25)',
+            borderRadius: 8,
+            width: 34,
+            height: 34,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#9AA5B8',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <RefreshCw
+            size={14}
+            color="#35D8FF"
+            style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}
+          />
+        </button>
+
+        {/* Notification Bell with Badge */}
         <button
           onClick={onOpenAlerts}
           title="Open Emergency Alerts"
@@ -172,8 +287,8 @@ export default function TopNavigation({
             background: 'rgba(16, 21, 33, 0.8)',
             border: '1px solid rgba(120, 140, 180, 0.25)',
             borderRadius: 8,
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -183,7 +298,7 @@ export default function TopNavigation({
             transition: 'all 0.15s ease'
           }}
         >
-          <BellRing size={16} color="#FF9D3D" />
+          <BellRing size={15} color="#FF9D3D" />
           {unreadAlertCount > 0 && (
             <span
               style={{
@@ -200,7 +315,7 @@ export default function TopNavigation({
           )}
         </button>
 
-        {/* User Profile Avatar / Trigger */}
+        {/* User Profile Avatar */}
         <button
           onClick={onOpenProfile}
           title="User Profile & Settings"
@@ -208,7 +323,7 @@ export default function TopNavigation({
             background: 'rgba(16, 21, 33, 0.8)',
             border: '1px solid rgba(120, 140, 180, 0.25)',
             borderRadius: 8,
-            padding: '5px 10px',
+            padding: '4px 8px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
@@ -216,25 +331,52 @@ export default function TopNavigation({
             cursor: 'pointer'
           }}
         >
-          <div
+          <img
+            src="/images/avatars/responder-avatar.jpg"
+            alt="User Avatar"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
             style={{
               width: 24,
               height: 24,
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #35D8FF, #8B6CFF)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              color: '#070A10'
+              objectFit: 'cover',
+              border: '1px solid rgba(53, 216, 255, 0.5)'
             }}
-          >
-            {currentUser?.name ? currentUser.name[0].toUpperCase() : 'O'}
-          </div>
-          <span style={{ fontSize: '0.76rem', fontWeight: 600, maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {currentUser?.name || 'Official'}
+          />
+          <span style={{ fontSize: '0.74rem', fontWeight: 600, maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {currentUser?.name || 'Lee Montaria'}
           </span>
+        </button>
+
+        {/* Dedicated Login / Switch Portal Button */}
+        <button
+          onClick={() => onSelectSection('login')}
+          title="Access Login Portal / Switch Account"
+          style={{
+            background: activeSection === 'login' ? 'linear-gradient(135deg, rgba(139, 108, 255, 0.25), rgba(255, 77, 184, 0.25))' : 'rgba(16, 21, 33, 0.8)',
+            border: `1px solid ${activeSection === 'login' ? '#FF4DB8' : 'rgba(120, 140, 180, 0.25)'}`,
+            borderRadius: 8,
+            padding: '5px 10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            color: activeSection === 'login' ? '#FF4DB8' : '#CBD5E1',
+            cursor: 'pointer',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            fontFamily: 'Space Grotesk, sans-serif',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = '#35D8FF'; e.currentTarget.style.color = '#35D8FF'; }}
+          onMouseOut={(e) => { 
+            e.currentTarget.style.borderColor = activeSection === 'login' ? '#FF4DB8' : 'rgba(120, 140, 180, 0.25)';
+            e.currentTarget.style.color = activeSection === 'login' ? '#FF4DB8' : '#CBD5E1';
+          }}
+        >
+          <Lock size={13} color="#35D8FF" />
+          <span>Login</span>
         </button>
       </div>
     </header>

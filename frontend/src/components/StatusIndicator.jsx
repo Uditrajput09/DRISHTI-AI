@@ -90,7 +90,7 @@ export default function StatusIndicator({ isOnline = true }) {
           </div>
 
           <div style={{ borderTop: '1px solid rgba(120, 140, 180, 0.15)', paddingTop: 6, display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#5C677D' }}>
-            <span>East Khasi Hills Pilot Sentinel</span>
+            <span>East Khasi Hills Pilot • DRISHTI AI</span>
             <span>MDoNER Compliant</span>
           </div>
         </div>

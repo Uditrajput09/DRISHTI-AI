@@ -44,6 +44,21 @@ def submit_field_report(req: FieldReportCreate, db: Session = Depends(get_db)):
             matched_zone_id = best_z.id
 
     now_utc = datetime.now(timezone.utc)
+
+    # Check for existing nearby reports (~1.3km / 0.012 deg) to flag clustered hotspot
+    nearby = (
+        db.query(FieldReport)
+        .filter(
+            FieldReport.latitude.isnot(None),
+            FieldReport.longitude.isnot(None),
+            FieldReport.latitude.between(req.latitude - 0.012, req.latitude + 0.012),
+            FieldReport.longitude.between(req.longitude - 0.012, req.longitude + 0.012)
+        )
+        .first()
+    )
+    initial_status = "confirmed_hotspot" if nearby else "submitted"
+    geo_confidence = "confirmed_hotspot" if nearby else "pending_isolated"
+
     report = FieldReport(
         report_uid=report_uid,
         zone_id=matched_zone_id,
@@ -56,7 +71,7 @@ def submit_field_report(req: FieldReportCreate, db: Session = Depends(get_db)):
         severity=req.severity,
         description=req.description,
         photo_data_url=req.photo_data_url,
-        status="submitted",
+        status=initial_status,
         synced=True,
         device_created_at=req.device_created_at or now_utc,
         server_received_at=now_utc
@@ -70,6 +85,7 @@ def submit_field_report(req: FieldReportCreate, db: Session = Depends(get_db)):
         "report_id": report.id,
         "report_uid": report.report_uid,
         "matched_zone_id": matched_zone_id,
+        "geo_confidence": geo_confidence,
         "message": "Report successfully recorded and mapped to risk grid."
     }
 

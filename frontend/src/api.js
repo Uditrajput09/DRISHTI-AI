@@ -115,6 +115,7 @@ export const api = {
       const data = await res.json();
       
       // Clear offline queue on successful sync
+      localStorage.removeItem('drishti_offline_report_queue');
       localStorage.removeItem('sih_offline_report_queue');
       return data;
     } catch (err) {
@@ -125,7 +126,7 @@ export const api = {
 
   getOfflineQueue() {
     try {
-      const data = localStorage.getItem('sih_offline_report_queue');
+      const data = localStorage.getItem('drishti_offline_report_queue') || localStorage.getItem('sih_offline_report_queue');
       return data ? JSON.parse(data) : [];
     } catch (e) {
       return [];
@@ -136,10 +137,10 @@ export const api = {
     const queue = this.getOfflineQueue();
     queue.push({
       ...report,
-      report_uid: `OFFLINE-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+      report_uid: `DRISHTI-OFFLINE-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
       device_created_at: new Date().toISOString()
     });
-    localStorage.setItem('sih_offline_report_queue', JSON.stringify(queue));
+    localStorage.setItem('drishti_offline_report_queue', JSON.stringify(queue));
   },
 
   async getReports() {

@@ -79,7 +79,7 @@ export default function AuthModal({ isOpen, onClose, currentUser, onLogin }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Sparkles size={18} color="#FF6EC7" />
               <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
-                DRISHTI_Ai Portal Sign In
+                DRISHTI AI Portal Sign In
               </h2>
             </div>
             <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '4px 0 0 0' }}>

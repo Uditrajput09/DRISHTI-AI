@@ -33,6 +33,8 @@ from backend.api.routes_vulnerability import router as vulnerability_router
 from backend.api.routes_flood import router as flood_router
 from backend.api.routes_escalation import router as escalation_router
 from backend.api.routes_survey import router as survey_router
+from backend.api.routes_clusters import router as clusters_router
+from backend.api.routes_cap import router as cap_router
 
 scheduler = BackgroundScheduler()
 
@@ -100,7 +102,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="DRISHTI_Ai Landslide Early Warning & Risk Monitoring API",
+    title="DRISHTI AI Landslide Early Warning & Risk Monitoring API",
     description="Backend API for real-time landslide risk classification, GIS layers, multi-lingual alerts, and offline citizen reporting for the North Eastern Region of India (East Khasi Hills, Meghalaya pilot).",
     version="1.0.0",
     lifespan=lifespan
@@ -130,6 +132,8 @@ app.include_router(vulnerability_router)
 app.include_router(flood_router)
 app.include_router(escalation_router)
 app.include_router(survey_router)
+app.include_router(clusters_router)
+app.include_router(cap_router)
 
 
 @app.get("/")

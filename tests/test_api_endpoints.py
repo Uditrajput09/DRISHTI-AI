@@ -138,3 +138,78 @@ def test_infrastructure_endpoints():
     roads_resp = client.get("/api/infrastructure/roads")
     assert roads_resp.status_code == 200
     assert len(roads_resp.json()) > 0
+
+
+def test_risk_confidence_score():
+    """Verify ML inter-tree variance, confidence score, and uncertainty bounds."""
+    # Direct model verification
+    feat = {
+        "slope_angle": 38.5,
+        "rainfall_24h_mm": 110.0,
+        "rainfall_72h_mm": 210.0,
+        "antecedent_rainfall_index": 140.0,
+        "soil_moisture_pct": 88.0,
+        "distance_to_road_m": 12.0,
+        "vulnerability_index": 0.75
+    }
+    pred = risk_model.predict_risk(feat)
+    assert "confidence_score" in pred
+    assert "uncertainty_band" in pred
+    assert pred["confidence_score"] is not None
+    assert 0.0 <= pred["confidence_score"] <= 1.0
+    band = pred["uncertainty_band"]
+    assert isinstance(band, list) and len(band) == 2
+    assert band[0] <= band[1]
+
+    # Endpoint simulation verification
+    req = {
+        "simulated_hourly_rainfall_mm": 95.0,
+        "simulated_duration_hours": 4,
+        "simulated_soil_moisture_pct": 82.0,
+        "trigger_alerts": False
+    }
+    resp = client.post("/api/risk/simulate", json=req)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["results"]) > 0
+    first = data["results"][0]
+    assert "confidence_score" in first
+    assert "uncertainty_band" in first
+    assert first["confidence_score"] is not None
+
+
+def test_cluster_hotspots():
+    """Verify DBSCAN geo-clustering and hotspot detection endpoints."""
+    # 1. Hotspots GeoJSON
+    resp = client.get("/api/clusters/hotspots")
+    assert resp.status_code == 200
+    geojson = resp.json()
+    assert geojson["type"] == "FeatureCollection"
+    assert "features" in geojson
+    assert "summary" in geojson
+    assert "total_reports" in geojson["summary"]
+
+    # 2. Report confidence list
+    resp_conf = client.get("/api/clusters/report-confidence")
+    assert resp_conf.status_code == 200
+    assert isinstance(resp_conf.json(), list)
+
+
+def test_cap_xml_export():
+    """Verify OASIS CAP v1.2 XML emergency alert export and Atom feed."""
+    # 1. Latest alert in CAP XML
+    resp = client.get("/api/alerts/cap/latest")
+    assert resp.status_code == 200
+    assert "text/xml" in resp.headers.get("content-type", "")
+    content = resp.text
+    assert "<alert" in content
+    assert "urn:oasis:names:tc:emergency:cap:1.2" in content
+    assert "<identifier>" in content
+    assert "<info>" in content
+    assert "<severity>" in content
+
+    # 2. Atom syndication feed
+    feed_resp = client.get("/api/alerts/cap/feed")
+    assert feed_resp.status_code == 200
+    assert "<feed" in feed_resp.text
+

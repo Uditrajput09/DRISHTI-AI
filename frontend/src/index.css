@@ -1,6 +1,6 @@
-/* ─── DRISHTI-AI GIS COMMAND CENTER DESIGN SYSTEM ───────────────────────── */
+/* ─── DRISHTI-AI EMERGENCY OPERATIONS & GIS COMMAND CENTER DESIGN SYSTEM ─── */
 :root {
-  /* Core Command Palette */
+  /* Core Background Hierarchy */
   --bg-main: #070A10;
   --bg-surface: #101521;
   --bg-surface-elevated: #151B29;
@@ -8,35 +8,29 @@
   --border-command: rgba(120, 140, 180, 0.22);
   --border-command-active: rgba(53, 216, 255, 0.55);
 
-  /* Accents */
+  /* Primary Accent System */
   --cyan-primary: #35D8FF;
   --purple-secondary: #8B6CFF;
   --pink-interactive: #FF4DB8;
 
-  /* Risk Severity Indicators */
+  /* Risk Severity Scale */
   --risk-critical: #FF3B6B;
-  --risk-critical-bg: rgba(255, 59, 107, 0.14);
+  --risk-critical-bg: rgba(255, 59, 107, 0.15);
   --risk-critical-border: rgba(255, 59, 107, 0.45);
 
   --risk-high: #FF9D3D;
-  --risk-high-bg: rgba(255, 157, 61, 0.14);
+  --risk-high-bg: rgba(255, 157, 61, 0.15);
   --risk-high-border: rgba(255, 157, 61, 0.45);
 
   --risk-medium: #FFD84D;
-  --risk-medium-bg: rgba(255, 216, 77, 0.14);
+  --risk-medium-bg: rgba(255, 216, 77, 0.15);
   --risk-medium-border: rgba(255, 216, 77, 0.45);
 
   --risk-safe: #39D98A;
-  --risk-safe-bg: rgba(57, 217, 138, 0.14);
+  --risk-safe-bg: rgba(57, 217, 138, 0.15);
   --risk-safe-border: rgba(57, 217, 138, 0.45);
 
-  /* Backwards-compatibility tokens */
-  --bg-card: #101521;
-  --bg-card-inner: #151B29;
-  --bg-glass: rgba(16, 21, 33, 0.88);
-  --border-glass: rgba(120, 140, 180, 0.22);
-  --border-glass-bright: rgba(53, 216, 255, 0.45);
-  
+  /* Typography & Readability */
   --text-primary: #F4F6FB;
   --text-secondary: #9AA5B8;
   --text-muted: #5C677D;
@@ -45,16 +39,25 @@
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
+  /* Geometry Tokens */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 18px;
   --radius-full: 9999px;
 
+  /* Elevation & Glow */
   --shadow-command: 0 8px 32px rgba(0, 0, 0, 0.55);
   --shadow-glow-cyan: 0 0 20px rgba(53, 216, 255, 0.35);
   --shadow-glow-pink: 0 0 20px rgba(255, 77, 184, 0.35);
   --shadow-glow-critical: 0 0 24px rgba(255, 59, 107, 0.45);
+
+  /* Backwards Compatibility Tokens */
+  --bg-card: #101521;
+  --bg-card-inner: #151B29;
+  --bg-glass: rgba(16, 21, 33, 0.88);
+  --border-glass: rgba(120, 140, 180, 0.22);
+  --border-glass-bright: rgba(53, 216, 255, 0.45);
 }
 
 * {
@@ -76,6 +79,10 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
 }
 
 /* ─── Scrollbars ────────────────────────────────────────────── */
@@ -111,23 +118,39 @@ h1, h2, h3, h4, h5, h6 {
 
 .command-panel-glass {
   background: var(--bg-surface-glass);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border-command);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-command);
 }
 
-/* Compatibility with previous .glass-panel & .holo-card */
+.command-panel-interactive {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-command);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-command);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.command-panel-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(53, 216, 255, 0.45);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(53, 216, 255, 0.15);
+}
+
+/* Compatibility aliases */
 .glass-panel, .holo-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-command);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-command);
 }
-
-.glass-panel-interactive:hover, .command-panel:hover {
-  border-color: rgba(53, 216, 255, 0.4);
+.holo-gradient-text {
+  background: linear-gradient(135deg, #35D8FF 0%, #8B6CFF 50%, #FF4DB8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-heading);
+  font-weight: 800;
 }
 
 /* ─── Buttons ───────────────────────────────────────────────── */
@@ -155,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary-pink {
-  background: linear-gradient(135deg, #FF4DB8 0%, #B8257D 100%);
+  background: linear-gradient(135deg, #FF4DB8 0%, #8B6CFF 100%);
   color: #FFFFFF;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -198,14 +221,13 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(120, 140, 180, 0.45);
 }
 
-/* Backwards compatibility for holo-btn */
 .holo-btn-primary {
   background: linear-gradient(135deg, #35D8FF 0%, #8B6CFF 100%);
   color: #070A10;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 0.82rem;
-  padding: 8px 16px;
+  font-size: 0.84rem;
+  padding: 9px 18px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.25);
   cursor: pointer;
@@ -217,6 +239,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .holo-btn-primary:hover {
   filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .holo-btn-secondary {
@@ -227,6 +250,12 @@ h1, h2, h3, h4, h5, h6 {
   padding: 8px 14px;
   cursor: pointer;
   font-size: 0.82rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.holo-btn-secondary:hover {
+  border-color: rgba(53, 216, 255, 0.45);
 }
 
 /* ─── Severity Badges ───────────────────────────────────────── */
@@ -305,7 +334,6 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.02em;
 }
 
-/* Aliases for holo-badges */
 .holo-badge-critical { color: var(--risk-critical); background: var(--risk-critical-bg); border: 1px solid var(--risk-critical-border); border-radius: var(--radius-full); font-family: var(--font-heading); font-weight: 700; padding: 2px 8px; }
 .holo-badge-high { color: var(--risk-high); background: var(--risk-high-bg); border: 1px solid var(--risk-high-border); border-radius: var(--radius-full); font-family: var(--font-heading); font-weight: 700; padding: 2px 8px; }
 .holo-badge-moderate { color: var(--risk-medium); background: var(--risk-medium-bg); border: 1px solid var(--risk-medium-border); border-radius: var(--radius-full); font-family: var(--font-heading); font-weight: 700; padding: 2px 8px; }
@@ -374,6 +402,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  background: #39D98A;
+  box-shadow: 0 0 8px #39D98A;
   display: inline-block;
   animation: liveDotPulse 1.8s infinite ease-in-out;
 }
@@ -406,14 +436,46 @@ input[type="range"]::-webkit-slider-thumb:hover {
   .desktop-nav {
     display: none !important;
   }
+  .desktop-sidebar {
+    display: none !important;
+  }
 }
 
-@media (max-width: 1024px) {
-  .gis-command-grid {
+/* ─── Screen 8: Login Split Layout ────────────────────────── */
+.login-split-card {
+  width: 100%;
+  max-width: 960px;
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--border-command);
+  background: var(--bg-surface);
+}
+
+.login-visual-panel {
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(7, 10, 16, 0.4) 0%, rgba(7, 10, 16, 0.92) 100%), url('/images/login/login-meghalaya-rain.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(120, 140, 180, 0.2);
+  min-height: 400px;
+}
+
+@media (max-width: 860px) {
+  .login-split-card {
     grid-template-columns: 1fr !important;
+    max-width: 480px !important;
   }
-  .simulation-xai-grid {
-    grid-template-columns: 1fr !important;
+  .login-visual-panel {
+    min-height: 260px !important;
+    padding: 24px 20px !important;
   }
 }
 

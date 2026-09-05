@@ -45,10 +45,28 @@ class LandslideRiskModel:
         """
         feat_vector = np.array([extract_features_from_dict(zone_features)])
 
+        confidence_score = None
+        uncertainty_band = None
+        model_std = None
+
         if self.model is not None:
             proba = float(self.model.predict_proba(feat_vector)[0][1])
+            # Inter-tree variance calculation across Random Forest estimators
+            if hasattr(self.model, "estimators_") and len(self.model.estimators_) > 0:
+                tree_probas = np.array([
+                    float(tree.predict_proba(feat_vector)[0][1])
+                    for tree in self.model.estimators_
+                ])
+                tree_std = float(np.std(tree_probas))
+                # Inter-tree variance mapped to confidence score (0.0 to 1.0)
+                confidence_score = round(max(0.0, min(1.0, 1.0 - tree_std * 3.0)), 3)
+                lower = round(max(0.0, float(np.mean(tree_probas)) - 1.5 * tree_std), 3)
+                upper = round(min(1.0, float(np.mean(tree_probas)) + 1.5 * tree_std), 3)
+                uncertainty_band = [lower, upper]
+                model_std = round(tree_std, 4)
         else:
             # Fallback heuristic calculation if model uninitialized
+            # MOCKED: heuristic fallback when ML model artifact is unavailable
             slope = zone_features.get("slope_angle", 30.0)
             r24 = zone_features.get("rainfall_24h_mm", 0.0)
             sm = zone_features.get("soil_moisture_pct", 50.0)
@@ -74,6 +92,9 @@ class LandslideRiskModel:
             "risk_score": risk_score,
             "risk_level": risk_level,
             "probability": round(proba, 4),
+            "confidence_score": confidence_score,
+            "uncertainty_band": uncertainty_band,
+            "model_std": model_std,
             "triggering_factors": factors,
             "model_version": self.model_version
         }

@@ -84,7 +84,7 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview
             </div>
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
-                DRISHTI_Ai Citizen Mobile App
+                DRISHTI AI Citizen Mobile App
               </h2>
               <span style={{ fontSize: '0.72rem', color: '#4FD8EA', fontWeight: 700 }}>
                 Installable Android App & Citizen Field Reporter
