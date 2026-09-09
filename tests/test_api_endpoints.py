@@ -5,10 +5,10 @@ Automated end-to-end API and ML validation tests for DRISHTI-AI.
 
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
+from backend.main import app as _app
 from backend.ml.model import risk_model
 
-client = TestClient(app)
+client = TestClient(_app)
 
 
 def test_root_endpoint():

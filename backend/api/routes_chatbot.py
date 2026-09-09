@@ -145,6 +145,16 @@ def generate_local_response(question: str, db: Session, client_context: Optional
                 f"• **Primary Danger:** High likelihood of debris flows and rockfalls along steep cuts.\n\n"
                 f"**Advisory:** Restrict non-essential vehicular traffic on feeder roads and verify community shelter availability."
             )
+        else:
+            z = db.query(Zone).order_by(desc(Zone.base_slope_deg)).first()
+            name = z.name if z else "Pynursla"
+            slope = z.base_slope_deg if z else 42.0
+            return (
+                f"🚨 **{name}** is historically at highest risk with steep natural slopes ({slope}°).\n\n"
+                f"• **District:** East Khasi Hills, Meghalaya\n"
+                f"• **Terrain:** Steep canyon escarpments with severe landslide hazard under heavy rainfall.\n"
+                f"• **Advisory:** Monitor live telemetry and avoid vulnerable toe cuts along highway corridors."
+            )
 
     # 4. Evacuation / Shelters / Emergency safety
     if any(phrase in q for phrase in ["evacuat", "shelter", "safe", "rescue", "emergency", "help", "sos", "hospital"]):

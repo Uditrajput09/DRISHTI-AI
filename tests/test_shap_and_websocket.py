@@ -6,12 +6,12 @@ Automated tests for Upgrade 2 (SHAP Feature Attribution) and Upgrade 3 (WebSocke
 import pytest
 import json
 from fastapi.testclient import TestClient
-from backend.main import app
+from backend.main import app as _app
 from backend.ml.model import risk_model
 from backend.ml.features import FEATURE_COLUMNS
 from backend.api.ws_manager import ws_manager
 
-client = TestClient(app)
+client = TestClient(_app)
 
 
 def test_shap_model_attribution():

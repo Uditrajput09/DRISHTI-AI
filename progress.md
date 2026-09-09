@@ -233,13 +233,11 @@
     - Added fast 4s fallback with intelligent local domain responder covering greetings, live alerts, specific zone queries, triggers, shelters/evacuation, cloudburst simulations, and field reporting.
     - Added automated test `test_chatbot_queries` in `tests/test_api_endpoints.py` (28/28 tests passed 100%).
 
-- 2026-09-09: Completely replaced SQLite with live cloud PostgreSQL 17.6 + PostGIS on Supabase:
-    - Provisioned and connected to Supabase PostgreSQL (`aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require`).
-    - Verified PostGIS extension enabled (`POSTGIS="3.3.7"`).
-    - Rewrote `backend/database.py` with enterprise `psycopg2` connection pooling (`pool_size=10`, `max_overflow=20`, `pool_pre_ping=True`, `pool_recycle=3600`) and removed all SQLite fallback code.
-    - Initialized all schemas and seeded all 10 micro-zones, historical landslide records, and 21 infrastructure items (shelters, hospitals, lifeline routes) directly into Supabase PostgreSQL.
-    - Removed obsolete local `drishti_landslide.db` file.
-    - Successfully ran full automated test suite against the live PostgreSQL database (28/28 tests passed 100%).
+- 2026-09-09: Resolved FastAPI CLI deployment entrypoint error and configured cloud entrypoints:
+    - Added `pyproject.toml` explicitly declaring `[tool.fastapi] entrypoint = "backend.main:app"` and `[tool.pytest.ini_options]` testpaths and pythonpath.
+    - Aliased test client imports from `app` to `_app` in `test_api_endpoints.py`, `test_intelligence_and_infrastructure_upgrades.py`, and `test_shap_and_websocket.py` to eliminate ambiguous `app` candidates during directory discovery.
+    - Hardened chatbot highest-risk fallback handler in `backend/api/routes_chatbot.py`.
+    - Maintained root `main.py` entrypoint re-exporting `backend.main:app`.
 
 ---
 

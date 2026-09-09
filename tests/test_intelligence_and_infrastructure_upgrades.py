@@ -9,13 +9,13 @@ Comprehensive test suite verifying:
 
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
+from backend.main import app as _app
 from backend.ml.model import risk_model
 from backend.ml.anomaly import anomaly_detector
 from backend.ml.forecast_model import risk_forecaster
 from backend.cache import cache_get, cache_set, cache_invalidate_prefix, get_cache_status
 
-client = TestClient(app)
+client = TestClient(_app)
 
 
 def test_xgboost_ensemble_model():

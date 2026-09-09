@@ -1,0 +1,13 @@
+[project]
+name = "drishti-ai"
+version = "2.0.0"
+description = "DRISHTI-AI AI-based Landslide Early Warning System"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.fastapi]
+entrypoint = "backend.main:app"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
