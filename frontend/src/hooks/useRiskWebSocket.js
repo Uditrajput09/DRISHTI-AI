@@ -24,7 +24,8 @@ export function useRiskWebSocket(onZoneUpdate) {
 
   const getWsUrl = useCallback(() => {
     if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_WS_URL) {
-      return import.meta.env.VITE_WS_URL;
+      const raw = import.meta.env.VITE_WS_URL.replace(/\/$/, '');
+      return raw.endsWith('/ws/risk-live') ? raw : `${raw}/ws/risk-live`;
     }
     const isSecure = window.location.protocol === 'https:';
     const protocol = isSecure ? 'wss:' : 'ws:';

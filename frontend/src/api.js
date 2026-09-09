@@ -3,9 +3,10 @@
  * Centralized API client with offline storage queue and error recovery.
  */
 
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE) 
+const RAW_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE) 
   ? import.meta.env.VITE_API_BASE.replace(/\/$/, '') 
-  : '/api';
+  : '';
+const API_BASE = RAW_BASE.endsWith('/api') ? RAW_BASE : (RAW_BASE ? `${RAW_BASE}/api` : '/api');
 
 export const api = {
   // ─── Risk Endpoints ──────────────────────────────────────────
