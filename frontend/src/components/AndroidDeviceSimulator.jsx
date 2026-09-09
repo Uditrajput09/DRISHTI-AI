@@ -230,21 +230,18 @@ export default function AndroidDeviceSimulator({ isOpen, onClose }) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div
+          <img
+            src="/logo.jpg"
+            alt="DRISHTI-AI Logo"
             style={{
               width: 36,
               height: 36,
-              borderRadius: 'var(--radius-input)',
-              backgroundColor: 'var(--brand-tint)',
-              border: '1px solid var(--brand-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--brand-primary)'
+              borderRadius: 'var(--radius-input, 8px)',
+              objectFit: 'cover',
+              border: '1px solid rgba(79, 111, 255, 0.35)',
+              flexShrink: 0
             }}
-          >
-            <Smartphone size={18} />
-          </div>
+          />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h2

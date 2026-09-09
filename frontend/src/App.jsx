@@ -44,7 +44,7 @@ function AppContent() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Primary Application Section: Default to 'gis' (GIS Command Center)
+  // Primary Application Section: Default to 'login' as the first landing page
   const [activeSection, setActiveSection] = useState(() => {
     const path = window.location.pathname;
     if (path === '/risk') return 'risk';
@@ -54,9 +54,10 @@ function AppContent() {
     if (path === '/alerts') return 'alerts';
     if (path === '/reports') return 'reports';
     if (path === '/profile') return 'profile';
-    if (path === '/login') return 'login';
     if (path === '/evacuation' || path === '/shelters') return 'evacuation';
-    return 'gis';
+    if (path === '/offline-maps') return 'offline-maps';
+    if (path === '/app' || path === '/gis') return 'gis';
+    return 'login';
   });
 
   // Telemetry state
@@ -126,20 +127,22 @@ function AppContent() {
   // Handle URL history state
   const handleSelectSection = (sectionId) => {
     const raw = String(sectionId || '').replace(/^\//, '');
-    const normalized = (!raw || raw === 'app' || raw === 'gis') ? 'gis' : raw;
+    const normalized = (!raw || raw === 'login') ? 'login' : (raw === 'app' || raw === 'gis') ? 'gis' : raw;
     setActiveSection(normalized);
     const search = window.location.search || '';
-    const newPath = (normalized === 'gis' ? '/app' : `/${normalized}`) + search;
+    const newPath = (normalized === 'login' ? '/login' : normalized === 'gis' ? '/app' : `/${normalized}`) + search;
     window.history.pushState({}, '', newPath);
   };
 
   useEffect(() => {
     const handlePopState = () => {
       const raw = window.location.pathname.replace(/^\//, '');
-      if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'login', 'evacuation', 'shelters', 'offline-maps'].includes(raw)) {
-        setActiveSection(raw === 'shelters' ? 'evacuation' : raw);
+      if (!raw || raw === 'login') {
+        setActiveSection('login');
+      } else if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'evacuation', 'shelters', 'offline-maps', 'app'].includes(raw)) {
+        setActiveSection(raw === 'shelters' ? 'evacuation' : raw === 'app' ? 'gis' : raw);
       } else {
-        setActiveSection('gis');
+        setActiveSection('login');
       }
     };
     window.addEventListener('popstate', handlePopState);

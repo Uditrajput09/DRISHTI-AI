@@ -139,9 +139,25 @@ export function TopNavigation({
                     color: isLast ? 'var(--text-primary)' : 'var(--text-muted)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    textOverflow: 'ellipsis',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
                   }}
                 >
+                  {idx === 0 && (
+                    <img
+                      src="/logo.jpg"
+                      alt="DRISHTI-AI"
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: 3,
+                        objectFit: 'cover',
+                        flexShrink: 0
+                      }}
+                    />
+                  )}
                   {crumb}
                 </span>
               </React.Fragment>

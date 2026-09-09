@@ -295,6 +295,19 @@
       - Executed entire backend pytest suite (`.venv\Scripts\python -m pytest tests/ -v --tb=short`): **33 of 33 tests passed (100%)** across API endpoints, XGBoost ensemble, Isolation Forest anomaly detector, 7-day probabilistic forecast, Redis cache fallback, SHAP explainability, and WebSocket live risk streaming.
       - Executed frontend production build (`npm run build`): **2,551 modules bundled with 0 errors** in 9.80s.
 
+- 2026-09-09: Implemented Refero Design Login Landing Page as Primary Entrypoint (`LoginView.jsx`, `App.jsx`):
+    - Made Login the primary landing page on root `http://localhost:5173/` (`/`) and `/login` in `App.jsx`, maintaining full accessibility to deep links (`/app`, `/risk`, `/evacuation`, etc.).
+    - Overhauled `LoginView.jsx` using the Refero Design methodology into a mission-critical aerospace & geospatial operations portal:
+      - **Left Hero & Mission Panel**: MDoNER/SDMA government accreditation badge, headline, 4 core pillar cards (Physics-Informed XGBoost Ensemble, Dijkstra Safe Corridors, 5-Source Ingestion, Zero-Signal Offline Nav), live pilot region telemetry strip (10 micro-zones, 28 shelters, 96.5% precision), and a prominent **⚡ Explore Live Command Center (Guest / Jury Evaluation Access)** 1-click bypass button.
+      - **Right Operator Gate Card**: Glassmorphic auth card with Operator Sign In vs Register Responder tabs, Active Session Detector ("Continue to Command Center as [Name]"), 1-click demo evaluation presets (Citizen Volunteer, SDMA Officer, SDRF Lead), and national emergency hotlines (112 / 1070).
+- 2026-09-09: Integrated Official DRISHTI-AI Brand Logo (Option 7 — Minimalist Linear Contour Ribbon & Crest):
+    - Selected official logo concept (Option 7) and deployed to public assets (`frontend/public/logo.jpg` and `frontend/public/drishti-logo.jpg`).
+    - Updated `frontend/index.html`: configured browser tab favicon (`rel="icon"`), Apple Touch Icon (`rel="apple-touch-icon"`), and OpenGraph / Twitter Card preview meta tags.
+    - Integrated branded emblem into `frontend/src/views/LoginView.jsx` (hero title banner and operator authentication card header).
+    - Integrated logo into `frontend/src/components/ui/Sidebar.jsx` (top brand rail lockup) and `frontend/src/components/ui/TopNavigation.jsx` (root breadcrumb path).
+    - Integrated branded app icon into `frontend/src/components/AndroidAppModal.jsx`, `frontend/src/components/AndroidDeviceSimulator.jsx`, and `frontend/src/views/ProfileView.jsx`.
+    - Validated production bundle with 0 errors (`npm run build`, 2,551 modules bundled in 10.41s) and synchronized native Android container via `npx cap sync android` (0.201s).
+
 ---
 
 ## In Progress

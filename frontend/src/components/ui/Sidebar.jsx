@@ -69,7 +69,7 @@ export function Sidebar({
       title: 'SYSTEM',
       items: [
         { id: 'profile', label: 'Profile & Emergency', icon: User, badge: null },
-        { id: 'settings', label: 'Settings', icon: Settings, badge: null },
+        { id: 'login', label: 'Operator Portal / Exit', icon: Shield, badge: null },
         { id: 'help', label: 'Help & Shortcuts', icon: HelpCircle, badge: null }
       ]
     }
@@ -154,21 +154,19 @@ export function Sidebar({
                 userSelect: 'none'
               }}
             >
-              <div
+              <img
+                src="/logo.jpg"
+                alt="DRISHTI-AI Logo"
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'var(--brand-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FFFFFF',
-                  flexShrink: 0
+                  borderRadius: 'var(--radius-sm, 6px)',
+                  objectFit: 'cover',
+                  border: '1px solid rgba(79, 111, 255, 0.35)',
+                  flexShrink: 0,
+                  boxShadow: '0 0 10px rgba(79, 111, 255, 0.25)'
                 }}
-              >
-                <Shield size={18} />
-              </div>
+              />
               {!isCollapsed && (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span

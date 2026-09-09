@@ -358,12 +358,28 @@ export default function ProfileView({
 
           {activeNav === 'android' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                DRISHTI-AI Android Companion Application
-              </h3>
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Native Android APK with hardware accelerometer tilt sensing, offline GIS caching, and background push alarms.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <img
+                  src="/logo.jpg"
+                  alt="DRISHTI-AI"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    objectFit: 'cover',
+                    border: '1px solid rgba(79, 111, 255, 0.35)',
+                    flexShrink: 0
+                  }}
+                />
+                <div>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    DRISHTI-AI Android Companion Application
+                  </h3>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                    Native Android APK with hardware accelerometer tilt sensing, offline GIS caching, and background push alarms.
+                  </p>
+                </div>
+              </div>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <Button

@@ -117,21 +117,18 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchSimulator }) 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
+            <img
+              src="/logo.jpg"
+              alt="DRISHTI-AI Logo"
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: 'var(--radius-input)',
-                backgroundColor: 'var(--brand-tint)',
-                border: '1px solid var(--brand-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--brand-primary)'
+                borderRadius: 'var(--radius-input, 8px)',
+                objectFit: 'cover',
+                border: '1px solid rgba(79, 111, 255, 0.35)',
+                flexShrink: 0
               }}
-            >
-              <Smartphone size={18} />
-            </div>
+            />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <h2
@@ -256,20 +253,18 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchSimulator }) 
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div
+                    <img
+                      src="/logo.jpg"
+                      alt="DRISHTI-AI APK"
                       style={{
                         width: 32,
                         height: 32,
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'var(--brand-tint)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--brand-primary)'
+                        borderRadius: 'var(--radius-sm, 6px)',
+                        objectFit: 'cover',
+                        border: '1px solid rgba(79, 111, 255, 0.35)',
+                        flexShrink: 0
                       }}
-                    >
-                      <FileCheck size={18} />
-                    </div>
+                    />
                     <div>
                       <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                         drishti-ai-v1.0.apk
