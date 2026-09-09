@@ -23,6 +23,9 @@ export function useRiskWebSocket(onZoneUpdate) {
   }, [onZoneUpdate]);
 
   const getWsUrl = useCallback(() => {
+    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_WS_URL) {
+      return import.meta.env.VITE_WS_URL;
+    }
     const isSecure = window.location.protocol === 'https:';
     const protocol = isSecure ? 'wss:' : 'ws:';
     
@@ -33,6 +36,7 @@ export function useRiskWebSocket(onZoneUpdate) {
     }
     return `${protocol}//${window.location.host}/ws/risk-live`;
   }, []);
+
 
   const connect = useCallback(() => {
     // Clear any existing reconnect timer
