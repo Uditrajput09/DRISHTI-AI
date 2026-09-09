@@ -16,6 +16,7 @@ export function Drawer({
   children,
   width = 400,
   position = 'right', // 'right' | 'left' | 'bottom'
+  hasBackdrop = true,
   style = {},
   className = ''
 }) {
@@ -40,17 +41,19 @@ export function Drawer({
         display: 'flex',
         justifyContent: position === 'right' ? 'flex-end' : position === 'left' ? 'flex-start' : 'center',
         alignItems: position === 'bottom' ? 'flex-end' : 'stretch',
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: hasBackdrop ? 'rgba(0, 0, 0, 0.65)' : 'transparent',
+        backdropFilter: hasBackdrop ? 'blur(4px)' : 'none',
+        pointerEvents: hasBackdrop ? 'auto' : 'none',
         transition: 'opacity var(--transition-fast)'
       }}
-      onClick={onClose}
-      aria-modal="true"
+      onClick={hasBackdrop ? onClose : undefined}
+      aria-modal={hasBackdrop ? 'true' : 'false'}
       role="dialog"
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
+          pointerEvents: 'auto',
           width: position === 'bottom' ? '100%' : '100%',
           maxWidth: position === 'bottom' ? '100%' : `${width}px`,
           height: position === 'bottom' ? '80vh' : '100%',

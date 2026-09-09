@@ -91,15 +91,15 @@
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Layer Stacking */
+  /* Layer Stacking (Above Leaflet map controls which use z-index 1000) */
   --z-base: 1;
   --z-dropdown: 50;
-  --z-header: 100;
-  --z-sidebar: 110;
-  --z-drawer: 200;
-  --z-modal: 300;
-  --z-fab: 400;
-  --z-toast: 500;
+  --z-header: 1050;
+  --z-sidebar: 1060;
+  --z-fab: 1100;
+  --z-drawer: 1200;
+  --z-modal: 1300;
+  --z-toast: 1500;
 
   /* Backwards compatibility aliases for existing codebase variables */
   --color-copper: var(--brand-primary);

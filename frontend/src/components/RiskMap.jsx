@@ -30,6 +30,17 @@ function MapController({ centerPos, zoomLevel, userLocation }) {
     }
   }, [userLocation, map]);
 
+  // Automatically recalculate Leaflet map viewport and redraw tiles whenever drawer opens or container resizes
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container) return;
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [map]);
+
   return null;
 }
 

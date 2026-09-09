@@ -110,13 +110,16 @@ export function AIAssistantDrawer({
     });
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
       title="DRISHTI AI Assistant"
       subtitle="EOC Disaster Intelligence & Decision Support"
-      width={440}
+      width={420}
+      hasBackdrop={isMobile}
     >
       {/* Messages Stream */}
       <div

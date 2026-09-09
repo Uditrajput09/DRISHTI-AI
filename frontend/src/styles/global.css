@@ -273,3 +273,10 @@ button:disabled {
   animation: pulseDot 2s infinite ease-in-out;
 }
 
+/* 10. Responsive GIS Command Grid */
+@media (max-width: 1280px) {
+  .gis-command-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+

@@ -104,7 +104,9 @@ export function AppShell({
           display: 'flex',
           flexDirection: 'column',
           minWidth: 0,
-          position: 'relative'
+          position: 'relative',
+          marginRight: isAIDrawerOpen && !isMobile ? 420 : 0,
+          transition: 'margin-right var(--transition-normal, 200ms cubic-bezier(0.4, 0, 0.2, 1))'
         }}
         className="drishti-workspace"
       >
@@ -157,40 +159,42 @@ export function AppShell({
         />
       )}
 
-      {/* 5. Floating Enterprise AI Assistant FAB Button */}
-      <button
-        onClick={() => setIsAIDrawerOpen(!isAIDrawerOpen)}
-        title="DRISHTI AI Assistant"
-        aria-label="Open AI Assistant"
-        style={{
-          position: 'fixed',
-          bottom: isMobile ? 70 : 24,
-          right: isMobile ? 14 : 24,
-          width: isMobile ? 42 : 48,
-          height: isMobile ? 42 : 48,
-          borderRadius: 'var(--radius-pill)',
-          backgroundColor: 'var(--brand-primary)',
-          color: '#FFFFFF',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: 'var(--shadow-elevated)',
-          cursor: 'pointer',
-          zIndex: 'var(--z-fab)',
-          transition: 'transform var(--transition-fast), background-color var(--transition-fast)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.08)';
-          e.currentTarget.style.backgroundColor = 'var(--brand-hover)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.backgroundColor = 'var(--brand-primary)';
-        }}
-      >
-        {isAIDrawerOpen ? <X size={isMobile ? 18 : 20} /> : <Bot size={isMobile ? 20 : 22} />}
-      </button>
+      {/* 5. Floating Enterprise AI Assistant FAB Button (hidden when drawer is open to prevent overlapping input) */}
+      {!isAIDrawerOpen && (
+        <button
+          onClick={() => setIsAIDrawerOpen(true)}
+          title="DRISHTI AI Assistant"
+          aria-label="Open AI Assistant"
+          style={{
+            position: 'fixed',
+            bottom: isMobile ? 70 : 24,
+            right: isMobile ? 14 : 24,
+            width: isMobile ? 42 : 48,
+            height: isMobile ? 42 : 48,
+            borderRadius: 'var(--radius-pill)',
+            backgroundColor: 'var(--brand-primary)',
+            color: '#FFFFFF',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-elevated)',
+            cursor: 'pointer',
+            zIndex: 'var(--z-fab)',
+            transition: 'transform var(--transition-fast), background-color var(--transition-fast)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.08)';
+            e.currentTarget.style.backgroundColor = 'var(--brand-hover)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.backgroundColor = 'var(--brand-primary)';
+          }}
+        >
+          <Bot size={isMobile ? 20 : 22} />
+        </button>
+      )}
 
       {/* 6. Right-Side Enterprise AI Drawer */}
       <AIAssistantDrawer
