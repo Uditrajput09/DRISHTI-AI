@@ -209,6 +209,14 @@ def root():
 
 
 
+@app.get("/ping")
+def ping():
+    """Lightweight keepalive endpoint for uptime monitors (UptimeRobot, cron-job.org, GitHub Actions).
+    Zero DB/cache queries — wakes the Render dyno instantly with minimal overhead.
+    """
+    return {"status": "ok"}
+
+
 @app.get("/api/health")
 def health_check():
     """Health check endpoint for Docker & monitoring."""
