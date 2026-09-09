@@ -30,7 +30,10 @@ class AlertDispatchEngine:
         risk_level: str,
         rainfall_24h: float,
         risk_score_id: Optional[int] = None,
-        force_dispatch: bool = False
+        force_dispatch: bool = False,
+        imd_warning_level: Optional[str] = None,
+        nearest_road: Optional[str] = None,
+        slope_angle: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
         Evaluate if a zone's risk exceeds the alert threshold (or is forced) and dispatch alerts.
@@ -54,8 +57,12 @@ class AlertDispatchEngine:
                 zone_name=zone.name,
                 risk_score=risk_score,
                 risk_level=risk_level,
-                rainfall_24h=rainfall_24h
+                rainfall_24h=rainfall_24h,
+                imd_warning_level=imd_warning_level,
+                nearest_road=nearest_road,
+                slope_angle=slope_angle
             )
+
 
             # 1. Dispatch SMS
             sms_res = sms_service.send_sms(numbers=phone_numbers, message=message_text)

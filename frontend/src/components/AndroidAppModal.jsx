@@ -8,397 +8,686 @@ import {
   ExternalLink, 
   X, 
   ShieldAlert, 
-  Sparkles, 
-  Layers, 
-  WifiOff, 
   Play,
   Terminal,
-  Info
+  Info,
+  Sliders,
+  Radio,
+  FileCheck,
+  Check
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
-export default function AndroidAppModal({ isOpen, onClose, onLaunchMobilePreview }) {
-  const [copied, setCopied] = useState(false);
-  const [activeView, setActiveView] = useState('pwa'); // 'pwa' | 'gradle'
+export default function AndroidAppModal({ isOpen, onClose, onLaunchSimulator }) {
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedSha, setCopiedSha] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+  const [activeTab, setActiveTab] = useState('download'); // 'download' | 'qr' | 'developer'
+  const { showToast } = useToast();
 
   if (!isOpen) return null;
 
-  // Determine local LAN / network address for mobile scanning
-  const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? (window.location.hostname) 
-    : window.location.hostname;
+  const host = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? window.location.hostname 
+    : 'localhost';
   
   const mobileUrl = `${window.location.protocol}//${host}:${window.location.port || '5173'}/?mode=mobile`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(mobileUrl)}&bgcolor=ffffff&color=0f172a&margin=6`;
+  // High contrast QR code for instant camera recognition
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}&bgcolor=ffffff&color=0a0a0a&margin=8`;
+  const sha256 = '563a18989e9cb74ace8f50880ae23e6c0a542a70b525babf6c242bb1bf38c25d';
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(mobileUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }).catch(() => {
-      // Fallback
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      setCopiedLink(true);
+      showToast('Mobile URL copied to clipboard!', 'info');
+      setTimeout(() => setCopiedLink(false), 2500);
     });
   };
 
+  const handleCopySha = () => {
+    navigator.clipboard.writeText(sha256).then(() => {
+      setCopiedSha(true);
+      showToast('SHA-256 checksum copied to clipboard!', 'info');
+      setTimeout(() => setCopiedSha(false), 2500);
+    });
+  };
+
+  const handleCopyCmd = () => {
+    const cmd = "npm run build && npx cap sync android && npx cap open android";
+    navigator.clipboard.writeText(cmd).then(() => {
+      setCopiedCmd(true);
+      showToast('Capacitor commands copied to clipboard!', 'info');
+      setTimeout(() => setCopiedCmd(false), 2500);
+    });
+  };
+
+  const handleDownloadApk = () => {
+    const downloadUrl = window.location.port === '8000' ? '/api/download/apk' : '/downloads/drishti-ai-v1.0.apk';
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'drishti-ai-v1.0.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Starting Android APK download (28 MB)...', 'success');
+  };
+
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(6, 6, 8, 0.88)',
-      backdropFilter: 'blur(20px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 3500,
-      padding: 16
-    }}>
-      <div className="holo-card" style={{
-        boxShadow: '0 24px 64px rgba(0, 0, 0, 0.8), 0 0 32px rgba(120, 115, 245, 0.25)',
-        width: '100%',
-        maxWidth: 540,
-        overflow: 'hidden',
-        position: 'relative'
-      }}>
-        {/* Modal Header */}
-        <div style={{
-          padding: '18px 24px 14px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(5, 5, 7, 0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 3500,
+        padding: 16
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-modal)',
+          width: '100%',
+          maxWidth: 560,
+          overflow: 'hidden',
+          position: 'relative',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'linear-gradient(90deg, rgba(255, 110, 199, 0.15), rgba(120, 115, 245, 0.15))'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #FF6EC7, #7873F5, #4FD8EA)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 12px rgba(120, 115, 245, 0.4)'
-            }}>
-              <Smartphone size={20} color="#ffffff" />
+          flexDirection: 'column',
+          animation: 'modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        {/* Modal Header */}
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: 'var(--bg-surface-elevated)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 'var(--radius-input)',
+                backgroundColor: 'var(--brand-tint)',
+                border: '1px solid var(--brand-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--brand-primary)'
+              }}
+            >
+              <Smartphone size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', margin: 0, fontFamily: 'Space Grotesk, sans-serif' }}>
-                DRISHTI AI Citizen Mobile App
-              </h2>
-              <span style={{ fontSize: '0.72rem', color: '#4FD8EA', fontWeight: 700 }}>
-                Installable Android App & Citizen Field Reporter
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h2
+                  style={{
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    letterSpacing: '-0.01em'
+                  }}
+                >
+                  DRISHTI-AI Android Application
+                </h2>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    padding: '2px 6px',
+                    borderRadius: 'var(--radius-sm)',
+                    backgroundColor: 'rgba(49, 183, 122, 0.12)',
+                    color: 'var(--status-live)',
+                    border: '1px solid rgba(49, 183, 122, 0.25)'
+                  }}
+                >
+                  v1.0 Release
+                </span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                Official APK Package & Hardware Simulation Studio
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'transparent',
               border: 'none',
-              borderRadius: '50%',
+              borderRadius: 'var(--radius-sm)',
               width: 30,
               height: 30,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#94a3b8',
-              cursor: 'pointer'
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              transition: 'background var(--transition-fast)'
             }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-surface-secondary)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+            aria-label="Close"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Mode Selector Tabs */}
-        <div style={{
-          display: 'flex',
-          background: 'rgba(15, 15, 22, 0.8)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '6px 20px 0'
-        }}>
-          <button
-            onClick={() => setActiveView('pwa')}
-            style={{
-              padding: '8px 14px',
-              background: 'none',
-              border: 'none',
-              borderBottom: activeView === 'pwa' ? '2px solid #FF6EC7' : '2px solid transparent',
-              color: activeView === 'pwa' ? '#FF9AD7' : '#94a3b8',
-              fontWeight: 700,
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
-            }}
-          >
-            <Smartphone size={14} />
-            <span>Direct Android Install (PWA)</span>
-          </button>
-          <button
-            onClick={() => setActiveView('gradle')}
-            style={{
-              padding: '8px 14px',
-              background: 'none',
-              border: 'none',
-              borderBottom: activeView === 'gradle' ? '2px solid #FF6EC7' : '2px solid transparent',
-              color: activeView === 'gradle' ? '#FF9AD7' : '#94a3b8',
-              fontWeight: 700,
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
-            }}
-          >
-            <Terminal size={14} />
-            <span>Capacitor APK Source</span>
-          </button>
+        {/* Tab Navigation */}
+        <div
+          style={{
+            display: 'flex',
+            backgroundColor: 'var(--bg-surface)',
+            borderBottom: '1px solid var(--border-primary)',
+            padding: '0 20px',
+            gap: 4
+          }}
+        >
+          {[
+            { id: 'download', label: 'Download APK', icon: Download },
+            { id: 'qr', label: 'Scan & PWA', icon: QrCode },
+            { id: 'developer', label: 'Capacitor Source', icon: Terminal }
+          ].map(t => {
+            const Icon = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  padding: '11px 12px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: isActive ? '2px solid var(--brand-primary)' : '2px solid transparent',
+                  color: isActive ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '0.76rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'all var(--transition-fast)'
+                }}
+              >
+                <Icon size={14} />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Content Body */}
-        <div style={{ padding: '18px 24px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* Tab Content */}
+        <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           
-          {activeView === 'pwa' ? (
+          {/* TAB 1: DIRECT APK DOWNLOAD & SIMULATE */}
+          {activeTab === 'download' && (
             <>
-              {/* Features Highlights */}
-              <div style={{
-                background: 'rgba(30, 41, 59, 0.5)',
-                border: '1px solid var(--border-glass)',
-                borderRadius: 10,
-                padding: '10px 14px',
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 8,
-                fontSize: '0.74rem',
-                color: '#e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} color="#10b981" />
-                  <span>Hardware Camera & Photo Upload</span>
+              {/* APK Release Package Card */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: 'var(--radius-input)',
+                  padding: '14px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'var(--brand-tint)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--brand-primary)'
+                      }}
+                    >
+                      <FileCheck size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        drishti-ai-v1.0.apk
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+                        Universal Build • 27.97 MB (28 MB) • Android 8.0 - 14 (API 26-34)
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      backgroundColor: 'rgba(79, 111, 255, 0.12)',
+                      color: 'var(--brand-primary)',
+                      border: '1px solid var(--brand-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '2px 8px',
+                      fontSize: '0.65rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    CERTIFIED RELEASE
+                  </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} color="#10b981" />
-                  <span>Zero-Signal Offline Queue & Auto-Sync</span>
+
+                {/* Capability Pills */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '6px 12px',
+                    fontSize: '0.72rem',
+                    color: 'var(--text-secondary)',
+                    padding: '8px 0',
+                    borderTop: '1px solid var(--border-secondary)',
+                    borderBottom: '1px solid var(--border-secondary)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={13} style={{ color: 'var(--brand-primary)' }} />
+                    <span>Hardware Camera & Photos</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={13} style={{ color: 'var(--brand-primary)' }} />
+                    <span>Zero-Signal Offline Queue</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={13} style={{ color: 'var(--brand-primary)' }} />
+                    <span>GPS Telemetry Auto-Lock</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckCircle2 size={13} style={{ color: 'var(--brand-primary)' }} />
+                    <span>CAP v1.2 Push Alerts</span>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} color="#10b981" />
-                  <span>GPS Geotagging & Incident Feed</span>
+
+                {/* SHA-256 Checksum */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: 'var(--bg-main)',
+                    border: '1px solid var(--border-secondary)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '6px 10px',
+                    fontSize: '0.68rem',
+                    fontFamily: 'var(--font-mono)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>SHA256:</span>
+                  <span
+                    style={{
+                      color: 'var(--text-secondary)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: 360,
+                      margin: '0 8px'
+                    }}
+                    title={sha256}
+                  >
+                    {sha256}
+                  </span>
+                  <button
+                    onClick={handleCopySha}
+                    title="Copy Checksum"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: copiedSha ? 'var(--status-live)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      padding: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    {copiedSha ? <Check size={12} /> : <Copy size={12} />}
+                  </button>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} color="#10b981" />
-                  <span>Emergency Safe Shelter Routing</span>
+
+                {/* Primary Action Buttons: Download APK & Launch Simulator */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 2 }}>
+                  <button
+                    onClick={handleDownloadApk}
+                    style={{
+                      backgroundColor: 'var(--brand-primary)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: 'var(--radius-btn)',
+                      padding: '10px 14px',
+                      fontWeight: 600,
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(79, 111, 255, 0.3)',
+                      transition: 'background var(--transition-fast)'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-hover)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-primary)'; }}
+                  >
+                    <Download size={15} />
+                    <span>Download APK (28 MB)</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onLaunchSimulator();
+                    }}
+                    style={{
+                      backgroundColor: 'var(--bg-surface-secondary)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-primary)',
+                      borderRadius: 'var(--radius-btn)',
+                      padding: '10px 14px',
+                      fontWeight: 500,
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7,
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--brand-primary)';
+                      e.currentTarget.style.color = 'var(--brand-primary)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border-primary)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                  >
+                    <Sliders size={15} />
+                    <span>Simulate in Studio</span>
+                  </button>
                 </div>
               </div>
 
-              {/* QR Code & Mobile URL Section */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
-                background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid var(--border-glass-bright)',
-                borderRadius: 12,
-                padding: 14
-              }}>
-                {/* Real Scannable QR Code */}
-                <div style={{
-                  width: 100,
-                  height: 100,
-                  background: '#ffffff',
-                  borderRadius: 10,
-                  padding: 4,
+              {/* Step-by-step Installation Instructions */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-secondary)',
+                  borderRadius: 'var(--radius-input)',
+                  padding: '12px 14px',
+                  fontSize: '0.72rem',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Info size={14} style={{ color: 'var(--brand-primary)' }} />
+                  <span>3-Step Android Sideload Guide:</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, lineHeight: 1.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ minWidth: 18, height: 18, borderRadius: '50%', backgroundColor: 'var(--brand-tint)', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700 }}>1</span>
+                    <span>Tap <strong>Download APK (28 MB)</strong> above to save <code>drishti-ai-v1.0.apk</code>.</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ minWidth: 18, height: 18, borderRadius: '50%', backgroundColor: 'var(--brand-tint)', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700 }}>2</span>
+                    <span>When prompted by Android Package Installer, tap <strong>"Install unknown apps" &rarr; Allow</strong>.</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ minWidth: 18, height: 18, borderRadius: '50%', backgroundColor: 'var(--brand-tint)', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700 }}>3</span>
+                    <span>Launch DRISHTI-AI and grant Location & Camera permissions for offline field telemetry.</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* TAB 2: QR CODE & PWA INSTALL */}
+          {activeTab === 'qr' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
+                  gap: 16,
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: 'var(--radius-input)',
+                  padding: 16
+                }}
+              >
+                {/* High contrast scannable QR card */}
+                <div
+                  style={{
+                    width: 120,
+                    height: 120,
+                    backgroundColor: '#ffffff',
+                    borderRadius: 'var(--radius-input)',
+                    padding: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
                   <img 
                     src={qrCodeUrl} 
-                    alt="Scan to open DRISHTI-AI on Android" 
+                    alt="Scan for DRISHTI-AI Mobile App"
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
                   />
                 </div>
 
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 4px 0' }}>
-                    📱 Scan to Open on Your Smartphone
+                  <h4 style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+                    Point Mobile Camera to Scan
                   </h4>
-                  <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', lineHeight: 1.4 }}>
-                    Point your Android camera at the QR code, or open Chrome on your phone to install:
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                    Scan with your Android or iOS camera to launch the Progressive Web App (PWA) with instant offline queueing:
                   </p>
-                  
-                  {/* Copyable Mobile URL pill */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    background: 'rgba(2, 6, 23, 0.7)',
-                    padding: '5px 10px',
-                    borderRadius: 6,
-                    border: '1px solid rgba(6, 182, 212, 0.3)'
-                  }}>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontFamily: 'monospace',
-                      color: '#38bdf8',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      flex: 1
-                    }}>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      backgroundColor: 'var(--bg-main)',
+                      padding: '6px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-secondary)'
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--brand-primary)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        flex: 1
+                      }}
+                    >
                       {mobileUrl}
                     </span>
                     <button
                       onClick={handleCopyLink}
-                      title="Copy URL"
                       style={{
-                        background: copied ? '#10b981' : 'rgba(255,255,255,0.1)',
+                        background: 'transparent',
                         border: 'none',
-                        borderRadius: 4,
-                        padding: '3px 6px',
+                        color: copiedLink ? 'var(--status-live)' : 'var(--text-secondary)',
                         cursor: 'pointer',
-                        color: '#fff',
-                        fontSize: '0.68rem',
+                        padding: 2,
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 4
+                        alignItems: 'center'
                       }}
+                      title="Copy URL"
                     >
-                      <Copy size={12} />
-                      <span>{copied ? 'Copied!' : 'Copy'}</span>
+                      {copiedLink ? <Check size={13} /> : <Copy size={13} />}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Step-by-Step Android Install Guide */}
-              <div style={{
-                background: 'rgba(6, 182, 212, 0.08)',
-                border: '1px solid rgba(6, 182, 212, 0.25)',
-                borderRadius: 10,
-                padding: '10px 14px',
-                fontSize: '0.74rem',
-                color: '#cbd5e1'
-              }}>
-                <div style={{ fontWeight: 700, color: '#38bdf8', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Info size={14} />
-                  <span>How to Install on Android in 2 Taps (No corrupt APK downloads):</span>
-                </div>
-                <ol style={{ margin: '4px 0 0 16px', padding: 0, lineHeight: 1.5 }}>
-                  <li>Open the link above in <strong>Chrome</strong> on your Android phone.</li>
-                  <li>Tap the <strong>⋮ (Menu)</strong> in the top right &rarr; tap <strong>"Install app"</strong> (or <strong>"Add to Home screen"</strong>).</li>
-                  <li>DRISHTI-AI appears on your Android launcher like a native app with full offline queue & camera access!</li>
-                </ol>
-              </div>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <button
-                  onClick={() => {
-                    window.open(mobileUrl, '_blank');
-                  }}
-                  className="holo-btn-primary"
+                  onClick={() => window.open(mobileUrl, '_blank')}
                   style={{
-                    padding: '11px 14px',
-                    fontSize: '0.8rem',
+                    padding: '10px 14px',
+                    backgroundColor: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-btn)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.76rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8
+                    gap: 6,
+                    transition: 'all var(--transition-fast)'
                   }}
+                  onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--brand-primary)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-primary)'; }}
                 >
-                  <ExternalLink size={15} />
-                  <span>Open in Mobile Tab</span>
+                  <ExternalLink size={14} />
+                  <span>Open Mobile View</span>
                 </button>
 
                 <button
                   onClick={() => {
                     onClose();
-                    onLaunchMobilePreview();
+                    onLaunchSimulator();
                   }}
-                  className="holo-btn-secondary"
                   style={{
-                    padding: '11px 14px',
-                    fontSize: '0.8rem',
+                    padding: '10px 14px',
+                    backgroundColor: 'var(--brand-primary)',
+                    border: 'none',
+                    borderRadius: 'var(--radius-btn)',
+                    color: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8
+                    gap: 6,
+                    boxShadow: '0 2px 8px rgba(79, 111, 255, 0.25)',
+                    transition: 'background var(--transition-fast)'
                   }}
+                  onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-hover)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-primary)'; }}
                 >
-                  <Smartphone size={15} color="#4FD8EA" />
-                  <span>Interactive Emulator</span>
+                  <Sliders size={14} />
+                  <span>Launch Device Simulator</span>
                 </button>
               </div>
-            </>
-          ) : (
-            /* Capacitor / Gradle APK Build Tab */
+            </div>
+          )}
+
+          {/* TAB 3: CAPACITOR DEVELOPER SOURCE */}
+          {activeTab === 'developer' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
-                The full native Android project is structured in <code>frontend/android</code> using <strong>Capacitor 8</strong> (Package: <code>ai.drishti.landslide</code>).
+              <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                The native Android project is structured in <code>frontend/android</code> utilizing <strong>Capacitor 8</strong> (Package: <code>ai.drishti.landslide</code>).
               </p>
 
-              <div style={{
-                background: '#020617',
-                border: '1px solid var(--border-glass)',
-                borderRadius: 8,
-                padding: '10px 14px',
-                fontFamily: 'monospace',
-                fontSize: '0.72rem',
-                color: '#34d399',
-                lineHeight: 1.6
-              }}>
-                <div style={{ color: '#64748b' }}># 1. Build frontend distribution</div>
-                <div>npm run build</div>
-                <div style={{ color: '#64748b', marginTop: 4 }}># 2. Sync web assets into Android project</div>
-                <div>npx cap sync android</div>
-                <div style={{ color: '#64748b', marginTop: 4 }}># 3. Open in Android Studio or compile debug APK</div>
-                <div>npx cap open android</div>
-                <div style={{ color: '#64748b', marginTop: 4 }}># or build via Gradle (requires JDK 17+ & Android SDK):</div>
-                <div>cd android && ./gradlew assembleDebug</div>
-              </div>
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-main)',
+                  border: '1px solid var(--border-secondary)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '12px 14px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.70rem',
+                  lineHeight: 1.6,
+                  position: 'relative'
+                }}
+              >
+                <button
+                  onClick={handleCopyCmd}
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '4px 8px',
+                    color: copiedCmd ? 'var(--status-live)' : 'var(--text-secondary)',
+                    fontSize: '0.65rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                  title="Copy Build Commands"
+                >
+                  {copiedCmd ? <Check size={11} /> : <Copy size={11} />}
+                  <span>{copiedCmd ? 'Copied' : 'Copy'}</span>
+                </button>
 
-              <div style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: 8,
-                padding: '8px 12px',
-                fontSize: '0.72rem',
-                color: '#fde68a',
-                lineHeight: 1.4
-              }}>
-                ⚠️ <strong>Hackathon Demo Note</strong>: Organizers judge the live field app via the PWA (Progressive Web App) on smartphones or the live mobile simulator preview, avoiding manual APK sideloading requirements.
+                <div style={{ color: 'var(--text-muted)' }}># 1. Compile web bundle</div>
+                <div style={{ color: 'var(--text-primary)' }}>npm run build</div>
+                <div style={{ color: 'var(--text-muted)', marginTop: 4 }}># 2. Synchronize assets into Android shell</div>
+                <div style={{ color: 'var(--text-primary)' }}>npx cap sync android</div>
+                <div style={{ color: 'var(--text-muted)', marginTop: 4 }}># 3. Open in Android Studio or compile debug APK</div>
+                <div style={{ color: 'var(--text-primary)' }}>npx cap open android</div>
+                <div style={{ color: 'var(--text-muted)', marginTop: 4 }}># 4. Generate standalone APK release bundle</div>
+                <div style={{ color: 'var(--text-primary)' }}>python package_apk.py</div>
               </div>
 
               <button
                 onClick={() => {
                   onClose();
-                  onLaunchMobilePreview();
+                  onLaunchSimulator();
                 }}
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 100%)',
-                  color: '#fff',
+                  backgroundColor: 'var(--brand-primary)',
+                  color: '#ffffff',
                   border: 'none',
-                  borderRadius: 8,
-                  padding: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.8rem',
+                  borderRadius: 'var(--radius-btn)',
+                  padding: '10px 14px',
+                  fontWeight: 600,
+                  fontSize: '0.78rem',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8
+                  gap: 8,
+                  marginTop: 2,
+                  boxShadow: '0 2px 8px rgba(79, 111, 255, 0.25)',
+                  transition: 'background var(--transition-fast)'
                 }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-hover)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--brand-primary)'; }}
               >
-                <Play size={15} />
-                <span>Launch Mobile Demo Simulator</span>
+                <Sliders size={15} />
+                <span>Launch Android Device Simulator</span>
               </button>
             </div>
           )}

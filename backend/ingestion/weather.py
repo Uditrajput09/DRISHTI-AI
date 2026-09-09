@@ -106,7 +106,8 @@ class WeatherIngestionService:
                 "time": times[f_idx],
                 "rainfall_mm": _safe_get(precip, f_idx, 0.0),
                 "soil_moisture_pct": min(100.0, _safe_get(sm_0_7, f_idx, 0.35) / 0.50 * 100.0),
-                "temperature_c": _safe_get(temp, f_idx, 22.0)
+                "temperature_c": _safe_get(temp, f_idx, 22.0),
+                "wind_speed_kmh": _safe_get(wind, f_idx, 12.0)
             })
 
         return {
@@ -158,7 +159,8 @@ class WeatherIngestionService:
                 "time": f_time,
                 "rainfall_mm": sim_rain,
                 "soil_moisture_pct": sim_sm,
-                "temperature_c": round(21.0 - (i % 24) * 0.2 + random.uniform(-1, 1), 1)
+                "temperature_c": round(21.0 - (i % 24) * 0.2 + random.uniform(-1, 1), 1),
+                "wind_speed_kmh": round(random.uniform(8.0, 24.0) + (sim_rain * 0.15), 1)
             })
 
         return {

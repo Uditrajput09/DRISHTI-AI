@@ -63,49 +63,51 @@ export default function ChatbotPanel({ zones = [], onClose }) {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        borderRadius: 16,
-        border: "1px solid rgba(53, 216, 255, 0.35)",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.85), 0 0 20px rgba(53, 216, 255, 0.2)"
+        borderRadius: 14,
+        background: "rgba(8, 8, 10, 0.96)",
+        border: "1px solid var(--border-command)",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.85), 0 0 1px rgba(200, 150, 62, 0.3)"
       }}
     >
       {/* Header */}
       <div
         style={{
           padding: "12px 16px",
-          borderBottom: "1px solid rgba(120, 140, 180, 0.2)",
+          borderBottom: "1px solid var(--border-command)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "linear-gradient(90deg, rgba(53, 216, 255, 0.12), rgba(139, 108, 255, 0.12))"
+          background: "rgba(200, 150, 62, 0.06)"
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              background: "linear-gradient(135deg, #35D8FF, #8B6CFF)",
+              background: "rgba(200, 150, 62, 0.15)",
+              border: "1px solid var(--color-copper)",
               width: 32,
               height: 32,
-              borderRadius: 8,
+              borderRadius: 999,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 0 10px rgba(53, 216, 255, 0.4)"
+              boxShadow: "0 0 10px rgba(200, 150, 62, 0.25)"
             }}
           >
-            <Bot size={18} color="#070A10" />
+            <Bot size={16} color="var(--color-copper)" />
           </div>
           <div>
-            <div style={{ fontSize: "0.88rem", fontWeight: 800, color: "#FFFFFF", fontFamily: "Space Grotesk, sans-serif" }}>
+            <div style={{ fontSize: "0.95rem", fontWeight: 400, fontStyle: "italic", color: "var(--text-primary)", fontFamily: "var(--font-serif)" }}>
               DRISHTI-AI Intelligence
             </div>
-            <div style={{ fontSize: "0.68rem", color: "#35D8FF", fontWeight: 600 }}>
+            <div style={{ fontSize: "0.68rem", color: "var(--color-copper)", fontWeight: 600 }}>
               Gemini Flash • Geotechnical RAG
             </div>
           </div>
         </div>
         <button
           onClick={onClose}
-          style={{ background: "transparent", border: "none", color: "#9AA5B8", cursor: "pointer", padding: 4 }}
+          style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 4 }}
         >
           <X size={18} />
         </button>
@@ -132,14 +134,14 @@ export default function ChatbotPanel({ zones = [], onClose }) {
                 padding: "9px 13px",
                 borderRadius: m.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
                 background: m.role === "user"
-                  ? "linear-gradient(135deg, #35D8FF, #8B6CFF)"
-                  : "rgba(21, 27, 41, 0.9)",
-                color: m.role === "user" ? "#070A10" : "#F4F6FB",
-                fontWeight: m.role === "user" ? 700 : 400,
+                  ? "var(--gradient-gilded)"
+                  : "var(--bg-surface)",
+                color: m.role === "user" ? "#08080A" : "var(--text-primary)",
+                fontWeight: m.role === "user" ? 600 : 400,
                 fontSize: "0.82rem",
                 lineHeight: 1.5,
-                border: m.role === "assistant" ? "1px solid rgba(120, 140, 180, 0.2)" : "none",
-                boxShadow: m.role === "user" ? "0 4px 14px rgba(53, 216, 255, 0.25)" : "none"
+                border: m.role === "assistant" ? "1px solid var(--border-command)" : "none",
+                boxShadow: m.role === "user" ? "0 4px 14px rgba(200, 150, 62, 0.25)" : "none"
               }}
             >
               {m.text}
@@ -150,12 +152,12 @@ export default function ChatbotPanel({ zones = [], onClose }) {
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <div
               style={{
-                background: "rgba(53, 216, 255, 0.12)",
-                border: "1px solid rgba(53, 216, 255, 0.3)",
+                background: "rgba(200, 150, 62, 0.12)",
+                border: "1px solid rgba(200, 150, 62, 0.3)",
                 borderRadius: 12,
                 padding: "8px 12px",
                 fontSize: "0.78rem",
-                color: "#35D8FF",
+                color: "var(--color-copper)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6
@@ -176,8 +178,8 @@ export default function ChatbotPanel({ zones = [], onClose }) {
           display: "flex",
           flexWrap: "wrap",
           gap: 6,
-          borderTop: "1px solid rgba(120, 140, 180, 0.15)",
-          background: "rgba(21, 27, 41, 0.4)"
+          borderTop: "1px solid var(--border-command)",
+          background: "var(--bg-surface-elevated)"
         }}
       >
         {QUICK_QUESTIONS.map((q, i) => (
@@ -185,15 +187,15 @@ export default function ChatbotPanel({ zones = [], onClose }) {
             key={i}
             onClick={() => sendMessage(q)}
             style={{
-              background: "rgba(53, 216, 255, 0.08)",
-              color: "#35D8FF",
-              border: "1px solid rgba(53, 216, 255, 0.25)",
-              borderRadius: 20,
-              padding: "3px 9px",
+              background: "rgba(200, 150, 62, 0.08)",
+              color: "var(--color-copper)",
+              border: "1px solid rgba(200, 150, 62, 0.25)",
+              borderRadius: 999,
+              padding: "4px 10px",
               fontSize: "0.68rem",
               cursor: "pointer",
               fontWeight: 600,
-              fontFamily: "Space Grotesk, sans-serif"
+              fontFamily: "var(--font-sans)"
             }}
           >
             {q}
@@ -205,10 +207,10 @@ export default function ChatbotPanel({ zones = [], onClose }) {
       <div
         style={{
           padding: "10px 12px",
-          borderTop: "1px solid rgba(120, 140, 180, 0.2)",
+          borderTop: "1px solid var(--border-command)",
           display: "flex",
           gap: 8,
-          background: "rgba(16, 21, 33, 0.95)"
+          background: "var(--bg-surface)"
         }}
       >
         <input
@@ -218,16 +220,26 @@ export default function ChatbotPanel({ zones = [], onClose }) {
           onKeyDown={e => e.key === "Enter" && sendMessage(input)}
           placeholder="Ask about risk, zones, or roads..."
           className="command-input"
-          style={{ flex: 1, padding: "8px 12px", fontSize: "0.82rem" }}
+          style={{ flex: 1, padding: "8px 12px", fontSize: "0.82rem", borderRadius: 8 }}
         />
         <button
           id="chatbot-send-btn"
           onClick={() => sendMessage(input)}
           disabled={isLoading || !input.trim()}
-          className="btn-primary-cyan"
-          style={{ padding: "8px 12px" }}
+          className="btn-primary-gilded"
+          style={{
+            padding: "8px 14px",
+            borderRadius: 999,
+            background: "var(--gradient-gilded)",
+            border: "none",
+            color: "#08080A",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
         >
-          <Send size={14} />
+          <Send size={14} color="#08080A" />
         </button>
       </div>
     </div>

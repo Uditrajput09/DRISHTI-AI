@@ -6,7 +6,8 @@ import {
   Maximize2, 
   Minimize2, 
   RefreshCw, 
-  Layers 
+  Layers,
+  ChevronDown
 } from 'lucide-react';
 
 export default function MapControls({
@@ -26,45 +27,50 @@ export default function MapControls({
   const baseStyles = [
     { id: 'satellite', label: 'Satellite' },
     { id: 'topo', label: 'Terrain' },
-    { id: 'osm', label: 'Dark OSM' }
+    { id: 'osm', label: 'Dark Carto' }
   ];
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: 16,
-        right: 16,
+        top: 14,
+        right: 14,
         zIndex: 500,
         display: 'flex',
         flexDirection: 'column',
-        gap: 8
+        gap: 8,
+        fontFamily: 'var(--font-primary)'
       }}
+      className="ui-map-controls"
     >
-      {/* Map Style Selector */}
+      {/* Map Style Selector Dropdown */}
       <div style={{ position: 'relative' }}>
         <button
           onClick={() => setIsStyleMenuOpen(!isStyleMenuOpen)}
-          title="Switch Map Style"
+          title="Switch Map Base Layer"
           style={{
-            background: 'rgba(16, 21, 33, 0.92)',
+            backgroundColor: 'rgba(16, 16, 16, 0.94)',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(120, 140, 180, 0.25)',
-            borderRadius: 8,
-            color: '#F4F6FB',
-            padding: '7px 12px',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            fontFamily: 'Space Grotesk, sans-serif',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-input)',
+            color: 'var(--text-primary)',
+            padding: '6px 12px',
+            fontSize: 12,
+            fontWeight: 500,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.45)'
+            boxShadow: 'var(--shadow-card)',
+            transition: 'border-color var(--transition-fast)'
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-primary)')}
         >
-          <Layers size={14} color="#35D8FF" />
-          <span>{baseStyles.find(s => s.id === activeBaseMap)?.label || 'Satellite'}</span>
+          <Layers size={14} style={{ color: 'var(--brand-primary)' }} />
+          <span>{baseStyles.find((s) => s.id === activeBaseMap)?.label || 'Satellite'}</span>
+          <ChevronDown size={12} style={{ color: 'var(--text-muted)' }} />
         </button>
 
         {isStyleMenuOpen && (
@@ -73,19 +79,19 @@ export default function MapControls({
               position: 'absolute',
               top: 'calc(100% + 6px)',
               right: 0,
-              background: '#101521',
-              border: '1px solid rgba(120, 140, 180, 0.3)',
-              borderRadius: 8,
+              backgroundColor: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-input)',
               padding: 4,
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
               minWidth: 120,
-              boxShadow: '0 12px 28px rgba(0,0,0,0.6)',
+              boxShadow: 'var(--shadow-modal)',
               zIndex: 600
             }}
           >
-            {baseStyles.map(st => (
+            {baseStyles.map((st) => (
               <button
                 key={st.id}
                 onClick={() => {
@@ -93,128 +99,121 @@ export default function MapControls({
                   setIsStyleMenuOpen(false);
                 }}
                 style={{
-                  background: activeBaseMap === st.id ? 'rgba(53, 216, 255, 0.15)' : 'transparent',
-                  color: activeBaseMap === st.id ? '#35D8FF' : '#9AA5B8',
+                  backgroundColor: activeBaseMap === st.id ? 'var(--brand-tint)' : 'transparent',
+                  color: activeBaseMap === st.id ? 'var(--brand-light)' : 'var(--text-secondary)',
                   border: 'none',
-                  borderRadius: 6,
+                  borderRadius: 'var(--radius-sm)',
                   padding: '6px 10px',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
+                  fontSize: 12,
+                  fontWeight: activeBaseMap === st.id ? 600 : 400,
+                  cursor: 'pointer',
                   textAlign: 'left',
-                  cursor: 'pointer'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
                 }}
               >
-                {st.label}
+                <span>{st.label}</span>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Action Controls Group */}
+      {/* Control Buttons Cluster */}
       <div
         style={{
-          background: 'rgba(16, 21, 33, 0.92)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(120, 140, 180, 0.25)',
-          borderRadius: 8,
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
-          overflow: 'hidden'
+          backgroundColor: 'rgba(16, 16, 16, 0.94)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-input)',
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-card)'
         }}
       >
         <button
           onClick={onZoomIn}
           title="Zoom In"
           style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '1px solid rgba(120, 140, 180, 0.18)',
-            color: '#F4F6FB',
-            padding: 8,
-            cursor: 'pointer',
+            width: 34,
+            height: 34,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            borderBottom: '1px solid var(--border-primary)'
           }}
         >
-          <Plus size={16} />
+          <Plus size={15} />
         </button>
 
         <button
           onClick={onZoomOut}
           title="Zoom Out"
           style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '1px solid rgba(120, 140, 180, 0.18)',
-            color: '#F4F6FB',
-            padding: 8,
-            cursor: 'pointer',
+            width: 34,
+            height: 34,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Minus size={16} />
-        </button>
-
-        <button
-          onClick={onLocateMe}
-          disabled={isLocating}
-          title="Locate Me"
-          style={{
+            justifyContent: 'center',
             background: 'transparent',
             border: 'none',
-            borderBottom: '1px solid rgba(120, 140, 180, 0.18)',
-            color: isLocating ? '#35D8FF' : '#9AA5B8',
-            padding: 8,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            color: 'var(--text-primary)',
+            cursor: 'pointer'
           }}
         >
-          <LocateFixed size={16} />
-        </button>
-
-        <button
-          onClick={onToggleFullscreen}
-          title={isFullscreen ? 'Exit Fullscreen' : 'Toggle Fullscreen'}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '1px solid rgba(120, 140, 180, 0.18)',
-            color: '#9AA5B8',
-            padding: 8,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-        </button>
-
-        <button
-          onClick={onRefreshData}
-          disabled={isRefreshing}
-          title="Refresh Geospatial Data"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: isRefreshing ? '#35D8FF' : '#9AA5B8',
-            padding: 8,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <RefreshCw size={15} style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
+          <Minus size={15} />
         </button>
       </div>
+
+      {/* Location Button */}
+      <button
+        onClick={onLocateMe}
+        title="Locate Device Position"
+        style={{
+          width: 34,
+          height: 34,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(16, 16, 16, 0.94)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-input)',
+          color: isLocating ? 'var(--brand-primary)' : 'var(--text-primary)',
+          cursor: 'pointer',
+          boxShadow: 'var(--shadow-card)'
+        }}
+      >
+        <LocateFixed size={15} style={{ animation: isLocating ? 'pulseDot 1.5s infinite' : 'none' }} />
+      </button>
+
+      {/* Fullscreen Toggle */}
+      <button
+        onClick={onToggleFullscreen}
+        title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Map'}
+        style={{
+          width: 34,
+          height: 34,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(16, 16, 16, 0.94)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-input)',
+          color: 'var(--text-primary)',
+          cursor: 'pointer',
+          boxShadow: 'var(--shadow-card)'
+        }}
+      >
+        {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+      </button>
     </div>
   );
 }

@@ -1,6 +1,38 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: drishti-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=drishti_landslide
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d drishti_landslide"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: drishti-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -9,7 +41,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=sqlite:///./drishti_landslide.db
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/drishti_landslide
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=drishti_landslide
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
       - PILOT_DISTRICT_NAME=East Khasi Hills, Meghalaya
       - PILOT_CENTER_LAT=25.5788
       - PILOT_CENTER_LON=91.8933
@@ -20,6 +58,16 @@ services:
     volumes:
       - ./data:/app/data
       - drishti_data:/app/backend/ml
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   frontend:
@@ -35,3 +83,5 @@ services:
 
 volumes:
   drishti_data:
+  postgres_data:
+  redis_data:

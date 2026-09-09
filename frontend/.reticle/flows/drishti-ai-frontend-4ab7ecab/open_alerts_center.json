@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "name": "open_alerts_center",
+  "projectId": "drishti-ai-frontend-4ab7ecab",
+  "createdAt": 1788862962712,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "button",
+        "name": "Alerts Center 50"
+      },
+      "args": {},
+      "action": "click",
+      "expect": {
+        "console": {
+          "level": "error",
+          "absent": true
+        }
+      }
+    }
+  ],
+  "startPath": "/",
+  "intent": "Navigating from GIS Command Center to Emergency Alert Center",
+  "intentId": "flow:open_alerts_center"
+}

@@ -104,5 +104,30 @@ class TerrainIngestionService:
             "longitude": lon
         }
 
+    def calibrate_zone_slope(self, lat: float, lon: float, fallback_slope: float = 30.0) -> Dict[str, Any]:
+        """
+        Calibrate and validate terrain slope angle from DEM.
+        Combines point elevation with surrounding finite difference gradient.
+        """
+        try:
+            grad = self.calculate_slope_gradient(lat, lon)
+            dem_slope = grad.get("slope_angle_deg", fallback_slope)
+            # Geological sanity filter for Meghalaya hills (natural angles between 12 and 60 degrees)
+            calibrated_slope = min(62.0, max(12.0, dem_slope))
+            return {
+                "calibrated_slope_deg": round(calibrated_slope, 2),
+                "elevation_m": grad.get("center_elevation_m", 1200.0),
+                "aspect_deg": grad.get("slope_aspect_deg", 180.0),
+                "is_mocked": grad.get("is_mocked", True)
+            }
+        except Exception:
+            return {
+                "calibrated_slope_deg": fallback_slope,
+                "elevation_m": 1200.0,
+                "aspect_deg": 180.0,
+                "is_mocked": True
+            }
+
 
 terrain_service = TerrainIngestionService()
+

@@ -78,6 +78,38 @@ export const api = {
     }
   },
 
+  // ─── Unified Ingestion Pipeline Endpoints ─────────────────────
+  async getIngestionStatus() {
+    try {
+      const res = await fetch(`${API_BASE}/ingestion/status`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getIngestionStatus error:', err);
+      return { pipeline_status: 'operational', subsystems: {} };
+    }
+  },
+
+  async syncIngestion(dispatchAlerts = true) {
+    const res = await fetch(`${API_BASE}/ingestion/sync?dispatch_alerts=${dispatchAlerts}`, {
+      method: 'POST'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
+  async getZoneIngestionPreview(zoneId) {
+    try {
+      const res = await fetch(`${API_BASE}/ingestion/preview/${zoneId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getZoneIngestionPreview error:', err);
+      return null;
+    }
+  },
+
+
   // ─── Field Reports & Offline Queue ───────────────────────────
   async submitReport(reportData) {
     // If browser is offline, store directly in offline queue
@@ -214,6 +246,121 @@ export const api = {
       return await res.json();
     } catch (err) {
       return [];
+    }
+  },
+
+  async getTouristHotspots() {
+    try {
+      const res = await fetch(`${API_BASE}/infrastructure/tourist-hotspots`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      try { localStorage.setItem('drishti_tourist_hotspots', JSON.stringify(data)); } catch (e) {}
+      return data;
+    } catch (err) {
+      try {
+        const cached = localStorage.getItem('drishti_tourist_hotspots');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+      return [
+        { id: "spot_nohkalikai", name: "Nohkalikai Falls (Sohra)", lat: 25.2755, lon: 91.6853, zone_id: "EKH-Z01", risk: "Critical", category: "Waterfall Gorge", description: "340m plunge waterfall with high steep-gorge runoff and road cut-slope exposure." },
+        { id: "spot_sevensisters", name: "Seven Sisters Falls (Mawsmai)", lat: 25.2505, lon: 91.7214, zone_id: "EKH-Z01", risk: "High", category: "Cliff Escarpment", description: "Exposed plateau rim near limestone caves prone to rockfall during cloudbursts." },
+        { id: "spot_mawsynram", name: "Mawjymbuin Cave (Mawsynram)", lat: 25.3130, lon: 91.5830, zone_id: "EKH-Z02", risk: "High", category: "Cave & Karst Valley", description: "Wettest place on earth; underground drainage and karst dissolution vulnerability." },
+        { id: "spot_dawki", name: "Dawki Umngot River Ghats", lat: 25.1870, lon: 92.0190, zone_id: "EKH-Z05", risk: "Medium", category: "Border River Basin", description: "Crystal clear river valley prone to sudden upstream surge and gorge road cuts." },
+        { id: "spot_elephant", name: "Elephant Falls (Upper Shillong)", lat: 25.5340, lon: 91.8250, zone_id: "EKH-Z06", risk: "Low", category: "Forest Stream Cascades", description: "Three-tiered cascade near military Cantonment with quick urban medical access." },
+        { id: "spot_laitlum", name: "Laitlum Canyons (Smit)", lat: 25.4520, lon: 91.9050, zone_id: "EKH-Z04", risk: "High", category: "High Mountain Canyon", description: "Steep 2000ft gorges with frequent dense monsoon fogs and isolated access roads." },
+        { id: "spot_shillong", name: "Shillong City Center (Police Bazar)", lat: 25.5788, lon: 91.8833, zone_id: "EKH-Z06", risk: "Low", category: "District Headquarters", description: "Central transport hub with major trauma hospitals and state control rooms." }
+      ];
+    }
+  },
+
+  async planEvacuation(currentLat, currentLon, preferredType = 'all', maxDist = 45.0) {
+    const payload = {
+      current_lat: currentLat,
+      current_lon: currentLon,
+      preferred_type: preferredType,
+      max_distance_km: maxDist
+    };
+    try {
+      const res = await fetch(`${API_BASE}/infrastructure/plan-evacuation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      try { localStorage.setItem('drishti_last_evacuation_plan', JSON.stringify(data)); } catch (e) {}
+      return data;
+    } catch (err) {
+      // Offline fallback: calculate distances locally from cached facilities
+      try {
+        const cachedPlan = localStorage.getItem('drishti_last_evacuation_plan');
+        if (cachedPlan) return JSON.parse(cachedPlan);
+      } catch (e) {}
+      return null;
+    }
+  },
+
+  async sendSOSBeacon(lat, lon, reporterName = 'Tourist in Need', contact = '', message = 'Emergency: Trapped in tourist corridor due to flash runoff/landslide.') {
+    try {
+      const res = await fetch(`${API_BASE}/sos/beacon`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lat,
+          lon,
+          reporter_name: reporterName,
+          contact,
+          message
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      return { success: false, offline_queued: true, message: 'SOS queued for dispatch upon network recovery' };
+    }
+  },
+
+  // ─── Anomaly & Probabilistic Forecast ─────────────────────────
+  async getAnomalyScan() {
+    try {
+      const res = await fetch(`${API_BASE}/anomaly/scan`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getAnomalyScan error:', err);
+      return { status: 'fallback', total_zones_scanned: 0, anomalies_detected: 0, anomalies: [] };
+    }
+  },
+
+  async getZoneAnomaly(zoneId) {
+    try {
+      const res = await fetch(`${API_BASE}/anomaly/zone/${zoneId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
+  },
+
+  async getWeeklyForecast(zoneId = 1) {
+    try {
+      const res = await fetch(`${API_BASE}/forecast/weekly?zone_id=${zoneId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getWeeklyForecast error:', err);
+      return { zone_id: zoneId, days: [] };
+    }
+  },
+
+  async getProbabilisticForecast(zoneId = 1) {
+    try {
+      const res = await fetch(`${API_BASE}/forecast/probabilistic/${zoneId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getProbabilisticForecast error:', err);
+      return { zone_id: zoneId, days: [] };
     }
   }
 };

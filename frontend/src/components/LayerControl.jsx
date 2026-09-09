@@ -21,21 +21,12 @@ export default function LayerControl({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const layerOptions = [
-    { key: 'zones', label: 'Risk Zones' },
+    { key: 'zones', label: 'Hazard Zones' },
     { key: 'roads', label: 'Road Network' },
-    { key: 'shelters', label: 'Shelters' },
-    { key: 'hospitals', label: 'Hospitals' },
-    { key: 'reports', label: 'Field Reports' },
-    { key: 'evacuation', label: 'Evacuation Routes' },
-    { key: 'rainfall', label: 'Rainfall (Radar)' }
-  ];
-
-  const riskLegend = [
-    { label: 'Critical', range: '80 - 100', color: '#FF3B6B' },
-    { label: 'High', range: '60 - 79', color: '#FF9D3D' },
-    { label: 'Medium', range: '30 - 59', color: '#FFD84D' },
-    { label: 'Low', range: '10 - 29', color: '#7BED9F' },
-    { label: 'Safe', range: '0 - 9', color: '#39D98A' }
+    { key: 'shelters', label: 'Shelters & Havens' },
+    { key: 'hospitals', label: 'Medical Facilities' },
+    { key: 'reports', label: 'Field Observations' },
+    { key: 'rainfall', label: 'IMD Doppler Radar' }
   ];
 
   return (
@@ -45,17 +36,19 @@ export default function LayerControl({
         top: 14,
         left: 14,
         zIndex: 500,
-        width: isCollapsed ? 38 : 205,
-        background: 'rgba(10, 14, 23, 0.94)',
+        width: isCollapsed ? 36 : 210,
+        backgroundColor: 'rgba(16, 16, 16, 0.94)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(120, 140, 180, 0.25)',
-        borderRadius: 10,
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.7)',
-        transition: 'all 0.2s ease',
+        border: '1px solid var(--border-primary)',
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-elevated)',
+        transition: 'width var(--transition-normal)',
         overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        fontFamily: 'var(--font-primary)'
       }}
+      className="ui-layer-control"
     >
       {/* Header */}
       <div
@@ -63,138 +56,107 @@ export default function LayerControl({
           display: 'flex',
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'space-between',
-          padding: isCollapsed ? '10px 0' : '10px 12px',
-          borderBottom: isCollapsed ? 'none' : '1px solid rgba(120, 140, 180, 0.18)',
-          background: 'rgba(16, 21, 33, 0.7)'
+          padding: isCollapsed ? '10px 0' : '10px 14px',
+          borderBottom: isCollapsed ? 'none' : '1px solid var(--border-primary)',
+          backgroundColor: 'var(--bg-surface-elevated)'
         }}
       >
         {!isCollapsed && (
-          <span
-            style={{
-              fontSize: '0.68rem',
-              fontWeight: 800,
-              color: '#9AA5B8',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              fontFamily: 'Space Grotesk, sans-serif'
-            }}
-          >
-            MAP LAYERS
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Layers size={14} style={{ color: 'var(--brand-primary)' }} />
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase'
+              }}
+            >
+              GIS LAYERS
+            </span>
+          </div>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? 'Expand' : 'Collapse'}
+          title={isCollapsed ? 'Expand Layers' : 'Collapse Layers'}
           style={{
             background: 'transparent',
             border: 'none',
-            color: '#9AA5B8',
+            color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: 2
+            padding: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
+          aria-label={isCollapsed ? 'Expand Layers' : 'Collapse Layers'}
         >
-          {isCollapsed ? <ChevronRight size={16} color="#35D8FF" /> : <ChevronLeft size={14} />}
+          {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
         </button>
       </div>
 
       {!isCollapsed && (
-        <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* Layer Switches List */}
+        <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Layer Checkboxes */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {layerOptions.map(layer => {
-              const isChecked = layerVisibility[layer.key] !== false;
-              return (
-                <div
-                  key={layer.key}
-                  onClick={() => onToggleLayer(layer.key)}
+            {layerOptions.map((layer) => (
+              <label
+                key={layer.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  color: layerVisibility[layer.key] ? 'var(--text-primary)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={Boolean(layerVisibility[layer.key])}
+                  onChange={() => onToggleLayer && onToggleLayer(layer.key)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '0.72rem',
-                    color: isChecked ? '#F4F6FB' : '#5C677D',
+                    accentColor: 'var(--brand-primary)',
                     cursor: 'pointer'
                   }}
-                >
-                  <span style={{ fontWeight: isChecked ? 600 : 400 }}>{layer.label}</span>
-                  {/* Cyan / Blue Toggle Switch */}
-                  <div
-                    style={{
-                      width: 28,
-                      height: 15,
-                      borderRadius: 10,
-                      background: isChecked ? '#35D8FF' : 'rgba(120, 140, 180, 0.25)',
-                      position: 'relative',
-                      transition: 'background 0.2s ease'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 11,
-                        height: 11,
-                        borderRadius: '50%',
-                        background: '#FFFFFF',
-                        position: 'absolute',
-                        top: 2,
-                        left: isChecked ? 15 : 2,
-                        transition: 'left 0.2s ease',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.4)'
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                />
+                <span>{layer.label}</span>
+              </label>
+            ))}
           </div>
 
-          {/* RISK LEGEND */}
-          <div style={{ borderTop: '1px solid rgba(120, 140, 180, 0.18)', paddingTop: 10 }}>
-            <span
-              style={{
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                color: '#9AA5B8',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                fontFamily: 'Space Grotesk, sans-serif',
-                display: 'block',
-                marginBottom: 6
-              }}
-            >
-              RISK LEGEND
-            </span>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {riskLegend.map(item => (
-                <div
-                  key={item.label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '0.68rem',
-                    color: '#CBD5E1'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: item.color,
-                        boxShadow: `0 0 6px ${item.color}`
-                      }}
-                    />
-                    <span>{item.label}</span>
-                  </div>
-                  <span style={{ color: '#5C677D', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.64rem' }}>
-                    {item.range}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Reset Filters */}
+          <button
+            onClick={onResetFilters}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              padding: '6px 0',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-secondary)',
+              color: 'var(--text-secondary)',
+              fontSize: 11,
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all var(--transition-fast)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.borderColor = 'var(--border-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--border-secondary)';
+            }}
+          >
+            <RotateCcw size={12} />
+            <span>Reset Layers</span>
+          </button>
         </div>
       )}
     </div>

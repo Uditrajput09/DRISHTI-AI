@@ -4,7 +4,6 @@ import {
   BrainCircuit, 
   TrendingUp, 
   Sliders, 
-  Navigation, 
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
@@ -12,6 +11,10 @@ import {
   ChevronRight,
   FileText
 } from 'lucide-react';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { Badge, RiskBadge } from './ui/Badge';
+import { ProgressBar } from './ui/ProgressBar';
 import { exportZoneRiskPDF } from '../utils/pdfExport';
 
 export default function ZoneIntelligence({
@@ -25,12 +28,11 @@ export default function ZoneIntelligence({
 
   if (!zone) {
     return (
-      <div
-        className="command-panel"
+      <Card
         style={{
           padding: 24,
           textAlign: 'center',
-          color: '#9AA5B8',
+          color: 'var(--text-muted)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -39,14 +41,14 @@ export default function ZoneIntelligence({
           minHeight: 440
         }}
       >
-        <ShieldAlert size={40} color="rgba(53, 216, 255, 0.3)" style={{ marginBottom: 14 }} />
-        <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
-          NO ZONE SELECTED
+        <ShieldAlert size={36} color="var(--brand-primary)" style={{ marginBottom: 14, opacity: 0.7 }} />
+        <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+          No Zone Selected
         </div>
-        <p style={{ fontSize: '0.78rem', maxWidth: 240, lineHeight: 1.5, color: '#9AA5B8' }}>
+        <p style={{ fontSize: '0.78rem', maxWidth: 240, lineHeight: 1.5, color: 'var(--text-secondary)' }}>
           Select any micro-zone polygon on the GIS map to load real-time telemetry and geotechnical AI intelligence.
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -55,17 +57,17 @@ export default function ZoneIntelligence({
 
   const getRiskColor = (lvl) => {
     switch (lvl) {
-      case 'Critical': return '#FF3B6B';
-      case 'High': return '#FF9D3D';
-      case 'Medium': return '#FFD84D';
-      default: return '#39D98A';
+      case 'Critical': return 'var(--risk-critical)';
+      case 'High': return 'var(--risk-high)';
+      case 'Medium': return 'var(--risk-medium)';
+      default: return 'var(--risk-low)';
     }
   };
 
   const riskColor = getRiskColor(level);
 
   // SVG Circular Gauge parameters
-  const radius = 54;
+  const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
@@ -80,7 +82,7 @@ export default function ZoneIntelligence({
     }
   };
 
-  // Key factors data matching specification
+  // Key factors data
   const rainfall24h = zone.rainfall_24h || 660;
   const slopeAngle = zone.base_slope_deg || 38.5;
   const soilMoisture = zone.soil_moisture_pct || 92;
@@ -88,49 +90,47 @@ export default function ZoneIntelligence({
   const landCoverPct = zone.land_cover_vulnerability || 62;
 
   const factors = [
-    { label: 'Rainfall (24h)', value: `${rainfall24h} mm`, pct: Math.min(100, Math.round((rainfall24h / 700) * 100)), trend: 'up', color: '#FF3B6B' },
-    { label: 'Slope Angle', value: `${slopeAngle}°`, pct: Math.min(100, Math.round((slopeAngle / 50) * 100)), trend: 'up', color: '#FF9D3D' },
-    { label: 'Soil Saturation', value: `${soilMoisture}%`, pct: soilMoisture, trend: 'up', color: '#FF3B6B' },
-    { label: 'Distance to Drainage', value: `${drainageDist}m`, pct: Math.min(100, drainageDist), trend: 'down', color: '#8B6CFF' },
-    { label: 'Land Cover', value: `${landCoverPct}%`, pct: landCoverPct, trend: 'neutral', color: '#35D8FF' }
+    { label: 'Rainfall (24h)', value: `${rainfall24h} mm`, pct: Math.min(100, Math.round((rainfall24h / 700) * 100)), trend: 'up', color: 'var(--risk-critical)' },
+    { label: 'Slope Angle', value: `${slopeAngle}°`, pct: Math.min(100, Math.round((slopeAngle / 50) * 100)), trend: 'up', color: 'var(--risk-high)' },
+    { label: 'Soil Saturation', value: `${soilMoisture}%`, pct: soilMoisture, trend: 'up', color: 'var(--risk-critical)' },
+    { label: 'Drainage Proximity', value: `${drainageDist}m`, pct: Math.min(100, drainageDist), trend: 'down', color: 'var(--brand-primary)' },
+    { label: 'Vegetation Cover', value: `${landCoverPct}%`, pct: landCoverPct, trend: 'neutral', color: 'var(--text-secondary)' }
   ];
 
   return (
-    <div
-      className="command-panel"
+    <Card
       style={{
         padding: '18px 20px',
         display: 'flex',
         flexDirection: 'column',
         gap: 14,
-        position: 'relative',
-        boxShadow: '0 12px 36px rgba(0, 0, 0, 0.6)'
+        position: 'relative'
       }}
     >
       {/* Header: Zone Title & District */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#35D8FF', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Space Grotesk, sans-serif' }}>
+          <span style={{ fontSize: '0.66rem', fontWeight: 600, color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             ZONE INTELLIGENCE
           </span>
-          <span style={{ fontSize: '0.68rem', color: '#5C677D', fontFamily: 'JetBrains Mono, monospace' }}>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
             {zone.zone_code || 'EKH-Z01'}
           </span>
         </div>
 
         <h2
           style={{
-            fontSize: '1.25rem',
-            fontWeight: 900,
-            color: '#FFFFFF',
-            fontFamily: 'Space Grotesk, sans-serif',
-            lineHeight: 1.25,
-            letterSpacing: '-0.01em'
+            fontSize: '1.2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            lineHeight: 1.2,
+            letterSpacing: '-0.01em',
+            margin: 0
           }}
         >
           {zone.name || 'Sohra (Cherrapunji) Escarpment'}
         </h2>
-        <div style={{ fontSize: '0.72rem', color: '#9AA5B8', marginTop: 3 }}>
+        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 3 }}>
           East Khasi Hills • Elev: {zone.base_elevation_m || 1430}m
         </div>
       </div>
@@ -138,9 +138,9 @@ export default function ZoneIntelligence({
       {/* Circular Radial Gauge */}
       <div
         style={{
-          background: 'var(--bg-surface-elevated)',
-          border: '1px solid rgba(120, 140, 180, 0.2)',
-          borderRadius: 12,
+          background: 'var(--bg-card-hover)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-lg, 12px)',
           padding: '14px 16px',
           display: 'flex',
           alignItems: 'center',
@@ -149,22 +149,22 @@ export default function ZoneIntelligence({
         }}
       >
         {/* SVG Radial Gauge */}
-        <div style={{ position: 'relative', width: 110, height: 110 }}>
-          <svg width="110" height="110" viewBox="0 0 130 130" style={{ transform: 'rotate(-90deg)' }}>
+        <div style={{ position: 'relative', width: 104, height: 104 }}>
+          <svg width="104" height="104" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
             <circle
-              cx="65"
-              cy="65"
+              cx="60"
+              cy="60"
               r={radius}
-              stroke="rgba(120, 140, 180, 0.15)"
-              strokeWidth="10"
+              stroke="var(--border-primary)"
+              strokeWidth="8"
               fill="transparent"
             />
             <circle
-              cx="65"
-              cy="65"
+              cx="60"
+              cy="60"
               r={radius}
               stroke={riskColor}
-              strokeWidth="10"
+              strokeWidth="8"
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -185,69 +185,58 @@ export default function ZoneIntelligence({
               textAlign: 'center'
             }}
           >
-            <span style={{ fontSize: '0.62rem', color: '#9AA5B8', fontWeight: 700, textTransform: 'uppercase' }}>
-              Risk Score
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+              Risk
             </span>
-            <span style={{ fontSize: '1.55rem', fontWeight: 900, color: riskColor, fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1 }}>
+            <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>
               {score}%
             </span>
-            <span
-              style={{
-                fontSize: '0.6rem',
-                fontWeight: 800,
-                color: riskColor,
-                textTransform: 'uppercase',
-                background: `${riskColor}18`,
-                padding: '1px 6px',
-                borderRadius: 4,
-                marginTop: 2
-              }}
-            >
-              {level}
-            </span>
+            <div style={{ marginTop: 2 }}>
+              <RiskBadge level={level} style={{ fontSize: '0.6rem', padding: '1px 6px' }} />
+            </div>
           </div>
         </div>
 
-        {/* Gauge Right Info: Probability, Rainfall, Slope, Soil Moisture, ARI, Geology */}
+        {/* Gauge Right Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 140 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>Probability</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Probability</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
               {zone.probability ? `${(zone.probability * 100).toFixed(0)}%` : '100%'}
             </span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>Rainfall (24h)</span>
-            <span style={{ color: '#35D8FF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Rainfall (24h)</span>
+            <span style={{ color: 'var(--risk-critical)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
               {zone.rainfall_24h || 186} mm
             </span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>Slope Angle</span>
-            <span style={{ color: '#FF9D3D', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Slope Angle</span>
+            <span style={{ color: 'var(--risk-high)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
               {zone.base_slope_deg || 38.5}°
             </span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>Soil Moisture</span>
-            <span style={{ color: '#35D8FF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Soil Moisture</span>
+            <span style={{ color: 'var(--brand-primary)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
               {zone.soil_moisture_pct || 72}%
             </span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>ARI (Antecedent)</span>
-            <span style={{ color: '#FFD84D', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span style={{ color: 'var(--text-muted)' }}>ARI Index</span>
+            <span style={{ color: 'var(--risk-medium)', fontWeight: 600 }}>
               High
             </span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem' }}>
-            <span style={{ color: '#9AA5B8' }}>Geology</span>
-            <span style={{ color: '#CBD5E1', fontWeight: 600 }}>
+            <span style={{ color: 'var(--text-muted)' }}>Geology</span>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
               {zone.geology || 'Highly Fractured'}
             </span>
           </div>
@@ -256,19 +245,19 @@ export default function ZoneIntelligence({
 
       {/* Key Factors Progress Bars */}
       <div>
-        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#9AA5B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 8 }}>
-          Key Factors
+        <div style={{ fontSize: '0.66rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          Key Factors Breakdown
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {factors.map((f, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem' }}>
-                <span style={{ color: '#CBD5E1', fontWeight: 500 }}>{f.label}</span>
+                <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{f.label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ color: '#F4F6FB', fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
                     {f.value}
                   </span>
-                  <span style={{ color: f.color, fontWeight: 800, fontSize: '0.72rem', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ color: f.color, fontWeight: 600, fontSize: '0.7rem', display: 'flex', alignItems: 'center' }}>
                     {f.pct}%
                     {f.trend === 'up' && <ArrowUpRight size={12} />}
                     {f.trend === 'down' && <ArrowDownRight size={12} />}
@@ -278,109 +267,96 @@ export default function ZoneIntelligence({
               </div>
 
               {/* Progress bar */}
-              <div style={{ width: '100%', height: 5, background: 'rgba(120, 140, 180, 0.15)', borderRadius: 3, overflow: 'hidden' }}>
-                <div
-                  style={{
-                    width: `${f.pct}%`,
-                    height: '100%',
-                    background: f.color,
-                    borderRadius: 3,
-                    boxShadow: `0 0 6px ${f.color}80`
-                  }}
-                />
-              </div>
+              <ProgressBar value={f.pct} max={100} color={f.color} height={4} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Key Roads at Risk */}
-      <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid rgba(120, 140, 180, 0.18)', borderRadius: 10, padding: '10px 12px' }}>
-        <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#FF3B6B', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
-          Key Roads at Risk
+      {/* Key Roads at Risk (Pills) */}
+      <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md, 8px)', padding: '10px 12px' }}>
+        <div style={{ fontSize: '0.66rem', fontWeight: 600, color: 'var(--risk-critical)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+          Corridors & Roads at Risk
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ background: 'rgba(255, 59, 107, 0.15)', border: '1px solid rgba(255, 59, 107, 0.4)', color: '#FF3B6B', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: 4, fontFamily: 'Space Grotesk, sans-serif' }}>
+          <Badge variant="risk" riskLevel="Critical">
             NH-6
-          </span>
-          <span style={{ background: 'rgba(255, 157, 61, 0.15)', border: '1px solid rgba(255, 157, 61, 0.4)', color: '#FF9D3D', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: 4, fontFamily: 'Space Grotesk, sans-serif' }}>
+          </Badge>
+          <Badge variant="risk" riskLevel="High">
             NH-106
-          </span>
-          <span style={{ background: 'rgba(53, 216, 255, 0.12)', border: '1px solid rgba(53, 216, 255, 0.3)', color: '#35D8FF', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: 4, fontFamily: 'Space Grotesk, sans-serif' }}>
+          </Badge>
+          <Badge variant="brand">
             SH-5 (Sohra Link)
-          </span>
+          </Badge>
         </div>
       </div>
 
       {/* Operational Advisory */}
-      <div style={{ background: 'rgba(21, 27, 41, 0.7)', border: '1px solid rgba(120, 140, 180, 0.18)', borderRadius: 10, padding: '10px 12px' }}>
+      <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md, 8px)', padding: '10px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-          <AlertTriangle size={13} color="#FF9D3D" />
-          <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#FF9D3D', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'Space Grotesk, sans-serif' }}>
+          <AlertTriangle size={13} color="var(--risk-high)" />
+          <span style={{ fontSize: '0.66rem', fontWeight: 600, color: 'var(--risk-high)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Operational Advisory
           </span>
         </div>
-        <p style={{ fontSize: '0.74rem', color: '#CBD5E1', lineHeight: 1.45 }}>
+        <p style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.45, margin: 0 }}>
           Extreme rainfall combined with steep slope conditions indicates elevated landslide probability. Monitor NH-6 and nearby settlements. Avoid non-essential mountain travel.
         </p>
       </div>
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 2 }}>
-        <button
+        <Button
+          variant="primary"
           onClick={onOpenXAI}
-          className="btn-primary-cyan"
-          style={{ width: '100%', justifyContent: 'space-between', padding: '9px 14px' }}
+          style={{ width: '100%', justifyContent: 'space-between' }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <BrainCircuit size={15} />
-            <span>View XAI (Factor Attribution)</span>
+            <span>View Factor Attribution (XAI)</span>
           </span>
           <ChevronRight size={14} />
-        </button>
+        </Button>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <button
+          <Button
+            variant="secondary"
             onClick={onOpenForecast}
-            className="btn-surface"
-            style={{ justifyContent: 'center', padding: '8px 10px', fontSize: '0.75rem' }}
+            size="sm"
+            style={{ justifyContent: 'center' }}
           >
-            <TrendingUp size={13} color="#35D8FF" />
+            <TrendingUp size={13} color="var(--brand-primary)" />
             <span>Forecast</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="secondary"
             onClick={onOpenSimulation}
-            className="btn-surface"
-            style={{ justifyContent: 'center', padding: '8px 10px', fontSize: '0.75rem' }}
+            size="sm"
+            style={{ justifyContent: 'center' }}
           >
-            <Sliders size={13} color="#FF4DB8" />
+            <Sliders size={13} color="var(--brand-primary)" />
             <span>Simulation</span>
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleExportPDF}
           disabled={isExporting}
           style={{
-            background: 'transparent',
-            border: '1px dashed rgba(120, 140, 180, 0.25)',
-            color: '#9AA5B8',
-            borderRadius: 8,
-            padding: '7px 0',
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
+            border: '1px dashed var(--border-primary)',
+            color: 'var(--text-muted)',
+            width: '100%',
             justifyContent: 'center',
-            gap: 6
+            fontSize: '0.72rem'
           }}
         >
           <FileText size={13} />
           <span>{isExporting ? 'Generating Dossier...' : 'Export Geotechnical PDF Dossier'}</span>
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

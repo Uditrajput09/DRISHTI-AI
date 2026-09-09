@@ -34,8 +34,8 @@ export default function SidebarNavigation({
       className="desktop-sidebar"
       style={{
         width: 240,
-        backgroundColor: '#070A10',
-        borderRight: '1px solid rgba(120, 140, 180, 0.18)',
+        backgroundColor: 'var(--bg-surface-elevated)',
+        borderRight: '1px solid var(--border-command)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -45,7 +45,7 @@ export default function SidebarNavigation({
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        boxShadow: '4px 0 24px rgba(0, 0, 0, 0.4)'
+        boxShadow: '4px 0 24px rgba(0, 0, 0, 0.5)'
       }}
     >
       {/* Top: Branding & Nav Links */}
@@ -63,43 +63,44 @@ export default function SidebarNavigation({
         >
           <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, rgba(53, 216, 255, 0.25), rgba(139, 108, 255, 0.25))',
-              border: '1px solid rgba(53, 216, 255, 0.5)',
+              width: 36,
+              height: 36,
+              borderRadius: 999,
+              background: 'rgba(200, 150, 62, 0.15)',
+              border: '1px solid var(--color-copper)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 16px rgba(53, 216, 255, 0.35)',
+              boxShadow: '0 0 14px rgba(200, 150, 62, 0.3)',
               flexShrink: 0
             }}
           >
-            <Eye size={20} color="#35D8FF" />
+            <Eye size={18} color="var(--color-copper)" />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span
               style={{
-                fontSize: '1.15rem',
-                fontWeight: 900,
-                letterSpacing: '0.04em',
-                color: '#FFFFFF',
-                fontFamily: 'Space Grotesk, sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 400,
+                fontStyle: 'italic',
+                letterSpacing: '-0.02em',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-serif)',
                 lineHeight: 1.1
               }}
             >
-              DRISHTI <span style={{ color: '#35D8FF' }}>AI</span>
+              DRISHTI <span style={{ color: 'var(--color-copper)', fontStyle: 'normal' }}>AI</span>
             </span>
             <span
               style={{
                 fontSize: '0.62rem',
-                color: '#9AA5B8',
+                color: 'var(--text-muted)',
                 letterSpacing: '0.04em',
                 marginTop: 2
               }}
             >
-              East Khasi Hills, Meghalaya
+              East Khasi Hills • SDMA
             </span>
           </div>
         </div>
@@ -116,11 +117,11 @@ export default function SidebarNavigation({
                 onClick={() => onSelectSection(item.id)}
                 style={{
                   background: isActive
-                    ? 'linear-gradient(90deg, rgba(139, 108, 255, 0.18), rgba(53, 216, 255, 0.08))'
+                    ? 'rgba(200, 150, 62, 0.12)'
                     : 'transparent',
-                  border: `1px solid ${isActive ? 'rgba(139, 108, 255, 0.5)' : 'transparent'}`,
+                  border: `1px solid ${isActive ? 'rgba(200, 150, 62, 0.35)' : 'transparent'}`,
                   borderRadius: 8,
-                  padding: '10px 14px',
+                  padding: '9px 12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -129,18 +130,18 @@ export default function SidebarNavigation({
                   textAlign: 'left'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <IconComponent
                     size={16}
-                    color={isActive ? '#35D8FF' : '#9AA5B8'}
+                    color={isActive ? 'var(--color-copper)' : 'var(--text-secondary)'}
                   />
                   <span
                     style={{
                       fontSize: '0.82rem',
-                      fontWeight: isActive ? 800 : 500,
-                      color: isActive ? '#FFFFFF' : '#9AA5B8',
-                      fontFamily: 'Space Grotesk, sans-serif',
-                      letterSpacing: '0.02em'
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                      fontFamily: 'var(--font-sans)',
+                      letterSpacing: '0.01em'
                     }}
                   >
                     {item.label}
@@ -150,13 +151,14 @@ export default function SidebarNavigation({
                 {item.badge > 0 && (
                   <span
                     style={{
-                      background: '#FF3B6B',
-                      color: '#FFFFFF',
+                      background: 'rgba(200, 150, 62, 0.2)',
+                      border: '1px solid rgba(200, 150, 62, 0.4)',
+                      color: 'var(--color-copper)',
                       fontSize: '0.65rem',
-                      fontWeight: 900,
-                      borderRadius: 10,
+                      fontWeight: 700,
+                      borderRadius: 999,
                       padding: '1px 6px',
-                      fontFamily: 'Space Grotesk, sans-serif'
+                      fontFamily: 'monospace'
                     }}
                   >
                     {item.badge}
@@ -169,21 +171,20 @@ export default function SidebarNavigation({
       </div>
 
       {/* Bottom: AI Assistant Launcher Capsule */}
-      <div style={{ paddingTop: 16, borderTop: '1px solid rgba(120, 140, 180, 0.15)' }}>
+      <div style={{ paddingTop: 16, borderTop: '1px solid var(--border-command)' }}>
         <button
           onClick={onOpenChatbot}
-          className="command-panel-glass"
           style={{
             width: '100%',
             padding: '10px 14px',
             borderRadius: 10,
-            border: '1px solid rgba(139, 108, 255, 0.4)',
-            background: 'linear-gradient(135deg, rgba(139, 108, 255, 0.15), rgba(53, 216, 255, 0.1))',
+            border: '1px solid rgba(200, 150, 62, 0.35)',
+            background: 'rgba(200, 150, 62, 0.08)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
             cursor: 'pointer',
-            boxShadow: '0 4px 16px rgba(139, 108, 255, 0.2)'
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
           }}
         >
           <div
@@ -191,26 +192,26 @@ export default function SidebarNavigation({
               width: 28,
               height: 28,
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #8B6CFF, #35D8FF)',
+              background: 'var(--gradient-gilded)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}
           >
-            <Bot size={16} color="#FFFFFF" />
+            <Bot size={15} color="#08080A" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
             <span
               style={{
                 fontSize: '0.78rem',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                fontFamily: 'Space Grotesk, sans-serif'
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-sans)'
               }}
             >
               AI Assistant
             </span>
-            <span style={{ fontSize: '0.64rem', color: '#9AA5B8' }}>
+            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)' }}>
               Ask DRISHTI AI
             </span>
           </div>

@@ -7,12 +7,15 @@ import {
   Layers, 
   Navigation, 
   CheckCircle2, 
-  Zap 
+  Zap,
+  FileDown 
 } from 'lucide-react';
 import { api } from '../api';
 import { exportZoneRiskPDF } from '../utils/pdfExport';
 import VulnerabilityCard from './VulnerabilityCard';
-import { FileDown } from 'lucide-react';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { Badge, RiskBadge } from './ui/Badge';
 
 export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] }) {
   const [isDispatching, setIsDispatching] = useState(false);
@@ -21,21 +24,13 @@ export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] 
 
   if (!zone) {
     return (
-      <div className="glass-panel" style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>
-        <p>Select a micro-zone polygon on the GIS map to inspect AI risk metrics and triggering factors.</p>
-      </div>
+      <Card style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <p style={{ margin: 0 }}>Select a micro-zone polygon on the GIS map to inspect AI risk metrics and triggering factors.</p>
+      </Card>
     );
   }
 
   const factors = zone.triggering_factors || {};
-  const getBadgeClass = (level) => {
-    switch (level) {
-      case 'Critical': return 'badge-critical';
-      case 'High': return 'badge-high';
-      case 'Medium': return 'badge-medium';
-      default: return 'badge-low';
-    }
-  };
 
   const handleManualAlert = async () => {
     setIsDispatching(true);
@@ -66,86 +61,102 @@ export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] 
     }
   };
 
+  const getRiskColor = (lvl) => {
+    switch (lvl) {
+      case 'Critical': return 'var(--risk-critical)';
+      case 'High': return 'var(--risk-high)';
+      case 'Medium': return 'var(--risk-medium)';
+      default: return 'var(--risk-low)';
+    }
+  };
+
   return (
-    <div className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <Card style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4FD8EA', fontFamily: 'Space Grotesk, sans-serif' }}>{zone.zone_code}</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand-primary)', fontFamily: 'var(--font-mono)' }}>
+              {zone.zone_code}
+            </span>
             <span style={{ color: 'var(--text-muted)' }}>•</span>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{zone.district}</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{zone.district}</span>
           </div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', fontFamily: 'Space Grotesk, sans-serif' }}>{zone.name}</h2>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0' }}>
+            {zone.name}
+          </h2>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             Elev: {zone.base_elevation_m}m | Geo: {zone.geology}
           </div>
         </div>
 
-        {/* Risk Score Pill */}
+        {/* Risk Score Box */}
         <div style={{
           textAlign: 'right',
-          background: 'rgba(15, 15, 22, 0.85)',
+          background: 'var(--bg-card-hover)',
           padding: '8px 14px',
-          borderRadius: 14,
-          border: '1px solid rgba(255, 255, 255, 0.08)'
+          borderRadius: 'var(--radius-md, 8px)',
+          border: '1px solid var(--border-primary)'
         }}>
-          <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
             Risk Index
           </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: zone.risk_level === 'Critical' ? '#FF6EC7' : (zone.risk_level === 'High' ? '#7873F5' : '#52D199'), fontFamily: 'Space Grotesk, sans-serif' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: getRiskColor(zone.risk_level), fontFamily: 'var(--font-mono)' }}>
             {zone.risk_score}%
           </div>
-          <span className={`badge ${getBadgeClass(zone.risk_level)}`} style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px' }}>
-            {zone.risk_level}
-          </span>
+          <div style={{ marginTop: 2 }}>
+            <RiskBadge level={zone.risk_level} />
+          </div>
         </div>
       </div>
 
       {/* Explainable AI Trigger Factors */}
       <div>
-        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
-          <Zap size={16} color="#4FD8EA" />
+        <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Zap size={16} color="var(--brand-primary)" />
           <span>Explainable AI (XAI) Trigger Factors</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-          {Object.entries(factors).map(([key, factor]) => (
-            <div key={key} style={{
-              background: 'rgba(20, 20, 30, 0.75)',
-              padding: '10px 12px',
-              borderRadius: 12,
-              border: '1px solid rgba(255, 255, 255, 0.08)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{factor?.name || key}</span>
-                <span className={`badge ${getBadgeClass(factor?.impact || 'Moderate')}`} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px' }}>
-                  {factor?.impact || 'Moderate'}
-                </span>
+          {Object.entries(factors).map(([key, factor]) => {
+            const factorImpact = factor?.impact || 'Moderate';
+            const impactRisk = factorImpact === 'Severe' ? 'Critical' : (factorImpact === 'High' ? 'High' : (factorImpact === 'Moderate' ? 'Medium' : 'Low'));
+            return (
+              <div key={key} style={{
+                background: 'var(--bg-card-hover)',
+                padding: '10px 12px',
+                borderRadius: 'var(--radius-md, 8px)',
+                border: '1px solid var(--border-primary)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                    {factor?.name || key}
+                  </span>
+                  <RiskBadge level={impactRisk} style={{ fontSize: '0.62rem', padding: '1px 5px' }} />
+                </div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                  {factor?.value !== undefined ? factor.value : String(factor)}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.2 }}>
+                  {factor?.description || ''}
+                </div>
               </div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', fontFamily: 'Space Grotesk, sans-serif' }}>
-                {factor?.value !== undefined ? factor.value : String(factor)}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.2 }}>
-                {factor?.description || ''}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
       </div>
 
       {/* Lifeline Highway Exposure */}
       {zone.key_roads && zone.key_roads.length > 0 && (
-        <div style={{ background: 'rgba(120, 115, 245, 0.1)', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(120, 115, 245, 0.3)' }}>
-          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#A5A6F6', marginBottom: 4, fontFamily: 'Space Grotesk, sans-serif' }}>
-            🛣️ Exposed Lifeline Road Corridors:
+        <div style={{ background: 'var(--bg-card-hover)', padding: '10px 14px', borderRadius: 'var(--radius-md, 8px)', border: '1px solid var(--border-primary)' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
+            Exposed Lifeline Road Corridors
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {zone.key_roads.map((road, idx) => (
-              <span key={idx} style={{ background: 'rgba(15, 15, 20, 0.85)', color: '#f8fafc', fontSize: '0.74rem', padding: '3px 10px', borderRadius: 8, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <Badge key={idx} variant="brand">
                 {road}
-              </span>
+              </Badge>
             ))}
           </div>
         </div>
@@ -156,52 +167,34 @@ export default function ZoneInspector({ zone, onAlertDispatched, alertLogs = [] 
 
       {/* Action Buttons Row */}
       <div style={{ marginTop: 4, display: 'flex', gap: 10 }}>
-        <button
+        <Button
+          variant="primary"
           onClick={handleManualAlert}
           disabled={isDispatching}
-          className="holo-btn-primary"
-          style={{
-            flex: 1,
-            padding: '11px 16px',
-            fontSize: '0.86rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            cursor: isDispatching ? 'wait' : 'pointer'
-          }}
+          style={{ flex: 1, justifyContent: 'center' }}
         >
           <Send size={16} />
           <span>{isDispatching ? 'Broadcasting...' : 'Broadcast Emergency Alert'}</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="secondary"
           id="export-pdf-btn"
           onClick={handleExportPDF}
           disabled={isExporting}
           title="Export zone risk report as PDF"
-          className="holo-btn-secondary"
-          style={{
-            padding: '10px 16px',
-            fontSize: '0.86rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            cursor: isExporting ? 'wait' : 'pointer'
-          }}
         >
-          <FileDown size={16} color="#4FD8EA" />
+          <FileDown size={16} />
           <span>{isExporting ? '...' : 'PDF'}</span>
-        </button>
+        </Button>
       </div>
 
       {dispatchSuccess && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6EE7B7', fontSize: '0.78rem', fontWeight: 600, marginTop: 8, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--risk-low)', fontSize: '0.78rem', fontWeight: 600, marginTop: 4, justifyContent: 'center' }}>
           <CheckCircle2 size={16} />
           <span>{dispatchSuccess}</span>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
-

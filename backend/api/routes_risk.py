@@ -15,6 +15,7 @@ from backend.models import Zone, RiskScore, WeatherReading
 from backend.schemas import RiskSimulationRequest
 from backend.ml.model import risk_model
 from backend.alerts.engine import alert_engine
+from backend.cache import cache_get, cache_set, cache_invalidate_prefix
 
 router = APIRouter(prefix="/api/risk", tags=["Landslide Risk"])
 
@@ -85,6 +86,11 @@ def get_all_zones_risk(db: Session = Depends(get_db)):
     Get all micro-zones with their latest AI risk score, triggering factors,
     weather parameters, and GeoJSON polygon geometry.
     """
+    # Check Redis cache first
+    cached = cache_get("drishti:zones_risk:all")
+    if cached is not None:
+        return cached
+
     zones = db.query(Zone).all()
     results = []
 
@@ -135,6 +141,8 @@ def get_all_zones_risk(db: Session = Depends(get_db)):
             "computed_at": latest_risk.computed_at.isoformat() if latest_risk else datetime.now(timezone.utc).isoformat()
         })
 
+    # Cache snapshot with 60 second TTL
+    cache_set("drishti:zones_risk:all", results, ttl_seconds=60)
     return results
 
 
@@ -230,6 +238,38 @@ def simulate_landslide_risk(req: RiskSimulationRequest, db: Session = Depends(ge
             "alerts_triggered": len(alert_dispatches) > 0,
             "alerts_count": len(alert_dispatches)
         })
+
+    # Invalidate cached zones risk on simulation
+    cache_invalidate_prefix("drishti:zones_risk")
+
+    # Broadcast updated zones to all connected WebSocket clients
+    try:
+        import asyncio
+        from backend.api.ws_manager import ws_manager
+        all_updated_zones = get_all_zones_risk(db=db)
+        if ws_manager.active_connections:
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(ws_manager.broadcast({
+                        "type": "SIMULATION_UPDATE",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "zones": all_updated_zones
+                    }))
+                else:
+                    loop.run_until_complete(ws_manager.broadcast({
+                        "type": "SIMULATION_UPDATE",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "zones": all_updated_zones
+                    }))
+            except Exception:
+                asyncio.run(ws_manager.broadcast({
+                    "type": "SIMULATION_UPDATE",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "zones": all_updated_zones
+                }))
+    except Exception as ws_err:
+        print(f"[WebSocket Warning] Failed to broadcast simulation update: {ws_err}")
 
     return {
         "status": "success",

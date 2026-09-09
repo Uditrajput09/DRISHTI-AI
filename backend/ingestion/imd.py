@@ -62,5 +62,20 @@ class IMDIngestionService:
             "impact_assessment": "Moderate to High risk of localized landslides and mudslides along NH-6, NH-206, and Sohra Ghat sections."
         }
 
+    def get_severity_multiplier(self, warning_level: str) -> float:
+        """
+        Derive an AI risk calibration multiplier based on official IMD warning levels.
+        Red Alert escalates baseline hazard probability (+15%), Orange (+8%).
+        """
+        lvl = (warning_level or "").strip().lower()
+        if "red" in lvl:
+            return 1.15
+        elif "orange" in lvl:
+            return 1.08
+        elif "yellow" in lvl:
+            return 1.02
+        return 1.00
+
 
 imd_service = IMDIngestionService()
+

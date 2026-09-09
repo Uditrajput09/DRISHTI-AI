@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import TopNavigation from './components/TopNavigation';
-import SidebarNavigation from './components/SidebarNavigation';
-import HeaderBar from './components/HeaderBar';
-import BottomNavigation from './components/BottomNavigation';
+import React, { useState, useEffect, useCallback } from 'react';
+import AppShell from './components/ui/AppShell';
 import DashboardView from './views/DashboardView';
 import RiskIntelligenceView from './views/RiskIntelligenceView';
 import ForecastView from './views/ForecastView';
@@ -12,16 +9,39 @@ import FieldReportsView from './views/FieldReportsView';
 import ProfileView from './views/ProfileView';
 import LoginView from './views/LoginView';
 import SimulationView from './views/SimulationView';
+import EvacuationView from './views/EvacuationView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
-import ChatbotPanel from './components/ChatbotPanel';
+import AndroidDeviceSimulator from './components/AndroidDeviceSimulator';
+import CookieBanner from './components/CookieBanner';
+import BackToTop from './components/BackToTop';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import SkeletonLoader from './components/SkeletonLoader';
+import { ToastProvider, useToast } from './context/ToastContext';
 import { authService } from './services/authService';
+import { useRiskWebSocket } from './hooks/useRiskWebSocket';
 import { api } from './api';
-import { Bot, X } from 'lucide-react';
 
-export default function App() {
+function AppContent() {
+  const { showToast } = useToast();
+  const isSimulatorEmbed = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'mobile';
+
   // Current user authentication
   const [currentUser, setCurrentUser] = useState(() => authService.getCurrentUser());
+
+  // Theme state: default to 'dark'
+  const [theme, setTheme] = useState(() => localStorage.getItem('drishti_theme') || 'dark');
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    localStorage.setItem('drishti_theme', next);
+    document.documentElement.setAttribute('data-theme', next);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Primary Application Section: Default to 'gis' (GIS Command Center)
   const [activeSection, setActiveSection] = useState(() => {
@@ -34,6 +54,7 @@ export default function App() {
     if (path === '/reports') return 'reports';
     if (path === '/profile') return 'profile';
     if (path === '/login') return 'login';
+    if (path === '/evacuation' || path === '/shelters') return 'evacuation';
     return 'gis';
   });
 
@@ -46,27 +67,76 @@ export default function App() {
   const [reports, setReports] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
 
   // Modals & Panels
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+
+  // Handle messages from embedded Android Device Simulator
+  useEffect(() => {
+    const handleSimulatorMessage = (e) => {
+      if (e.data?.type === 'DRISHTI_SIMULATOR_NAVIGATE') {
+        handleSelectSection(e.data.payload);
+      }
+      if (e.data?.type === 'DRISHTI_SIMULATOR_NOTIFICATION' && e.data.payload) {
+        const notif = e.data.payload;
+        if (showToast) {
+          showToast(`${notif.title}: ${notif.body}`, notif.severity === 'critical' ? 'error' : 'warning');
+        }
+        setAlerts(prev => [{
+          id: `SIM-${notif.id || Date.now()}`,
+          level: notif.severity === 'critical' ? 'Critical' : notif.severity === 'high' ? 'High' : 'Medium',
+          score: notif.severity === 'critical' ? 98 : 75,
+          zone: 'Sohra (Cherrapunji) Sector',
+          message: notif.body,
+          channels: ['SMS', 'Push'],
+          language: 'English',
+          time: notif.time || 'Just now'
+        }, ...prev]);
+      }
+    };
+    window.addEventListener('message', handleSimulatorMessage);
+    return () => window.removeEventListener('message', handleSimulatorMessage);
+  }, [showToast]);
+
+  // Global keyboard shortcuts listener
+  useEffect(() => {
+    const handleGlobalKey = (e) => {
+      // Cmd+K or Ctrl+K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsShortcutsOpen(prev => !prev);
+      }
+      // '?' key
+      if (e.key === '?' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        setIsShortcutsOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, []);
 
   // Handle URL history state
   const handleSelectSection = (sectionId) => {
     const raw = String(sectionId || '').replace(/^\//, '');
     const normalized = (!raw || raw === 'app' || raw === 'gis') ? 'gis' : raw;
     setActiveSection(normalized);
-    const newPath = normalized === 'gis' ? '/app' : `/${normalized}`;
+    const search = window.location.search || '';
+    const newPath = (normalized === 'gis' ? '/app' : `/${normalized}`) + search;
     window.history.pushState({}, '', newPath);
   };
 
   useEffect(() => {
     const handlePopState = () => {
       const raw = window.location.pathname.replace(/^\//, '');
-      if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'login'].includes(raw)) {
-        setActiveSection(raw);
+      if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'login', 'evacuation', 'shelters'].includes(raw)) {
+        setActiveSection(raw === 'shelters' ? 'evacuation' : raw);
       } else {
         setActiveSection('gis');
       }
@@ -100,8 +170,46 @@ export default function App() {
       }
     } catch (err) {
       console.warn('Telemetry polling error:', err);
+    } finally {
+      setIsLoadingInitial(false);
     }
   };
+
+  // Real-time WebSocket listener for live risk score broadcasts
+  const handleLiveZoneUpdate = useCallback((newZones, rawEvent) => {
+    if (!newZones || !Array.isArray(newZones)) return;
+    setZones(newZones);
+    setSelectedZone(prev => {
+      if (!prev) return newZones[0] || null;
+      const match = newZones.find(z => z.id === prev.id);
+      return match || newZones[0];
+    });
+
+    // Dynamically update high-level district risk metrics
+    const critical_count = newZones.filter(z => z.risk_level === 'Critical').length;
+    const high_count = newZones.filter(z => z.risk_level === 'High').length;
+    const medium_count = newZones.filter(z => z.risk_level === 'Medium').length;
+    const low_count = newZones.filter(z => z.risk_level === 'Low').length;
+    const highest = [...newZones].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))[0];
+
+    setSummary(prev => ({
+      ...prev,
+      total_zones_monitored: newZones.length,
+      critical_count,
+      high_count,
+      medium_count,
+      low_count,
+      highest_risk_score: highest?.risk_score ?? prev.highest_risk_score,
+      highest_risk_zone: highest?.name || prev.highest_risk_zone,
+      last_updated: rawEvent?.timestamp || new Date().toISOString()
+    }));
+
+    if (showToast && rawEvent?.type === 'SIMULATION_UPDATE') {
+      showToast('Live Cloudburst Simulation streamed to GIS map', 'info');
+    }
+  }, [showToast]);
+
+  const { isConnected: isLiveConnected, lastUpdate: liveLastUpdate } = useRiskWebSocket(handleLiveZoneUpdate);
 
   useEffect(() => {
     loadAllData();
@@ -146,6 +254,7 @@ export default function App() {
       case 'incidents': return { title: '5. INCIDENTS', routeTag: '(/incidents)' };
       case 'reports': return { title: '6. FIELD REPORT', routeTag: '(/reports)' };
       case 'profile': return { title: '7. PROFILE', routeTag: '(/profile)' };
+      case 'evacuation': return { title: '8. TOURIST & EVACUATION GUIDE', routeTag: '(/evacuation)' };
       case 'simulation': return { title: 'CLOUDBURST SIMULATION', routeTag: '(/simulation)' };
       default: return { title: 'GIS COMMAND CENTER', routeTag: '(/app)' };
     }
@@ -156,76 +265,49 @@ export default function App() {
   // If on pure login screen, render full-page split-screen without sidebar
   if (activeSection === 'login') {
     return (
-      <LoginView
-        currentUser={currentUser}
-        onLoginSuccess={(user) => {
-          setCurrentUser(user);
-          handleSelectSection('gis');
-        }}
-        onNavigate={(p) => handleSelectSection(p)}
-      />
+      <div style={{ position: 'relative' }}>
+        <a href="#main-content" className="skip-to-content">Skip to content</a>
+        <LoginView
+          currentUser={currentUser}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            handleSelectSection('gis');
+          }}
+          onNavigate={(p) => handleSelectSection(p)}
+        />
+        <CookieBanner />
+      </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#070A10',
-        color: '#F4F6FB',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
+    <AppShell
+      activeSection={activeSection}
+      onSelectSection={handleSelectSection}
+      currentUser={currentUser}
+      unreadAlertCount={alerts.length > 0 ? alerts.length : 0}
+      onRefreshData={handleRefreshAll}
+      isRefreshing={isRefreshing}
+      currentTheme={theme}
+      onToggleTheme={toggleTheme}
+      onOpenAlerts={() => handleSelectSection('alerts')}
+      onOpenProfile={() => handleSelectSection('profile')}
+      onOpenShortcuts={() => setIsShortcutsOpen(true)}
+      onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+      onOpenSimulator={() => setIsSimulatorOpen(true)}
+      zones={zones}
+      selectedZone={selectedZone}
+      alerts={alerts}
     >
-      {/* 1. FIXED TOP NAVIGATION (Desktop >= 769px) matching "GLOBAL PAGE STRUCTURE" */}
-      <TopNavigation
-        activeSection={activeSection}
-        onSelectSection={handleSelectSection}
-        unreadAlertCount={alerts.length > 0 ? alerts.length : 6}
-        onOpenAlerts={() => handleSelectSection('alerts')}
-        onOpenProfile={() => handleSelectSection('profile')}
-        currentUser={currentUser}
-        onRefreshData={handleRefreshAll}
-        isRefreshing={isRefreshing}
-        showSidebar={showSidebar}
-        onToggleSidebar={() => setShowSidebar(!showSidebar)}
-      />
-
-      {/* 2. Main Content Layout (With Optional EOC Left Sidebar) */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {showSidebar && (
-          <SidebarNavigation
-            activeSection={activeSection}
-            onSelectSection={handleSelectSection}
-            unreadAlertCount={alerts.length > 0 ? alerts.length : 6}
-            onOpenChatbot={() => setIsChatbotOpen(true)}
-          />
-        )}
-
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: 0,
-            paddingBottom: 70
-          }}
-        >
-          {showSidebar && (
-            <HeaderBar
-              title={currentMeta.title}
-              routeTag={currentMeta.routeTag}
-              currentUser={currentUser}
-              unreadAlertCount={alerts.length > 0 ? alerts.length : 6}
-              onOpenAlerts={() => handleSelectSection('alerts')}
-              onOpenProfile={() => handleSelectSection('profile')}
-              onRefreshData={handleRefreshAll}
-              isRefreshing={isRefreshing}
-            />
-          )}
-
-          {/* View Router */}
-          <main style={{ flex: 1 }}>
+      {isLoadingInitial ? (
+        <div style={{ padding: 24 }}>
+          <SkeletonLoader type="chart" height={280} />
+          <div style={{ marginTop: 20 }}>
+            <SkeletonLoader count={2} height={140} />
+          </div>
+        </div>
+      ) : (
+        <>
           {/* Screen 1: GIS Command Center */}
           {activeSection === 'gis' && (
             <DashboardView
@@ -240,6 +322,8 @@ export default function App() {
               onRefreshAll={handleRefreshAll}
               isRefreshing={isRefreshing}
               onNavigateToSection={handleSelectSection}
+              isLiveConnected={isLiveConnected}
+              liveLastUpdate={liveLastUpdate}
             />
           )}
 
@@ -292,6 +376,8 @@ export default function App() {
               currentUser={currentUser}
               setCurrentUser={setCurrentUser}
               onNavigate={handleSelectSection}
+              onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+              onOpenSimulator={() => setIsSimulatorOpen(true)}
             />
           )}
 
@@ -303,48 +389,37 @@ export default function App() {
               onSelectZone={setSelectedZone}
             />
           )}
-        </main>
-        </div>
-      </div>
 
-      {/* 3. Mobile Bottom Navigation Bar (Screens <= 768px, matching Screen 9) */}
-      <BottomNavigation
-        activeSection={activeSection}
-        onSelectSection={handleSelectSection}
-        unreadAlertCount={alerts.length > 0 ? alerts.length : 6}
-      />
+          {/* Screen 8: Tourist Emergency & Evacuation Guide */}
+          {activeSection === 'evacuation' && (
+            <EvacuationView
+              currentUser={currentUser}
+              zones={zones}
+              facilities={facilities}
+              onNavigateToGIS={() => handleSelectSection('gis')}
+              onOpenAlerts={() => handleSelectSection('alerts')}
+            />
+          )}
+        </>
+      )}
 
-      {/* 4. Circular AI Assistant FAB (Screens 1 & 9) */}
-      <button
-        onClick={() => setIsChatbotOpen(!isChatbotOpen)}
-        title="Ask DRISHTI AI Assistant"
-        style={{
-          position: 'fixed',
-          bottom: 74,
-          right: 20,
-          width: 46,
-          height: 46,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #8B6CFF 0%, #35D8FF 100%)',
-          border: '2px solid rgba(255, 255, 255, 0.4)',
-          color: '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(139, 108, 255, 0.55)',
-          cursor: 'pointer',
-          zIndex: 1999,
-          transition: 'transform 0.2s ease'
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; }}
-        onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-      >
-        {isChatbotOpen ? <X size={20} /> : <Bot size={22} />}
-      </button>
+      {/* Floating Back to Top Button (Desktop only) */}
+      {!isSimulatorEmbed && <BackToTop />}
 
-      {/* Floating Chatbot Panel */}
-      {isChatbotOpen && (
-        <ChatbotPanel zones={zones} onClose={() => setIsChatbotOpen(false)} />
+      {/* Cookie Consent Banner (Desktop only) */}
+      {!isSimulatorEmbed && <CookieBanner />}
+
+      {/* Keyboard Shortcuts Modal (Desktop only) */}
+      {!isSimulatorEmbed && (
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+          onNavigate={handleSelectSection}
+          onToggleTheme={toggleTheme}
+          currentTheme={theme}
+          onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+          onOpenSimulator={() => setIsSimulatorOpen(true)}
+        />
       )}
 
       {/* Modals */}
@@ -355,11 +430,33 @@ export default function App() {
         onLogin={(user) => setCurrentUser(user)}
       />
 
-      <AndroidAppModal
-        isOpen={isAndroidModalOpen}
-        onClose={() => setIsAndroidModalOpen(false)}
-        onLaunchMobilePreview={() => handleSelectSection('reports')}
-      />
-    </div>
+      {!isSimulatorEmbed && (
+        <AndroidAppModal
+          isOpen={isAndroidModalOpen}
+          onClose={() => setIsAndroidModalOpen(false)}
+          onLaunchSimulator={() => {
+            setIsAndroidModalOpen(false);
+            setIsSimulatorOpen(true);
+          }}
+          onLaunchMobilePreview={() => handleSelectSection('reports')}
+        />
+      )}
+
+      {/* Android Hardware Device Simulator Overlay (Top window only) */}
+      {!isSimulatorEmbed && (
+        <AndroidDeviceSimulator
+          isOpen={isSimulatorOpen}
+          onClose={() => setIsSimulatorOpen(false)}
+        />
+      )}
+    </AppShell>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }

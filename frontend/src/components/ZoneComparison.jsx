@@ -13,7 +13,8 @@ import {
   Legend, 
   Tooltip 
 } from 'recharts';
-import { Scale, Layers, ChevronDown } from 'lucide-react';
+import { Scale } from 'lucide-react';
+import { Card } from './ui/Card';
 
 export default function ZoneComparison({ zones = [] }) {
   // Select up to 3-4 zones for comparison
@@ -31,8 +32,8 @@ export default function ZoneComparison({ zones = [] }) {
     { subject: 'Population', max: 100 }
   ];
 
-  // Colors for compared zones matching design board
-  const ZONE_COLORS = ['#FF3B6B', '#FF9D3D', '#35D8FF', '#8B6CFF'];
+  // Colors for compared zones: Electric blue, Low/green, Warning/orange, Neutral gray
+  const ZONE_COLORS = ['#4F6FFF', '#31B77A', '#FF8A4C', '#A1A1A1'];
 
   // Populate data for radar
   const formattedData = radarData.map(metric => {
@@ -70,48 +71,45 @@ export default function ZoneComparison({ zones = [] }) {
   };
 
   return (
-    <div
-      className="command-panel"
+    <Card
       style={{
-        padding: 20,
+        padding: 22,
         display: 'flex',
         flexDirection: 'column',
-        gap: 16,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+        gap: 16
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ background: 'rgba(53, 216, 255, 0.12)', padding: 6, borderRadius: 8 }}>
-            <Scale size={18} color="#35D8FF" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ background: 'var(--brand-primary-light)', border: '1px solid var(--border-primary)', padding: 7, borderRadius: 'var(--radius-md)' }}>
+            <Scale size={18} color="var(--brand-primary)" />
           </div>
           <div>
-            <h3 style={{ fontSize: '0.96rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.04em', fontFamily: 'Space Grotesk, sans-serif' }}>
-              ZONE COMPARISON RADAR
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Zone Comparison Radar
             </h3>
-            <div style={{ fontSize: '0.72rem', color: '#9AA5B8' }}>
-              Compare up to 4 zones across geotechnical and demographic vectors
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+              Multi-vector geotechnical risk comparison across selected sectors
             </div>
           </div>
         </div>
 
         {/* Zone Selector Chips */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {zones.slice(0, 6).map((z, idx) => {
+          {zones.slice(0, 6).map((z) => {
             const isSelected = selectedZoneIds.includes(z.id);
             return (
               <button
                 key={z.id}
                 onClick={() => toggleZone(z.id)}
                 style={{
-                  background: isSelected ? 'rgba(53, 216, 255, 0.15)' : 'var(--bg-surface-elevated)',
-                  border: `1px solid ${isSelected ? '#35D8FF' : 'rgba(120, 140, 180, 0.25)'}`,
-                  color: isSelected ? '#35D8FF' : '#9AA5B8',
-                  borderRadius: 6,
-                  padding: '4px 10px',
+                  background: isSelected ? 'var(--brand-primary)' : 'var(--bg-card)',
+                  border: `1px solid ${isSelected ? 'var(--brand-primary)' : 'var(--border-primary)'}`,
+                  color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                  borderRadius: 'var(--radius-full, 9999px)',
+                  padding: '4px 12px',
                   fontSize: '0.72rem',
-                  fontWeight: 700,
-                  fontFamily: 'Space Grotesk, sans-serif',
+                  fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
@@ -127,16 +125,16 @@ export default function ZoneComparison({ zones = [] }) {
       <div style={{ width: '100%', height: 320, position: 'relative' }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="75%" data={formattedData}>
-            <PolarGrid stroke="rgba(120, 140, 180, 0.2)" />
+            <PolarGrid stroke="var(--border-primary)" />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: '#9AA5B8', fontSize: 11, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600 }}
+              tick={{ fill: 'var(--text-secondary)', fontSize: 11, fontWeight: 500 }}
             />
             <PolarRadiusAxis
               angle={30}
               domain={[0, 100]}
-              tick={{ fill: '#5C677D', fontSize: 9 }}
-              stroke="rgba(120, 140, 180, 0.15)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
+              stroke="var(--border-primary)"
             />
             {activeZones.map((z, idx) => {
               const color = ZONE_COLORS[idx % ZONE_COLORS.length];
@@ -147,30 +145,30 @@ export default function ZoneComparison({ zones = [] }) {
                   dataKey={`zone_${z.id}`}
                   stroke={color}
                   fill={color}
-                  fillOpacity={0.25}
+                  fillOpacity={0.22}
                   strokeWidth={2}
                 />
               );
             })}
             <Tooltip
               contentStyle={{
-                backgroundColor: '#101521',
-                borderColor: 'rgba(120, 140, 180, 0.3)',
+                backgroundColor: 'var(--bg-surface)',
+                borderColor: 'var(--border-primary)',
                 borderRadius: 8,
                 fontSize: 12,
-                color: '#F4F6FB'
+                color: 'var(--text-primary)',
+                boxShadow: 'var(--shadow-md)'
               }}
             />
             <Legend
               wrapperStyle={{
                 fontSize: 11,
-                fontFamily: 'Space Grotesk, sans-serif',
                 paddingTop: 10
               }}
             />
           </RadarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 }

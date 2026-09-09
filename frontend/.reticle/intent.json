@@ -1,0 +1,1394 @@
+{
+  "version": 1,
+  "intents": {
+    "inline:clicking-alerts-center-navigation-button-opens-t-d9191e45": {
+      "id": "inline:clicking-alerts-center-navigation-button-opens-t-d9191e45",
+      "statement": "clicking Alerts Center navigation button opens the Emergency Alert Center dispatch logs",
+      "state": "proved",
+      "declaredAt": 1788862960575,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Emergency Alert Center"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/alerts",
+        "files": [
+          "src/components/ui/Sidebar.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788862962680",
+        "grade": "presence",
+        "at": 1788862962680
+      }
+    },
+    "flow:open_alerts_center": {
+      "id": "flow:open_alerts_center",
+      "statement": "Navigating from GIS Command Center to Emergency Alert Center",
+      "state": "declared",
+      "declaredAt": 1788862962713,
+      "surface": {
+        "flow": "open_alerts_center"
+      }
+    },
+    "inline:emergency-alert-center-view-is-rendered-with-act-ff755880": {
+      "id": "inline:emergency-alert-center-view-is-rendered-with-act-ff755880",
+      "statement": "Emergency Alert Center view is rendered with active broadcast status and route /alerts",
+      "state": "proved",
+      "declaredAt": 1788862974509,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Emergency Alert Center"
+          },
+          {
+            "kind": "route",
+            "pathname": "/alerts"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/alerts",
+        "files": [
+          "src/components/ui/Sidebar.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1788862974527",
+        "grade": "presence",
+        "at": 1788862974527
+      }
+    },
+    "inline:clicking-android-app-icon-opens-android-apk-dist-8d66e704": {
+      "id": "inline:clicking-android-app-icon-opens-android-apk-dist-8d66e704",
+      "statement": "clicking Android App icon opens Android APK distribution modal",
+      "state": "proved",
+      "declaredAt": 1788863724170,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Application"
+          },
+          {
+            "kind": "text",
+            "contains": "drishti-ai-v1.0.apk"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788863724422",
+        "grade": "presence",
+        "at": 1788863724422
+      }
+    },
+    "inline:clicking-simulate-in-studio-opens-hardware-andro-2711d62b": {
+      "id": "inline:clicking-simulate-in-studio-opens-hardware-andro-2711d62b",
+      "statement": "clicking Simulate in Studio opens hardware AndroidDeviceSimulator with 8-view jump dock",
+      "state": "proved",
+      "declaredAt": 1788863725501,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Device Simulator"
+          },
+          {
+            "kind": "text",
+            "contains": "Quick Screen Jump (8 Views)"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "files": [
+          "src/components/AndroidAppModal.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788863725680",
+        "grade": "presence",
+        "at": 1788863725680
+      }
+    },
+    "inline:hardware-simulator-panels-and-telemetry-controls-b2795454": {
+      "id": "inline:hardware-simulator-panels-and-telemetry-controls-b2795454",
+      "statement": "hardware simulator panels and telemetry controls are fully mounted and visible with no console errors",
+      "state": "bound",
+      "declaredAt": 1788863734656,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Pixel 8 Pro (1344 x 2992)"
+          },
+          {
+            "kind": "text",
+            "contains": "GPS Telemetry Injection"
+          },
+          {
+            "kind": "text",
+            "contains": "Radio / Network Mesh"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:open-androidappmodal-e2857df9": {
+      "id": "inline:open-androidappmodal-e2857df9",
+      "statement": "open AndroidAppModal",
+      "state": "proved",
+      "declaredAt": 1788867374507,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Application"
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788867374642",
+        "grade": "presence",
+        "at": 1788867374642
+      }
+    },
+    "inline:open-androiddevicesimulator-ca0e22b9": {
+      "id": "inline:open-androiddevicesimulator-ca0e22b9",
+      "statement": "open AndroidDeviceSimulator",
+      "state": "proved",
+      "declaredAt": 1788863759214,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Device Simulator"
+          },
+          {
+            "kind": "text",
+            "contains": "Quick Screen Jump (8 Views)"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "files": [
+          "src/components/AndroidAppModal.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788863759375",
+        "grade": "presence",
+        "at": 1788863759375
+      }
+    },
+    "inline:click-screen-jump-button-in-android-device-simul-648b12e1": {
+      "id": "inline:click-screen-jump-button-in-android-device-simul-648b12e1",
+      "statement": "click screen jump button in Android Device Simulator without error",
+      "state": "bound",
+      "declaredAt": 1788863759427,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      }
+    },
+    "inline:open-drishti-ai-android-application-modal-ca1e6d7a": {
+      "id": "inline:open-drishti-ai-android-application-modal-ca1e6d7a",
+      "statement": "open DRISHTI-AI Android Application modal",
+      "state": "proved",
+      "declaredAt": 1788864771217,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Application"
+          },
+          {
+            "kind": "text",
+            "contains": "drishti-ai-v1.0.apk"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864771405",
+        "grade": "presence",
+        "at": 1788864771405
+      }
+    },
+    "inline:launch-hardware-androiddevicesimulator-studio-7d02b3f9": {
+      "id": "inline:launch-hardware-androiddevicesimulator-studio-7d02b3f9",
+      "statement": "launch hardware AndroidDeviceSimulator studio",
+      "state": "proved",
+      "declaredAt": 1788864771460,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Device Simulator"
+          },
+          {
+            "kind": "text",
+            "contains": "Native Parity v1.0"
+          },
+          {
+            "kind": "text",
+            "contains": "Quick Screen Jump (8 Views)"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/AndroidAppModal.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864771680",
+        "grade": "presence",
+        "at": 1788864771680
+      }
+    },
+    "inline:verify-android-simulation-functions-cleanly-with-c3976e33": {
+      "id": "inline:verify-android-simulation-functions-cleanly-with-c3976e33",
+      "statement": "verify Android simulation functions cleanly with native parity and 0 console errors",
+      "state": "bound",
+      "declaredAt": 1788864359517,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Device Simulator"
+          },
+          {
+            "kind": "text",
+            "contains": "Native Parity v1.0"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:navigate-simulated-phone-to-field-report-screen-b1fb0191": {
+      "id": "inline:navigate-simulated-phone-to-field-report-screen-b1fb0191",
+      "statement": "navigate simulated phone to Field Report screen",
+      "state": "proved",
+      "declaredAt": 1788864641029,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      },
+      "surface": {
+        "files": [
+          "src/components/AndroidDeviceSimulator.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864641156",
+        "grade": "presence",
+        "at": 1788864641156
+      }
+    },
+    "inline:switch-to-broadcasts-sub-tab-in-simulator-ae3bbdd5": {
+      "id": "inline:switch-to-broadcasts-sub-tab-in-simulator-ae3bbdd5",
+      "statement": "switch to Broadcasts sub-tab in simulator",
+      "state": "bound",
+      "declaredAt": 1788864641244,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      }
+    },
+    "inline:all-simulator-controls-render-cleanly-with-0-con-684d96d5": {
+      "id": "inline:all-simulator-controls-render-cleanly-with-0-con-684d96d5",
+      "statement": "all simulator controls render cleanly with 0 console errors",
+      "state": "bound",
+      "declaredAt": 1788864641363,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI Android Device Simulator"
+          },
+          {
+            "kind": "text",
+            "contains": "Native Parity v1.0"
+          },
+          {
+            "kind": "text",
+            "contains": "Quick Screen Jump (8 Views)"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:mobile-user-clicks-reports-tab-and-field-reports-c08da99e": {
+      "id": "inline:mobile-user-clicks-reports-tab-and-field-reports-c08da99e",
+      "statement": "mobile user clicks Reports tab and Field Reports screen loads with 0 errors",
+      "state": "bound",
+      "declaredAt": 1788864742918,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Field Reports"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:mobile-user-clicks-alerts-tab-and-alerts-center-f971e9c3": {
+      "id": "inline:mobile-user-clicks-alerts-tab-and-alerts-center-f971e9c3",
+      "statement": "mobile user clicks Alerts tab and Alerts Center loads with 0 errors",
+      "state": "proved",
+      "declaredAt": 1788864743315,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Alerts Center"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/alerts",
+        "files": [
+          "src/components/BottomNavigation.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864743411",
+        "grade": "presence",
+        "at": 1788864743411
+      }
+    },
+    "inline:mobile-user-clicks-forecast-tab-and-forecast-vie-986049fd": {
+      "id": "inline:mobile-user-clicks-forecast-tab-and-forecast-vie-986049fd",
+      "statement": "mobile user clicks Forecast tab and Forecast view loads with 0 errors",
+      "state": "proved",
+      "declaredAt": 1788864743444,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "48H Forecast"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/forecast",
+        "files": [
+          "src/components/BottomNavigation.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864747580",
+        "grade": "presence",
+        "at": 1788864747580
+      }
+    },
+    "inline:mobile-user-clicks-risk-tab-and-risk-view-loads-2014089f": {
+      "id": "inline:mobile-user-clicks-risk-tab-and-risk-view-loads-2014089f",
+      "statement": "mobile user clicks Risk tab and Risk view loads with 0 errors",
+      "state": "proved",
+      "declaredAt": 1788864747621,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Risk Intelligence"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/risk",
+        "files": [
+          "src/components/BottomNavigation.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864747802",
+        "grade": "presence",
+        "at": 1788864747802
+      }
+    },
+    "inline:mobile-user-clicks-gis-tab-and-gis-command-cente-c7728d69": {
+      "id": "inline:mobile-user-clicks-gis-tab-and-gis-command-cente-c7728d69",
+      "statement": "mobile user clicks GIS tab and GIS Command Center loads with 0 errors",
+      "state": "proved",
+      "declaredAt": 1788864747842,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "GIS Command Center"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/BottomNavigation.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864752030",
+        "grade": "presence",
+        "at": 1788864752030
+      }
+    },
+    "inline:clean-simulation-execution-across-all-mobile-vie-33f81dbd": {
+      "id": "inline:clean-simulation-execution-across-all-mobile-vie-33f81dbd",
+      "statement": "clean simulation execution across all mobile views with zero console errors",
+      "state": "proved",
+      "declaredAt": 1788864752050,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/BottomNavigation.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1788864752068",
+        "grade": "presence",
+        "at": 1788864752068
+      }
+    },
+    "inline:verify-simulator-hardware-chassis-controls-and-z-007a1bac": {
+      "id": "inline:verify-simulator-hardware-chassis-controls-and-z-007a1bac",
+      "statement": "verify simulator hardware chassis, controls, and zero console errors",
+      "state": "proved",
+      "declaredAt": 1788864771712,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Download APK (28 MB)"
+          },
+          {
+            "kind": "text",
+            "contains": "GPS Telemetry"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/AndroidAppModal.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1788864771758",
+        "grade": "presence",
+        "at": 1788864771758
+      }
+    },
+    "inline:close-simulator-returning-to-command-center-41a9efaf": {
+      "id": "inline:close-simulator-returning-to-command-center-41a9efaf",
+      "statement": "close simulator returning to command center",
+      "state": "proved",
+      "declaredAt": 1788864771829,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      },
+      "surface": {
+        "route": "/app",
+        "files": [
+          "src/components/AndroidDeviceSimulator.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788864771967",
+        "grade": "presence",
+        "at": 1788864771967
+      }
+    },
+    "inline:clicking-mobile-hamburger-menu-opens-the-mobile-3433d8b3": {
+      "id": "inline:clicking-mobile-hamburger-menu-opens-the-mobile-3433d8b3",
+      "statement": "clicking mobile hamburger menu opens the mobile enterprise sidebar drawer",
+      "state": "bound",
+      "declaredAt": 1788865441756,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "COMMAND CENTER"
+          },
+          {
+            "kind": "text",
+            "contains": "Close navigation"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:clicking-risk-intelligence-navigates-to-risk-and-d85e7da8": {
+      "id": "inline:clicking-risk-intelligence-navigates-to-risk-and-d85e7da8",
+      "statement": "clicking Risk Intelligence navigates to /risk and closes drawer",
+      "state": "bound",
+      "declaredAt": 1788865623434,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Risk Intelligence"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:clicking-hamburger-button-opens-the-mobile-navig-f1e02830": {
+      "id": "inline:clicking-hamburger-button-opens-the-mobile-navig-f1e02830",
+      "statement": "clicking hamburger button opens the mobile navigation drawer",
+      "state": "bound",
+      "declaredAt": 1788865735467,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Close navigation"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:clicking-48h-forecast-inside-drawer-navigates-to-fe79491f": {
+      "id": "inline:clicking-48h-forecast-inside-drawer-navigates-to-fe79491f",
+      "statement": "clicking 48H Forecast inside drawer navigates to /forecast and closes drawer",
+      "state": "bound",
+      "declaredAt": 1788865739741,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "48H Forecast"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:re-opening-mobile-drawer-on-forecast-works-smoot-00fad3e8": {
+      "id": "inline:re-opening-mobile-drawer-on-forecast-works-smoot-00fad3e8",
+      "statement": "re-opening mobile drawer on /forecast works smoothly",
+      "state": "bound",
+      "declaredAt": 1788865744910,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Close navigation"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:clicking-close-button-dismisses-the-mobile-drawe-04b5ed9b": {
+      "id": "inline:clicking-close-button-dismisses-the-mobile-drawe-04b5ed9b",
+      "statement": "clicking close button dismisses the mobile drawer",
+      "state": "bound",
+      "declaredAt": 1788865749039,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Toggle Navigation Menu"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:zero-console-errors-throughout-the-mobile-hambur-44c06048": {
+      "id": "inline:zero-console-errors-throughout-the-mobile-hambur-44c06048",
+      "statement": "zero console errors throughout the mobile hamburger drawer lifecycle",
+      "state": "proved",
+      "declaredAt": 1788865753193,
+      "binding": {
+        "kind": "console",
+        "level": "error",
+        "absent": true
+      },
+      "surface": {
+        "route": "/forecast",
+        "files": [
+          "src/components/ui/Sidebar.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1788865753204",
+        "grade": "presence",
+        "at": 1788865753204
+      }
+    },
+    "inline:clicking-hamburger-opens-mobile-drawer-showing-c-0d3696ea": {
+      "id": "inline:clicking-hamburger-opens-mobile-drawer-showing-c-0d3696ea",
+      "statement": "clicking hamburger opens mobile drawer showing COMMAND CENTER section header",
+      "state": "bound",
+      "declaredAt": 1788865784707,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "COMMAND CENTER"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:clicking-close-button-dismisses-the-mobile-navig-aa271a61": {
+      "id": "inline:clicking-close-button-dismisses-the-mobile-navig-aa271a61",
+      "statement": "clicking close button dismisses the mobile navigation drawer",
+      "state": "bound",
+      "declaredAt": 1788865784898,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "DRISHTI-AI"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:verify-tourist-evacuation-view-renders-safe-rout-ebaf7a4b": {
+      "id": "inline:verify-tourist-evacuation-view-renders-safe-rout-ebaf7a4b",
+      "statement": "verify tourist evacuation view renders safe routing, help centers, multilingual phrases with zero console errors",
+      "state": "bound",
+      "declaredAt": 1788867226913,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "TOURIST EMERGENCY & EVACUATION GUIDE"
+          },
+          {
+            "kind": "text",
+            "contains": "Nearest Help Centers"
+          },
+          {
+            "kind": "text",
+            "contains": "Multi-Lingual Emergency Phrases"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:navigate-to-tourist-emergency-evacuation-guide-f-8e3cb7e6": {
+      "id": "inline:navigate-to-tourist-emergency-evacuation-guide-f-8e3cb7e6",
+      "statement": "navigate to Tourist Emergency & Evacuation Guide from Top Nav / Sidebar",
+      "state": "proved",
+      "declaredAt": 1788867357063,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Tourist Emergency & Fast Evacuation Guidance"
+          },
+          {
+            "kind": "text",
+            "contains": "Nearest Help Centers"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Sidebar.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788867357786",
+        "grade": "presence",
+        "at": 1788867357786
+      }
+    },
+    "inline:open-emergency-sos-distress-beacon-modal-and-ver-6d49a6e7": {
+      "id": "inline:open-emergency-sos-distress-beacon-modal-and-ver-6d49a6e7",
+      "statement": "open emergency SOS distress beacon modal and verify emergency contacts",
+      "state": "bound",
+      "declaredAt": 1788867227041,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Emergency Rescue Dispatch"
+          },
+          {
+            "kind": "text",
+            "contains": "Police Control Room: 112"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:verify-tourist-evacuation-view-renders-safe-rout-89b44cbd": {
+      "id": "inline:verify-tourist-evacuation-view-renders-safe-rout-89b44cbd",
+      "statement": "verify tourist evacuation view renders safe routing, help centers, and tourist presets with zero console errors",
+      "state": "proved",
+      "declaredAt": 1788867357880,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Tourist Emergency & Fast Evacuation Guidance"
+          },
+          {
+            "kind": "text",
+            "contains": "Nearest Help Centers"
+          },
+          {
+            "kind": "text",
+            "contains": "Tourist Location Preset"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Sidebar.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1788867357975",
+        "grade": "presence",
+        "at": 1788867357975
+      }
+    },
+    "inline:open-emergency-sos-distress-beacon-modal-and-ver-27049813": {
+      "id": "inline:open-emergency-sos-distress-beacon-modal-and-ver-27049813",
+      "statement": "open emergency SOS distress beacon modal and verify emergency dispatch protocol",
+      "state": "proved",
+      "declaredAt": 1788867358065,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Tourist SOS Emergency Beacon"
+          },
+          {
+            "kind": "text",
+            "contains": "Emergency Distress Protocol"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788867358299",
+        "grade": "presence",
+        "at": 1788867358299
+      }
+    },
+    "inline:launch-android-device-simulator-with-9-views-d8d53892": {
+      "id": "inline:launch-android-device-simulator-with-9-views-d8d53892",
+      "statement": "launch Android Device Simulator with 9 views",
+      "state": "proved",
+      "declaredAt": 1788867375694,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Quick Screen Jump (9 Views)"
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/AndroidAppModal.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788867375840",
+        "grade": "presence",
+        "at": 1788867375840
+      }
+    },
+    "inline:verify-mobile-refero-evacuation-segmented-contro-a7f1dabb": {
+      "id": "inline:verify-mobile-refero-evacuation-segmented-contro-a7f1dabb",
+      "statement": "verify mobile Refero evacuation segmented controls and persistent emergency action bar render without console errors",
+      "state": "bound",
+      "declaredAt": 1788868065394,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Help Centers"
+          },
+          {
+            "kind": "text",
+            "contains": "Escape Route"
+          },
+          {
+            "kind": "text",
+            "contains": "Phrases"
+          },
+          {
+            "kind": "text",
+            "contains": "112 Emergency"
+          },
+          {
+            "kind": "text",
+            "contains": "SOS Beacon"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:switch-to-mobile-escape-route-segmented-tab-and-5da55452": {
+      "id": "inline:switch-to-mobile-escape-route-segmented-tab-and-5da55452",
+      "statement": "switch to mobile Escape Route segmented tab and verify turn-by-turn routing appears",
+      "state": "proved",
+      "declaredAt": 1788868065549,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Hazard-Avoiding Navigation Steps"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/views/EvacuationView.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868065661",
+        "grade": "presence",
+        "at": 1788868065661
+      }
+    },
+    "inline:open-emergency-sos-beacon-modal-and-verify-whats-06eeb510": {
+      "id": "inline:open-emergency-sos-beacon-modal-and-verify-whats-06eeb510",
+      "statement": "open emergency SOS beacon modal and verify WhatsApp broadcast dispatch trigger",
+      "state": "proved",
+      "declaredAt": 1788868065874,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Tourist SOS Emergency Beacon"
+          },
+          {
+            "kind": "text",
+            "contains": "Emergency Distress Protocol"
+          },
+          {
+            "kind": "text",
+            "contains": "Share Emergency GPS Coordinates via WhatsApp"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868066027",
+        "grade": "presence",
+        "at": 1788868066027
+      }
+    },
+    "inline:switch-to-phrases-tab-and-verify-offline-surviva-1ec62043": {
+      "id": "inline:switch-to-phrases-tab-and-verify-offline-surviva-1ec62043",
+      "statement": "switch to Phrases tab and verify offline survival translation cards with phonetic guides appear",
+      "state": "proved",
+      "declaredAt": 1788868065702,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Survival Phrase Cards"
+          },
+          {
+            "kind": "text",
+            "contains": "Where is the nearest safe shelter"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/views/EvacuationView.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868065841",
+        "grade": "presence",
+        "at": 1788868065841
+      }
+    },
+    "inline:verify-mobile-evacuation-view-renders-segmented-5e1799f5": {
+      "id": "inline:verify-mobile-evacuation-view-renders-segmented-5e1799f5",
+      "statement": "verify mobile evacuation view renders segmented navigation, live gps, and bottom emergency bar",
+      "state": "bound",
+      "declaredAt": 1788868100158,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Help Centers"
+          },
+          {
+            "kind": "text",
+            "contains": "Escape Route"
+          },
+          {
+            "kind": "text",
+            "contains": "Phrases"
+          },
+          {
+            "kind": "text",
+            "contains": "📍 My Live GPS"
+          },
+          {
+            "kind": "text",
+            "contains": "112 Emergency"
+          },
+          {
+            "kind": "text",
+            "contains": "SOS Beacon"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:switch-to-mobile-escape-route-tab-and-assert-tur-493d7255": {
+      "id": "inline:switch-to-mobile-escape-route-tab-and-assert-tur-493d7255",
+      "statement": "switch to mobile Escape Route tab and assert turn-by-turn navigation steps",
+      "state": "proved",
+      "declaredAt": 1788868100288,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Hazard-Avoiding Navigation Steps"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/views/EvacuationView.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868100387",
+        "grade": "presence",
+        "at": 1788868100387
+      }
+    },
+    "inline:switch-to-phrases-tab-and-assert-multilingual-su-efe69c5e": {
+      "id": "inline:switch-to-phrases-tab-and-assert-multilingual-su-efe69c5e",
+      "statement": "switch to Phrases tab and assert multilingual survival cards with phonetic guides",
+      "state": "proved",
+      "declaredAt": 1788868100422,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Survival Phrase Cards"
+          },
+          {
+            "kind": "text",
+            "contains": "Where is the nearest safe shelter"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/views/EvacuationView.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868100545",
+        "grade": "presence",
+        "at": 1788868100545
+      }
+    },
+    "inline:switch-to-help-centers-tab-and-assert-recommende-5845eb6f": {
+      "id": "inline:switch-to-help-centers-tab-and-assert-recommende-5845eb6f",
+      "statement": "switch to Help Centers tab and assert recommended safe haven shelter card",
+      "state": "proved",
+      "declaredAt": 1788868100593,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "RECOMMENDED SAFE HAVEN"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/views/EvacuationView.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868100683",
+        "grade": "presence",
+        "at": 1788868100683
+      }
+    },
+    "inline:trigger-live-gps-device-telemetry-capture-with-f-e2f52e1b": {
+      "id": "inline:trigger-live-gps-device-telemetry-capture-with-f-e2f52e1b",
+      "statement": "trigger live gps device telemetry capture with fallback",
+      "state": "bound",
+      "declaredAt": 1788868100718,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "📍 My Live GPS"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:open-sos-emergency-modal-and-assert-whatsapp-eme-8c2fe106": {
+      "id": "inline:open-sos-emergency-modal-and-assert-whatsapp-eme-8c2fe106",
+      "statement": "open SOS emergency modal and assert WhatsApp emergency dispatch option",
+      "state": "proved",
+      "declaredAt": 1788868100871,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Tourist SOS Emergency Beacon"
+          },
+          {
+            "kind": "text",
+            "contains": "Emergency Distress Protocol"
+          },
+          {
+            "kind": "text",
+            "contains": "Share Emergency GPS Coordinates via WhatsApp"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      },
+      "surface": {
+        "route": "/evacuation",
+        "files": [
+          "src/components/ui/Button.jsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1788868101057",
+        "grade": "presence",
+        "at": 1788868101057
+      }
+    },
+    "inline:verify-dual-column-desktop-command-center-layout-c127d9f2": {
+      "id": "inline:verify-dual-column-desktop-command-center-layout-c127d9f2",
+      "statement": "verify dual-column desktop command center layout remains intact and error-free",
+      "state": "bound",
+      "declaredAt": 1788868108931,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Hazard-Avoiding Navigation Steps"
+          },
+          {
+            "kind": "text",
+            "contains": "RECOMMENDED SAFE HAVEN"
+          },
+          {
+            "kind": "text",
+            "contains": "Offline-Ready Directory"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    },
+    "inline:verify-dual-column-desktop-command-center-layout-b307a1a2": {
+      "id": "inline:verify-dual-column-desktop-command-center-layout-b307a1a2",
+      "statement": "verify dual-column desktop command center layout settled and error-free",
+      "state": "bound",
+      "declaredAt": 1788868118411,
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "text",
+            "contains": "Hazard-Avoiding Navigation Steps"
+          },
+          {
+            "kind": "text",
+            "contains": "RECOMMENDED SAFE HAVEN"
+          },
+          {
+            "kind": "text",
+            "contains": "Tourist Emergency & Fast Evacuation Guidance"
+          },
+          {
+            "kind": "console",
+            "level": "error",
+            "absent": true
+          }
+        ]
+      }
+    }
+  }
+}

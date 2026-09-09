@@ -213,3 +213,138 @@ def test_cap_xml_export():
     assert feed_resp.status_code == 200
     assert "<feed" in feed_resp.text
 
+
+def test_download_apk():
+    """Verify Android APK binary package download endpoint."""
+    resp = client.get("/api/download/apk")
+    assert resp.status_code == 200
+    assert resp.headers.get("content-type") == "application/vnd.android.package-archive"
+    assert "drishti-ai-v1.0.apk" in resp.headers.get("content-disposition", "")
+    # Verify non-trivial binary APK payload
+    content = resp.content
+    assert len(content) > 1000000  # > 1MB
+    assert content[:2] == b"PK"  # Valid ZIP/APK magic header
+
+
+def test_get_apk_info():
+    """Verify Android APK release metadata and SHA-256 fingerprint endpoint."""
+    resp = client.get("/api/download/apk/info")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["app_name"] == "DRISHTI-AI Citizen Mobile & Field Reporter"
+    assert data["package_name"] == "ai.drishti.landslide"
+    assert "drishti-ai-v1.0.apk" in data["file_name"]
+    assert "sha256" in data
+    assert len(data["sha256"]) == 64
+    assert "target_sdk" in data
+
+
+def test_ingestion_status():
+    """Verify unified data ingestion pipeline health diagnostics for all 5 subsystems."""
+    resp = client.get("/api/ingestion/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "pipeline_status" in data
+    assert "subsystems" in data
+    subs = data["subsystems"]
+    assert "open_meteo_weather" in subs
+    assert "imd_meteorology" in subs
+    assert "terrain_dem" in subs
+    assert "osm_overpass_highways" in subs
+    assert "multilingual_translation" in subs
+    assert subs["multilingual_translation"]["status"] == "healthy"
+
+
+def test_ingestion_sync():
+    """Verify on-demand execution of the full multi-source ingestion pipeline."""
+    resp = client.post("/api/ingestion/sync?dispatch_alerts=false")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["zones_processed"] > 0
+    assert len(data["sources_integrated"]) == 5
+    assert len(data["zone_summaries"]) > 0
+    first_summary = data["zone_summaries"][0]
+    assert "risk_score" in first_summary
+    assert "slope_deg" in first_summary
+    assert "nearest_road" in first_summary
+
+
+def test_ingestion_preview():
+    """Verify multi-source telemetry snapshot with 4-language localized alerts."""
+    resp = client.get("/api/ingestion/preview/1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["zone_id"] == 1
+    assert "weather" in data
+    assert "terrain" in data
+    assert "road_proximity" in data
+    assert "imd_warning" in data
+    assert "prediction" in data
+    assert "multilingual_advisories" in data
+
+    # Verify all 4 regional languages generated
+    advisories = data["multilingual_advisories"]
+    assert "en" in advisories
+    assert "hi" in advisories
+    assert "kha" in advisories
+    assert "as" in advisories
+
+    # Verify terrain slope and highway proximity incorporated
+    assert data["terrain"]["calibrated_slope_deg"] > 0
+    assert data["road_proximity"]["distance_to_road_m"] > 0
+
+
+def test_ingestion_feeds():
+    """Verify direct OSM highway network and IMD warning feeds."""
+    hw_resp = client.get("/api/ingestion/highways")
+    assert hw_resp.status_code == 200
+    assert hw_resp.json()["count"] > 0
+
+    imd_resp = client.get("/api/ingestion/imd")
+    assert imd_resp.status_code == 200
+    assert "warning_level" in imd_resp.json()
+
+
+def test_tourist_hotspots_and_evacuation_planner():
+    """Verify tourist hotspots catalog and real-time hazard-aware evacuation planner."""
+    # 1. Hotspots list
+    hotspots_resp = client.get("/api/infrastructure/tourist-hotspots")
+    assert hotspots_resp.status_code == 200
+    hotspots = hotspots_resp.json()
+    assert len(hotspots) >= 5
+    assert any("Nohkalikai" in h["name"] for h in hotspots)
+
+    # 2. Plan evacuation from Nohkalikai Falls (Sohra)
+    plan_payload = {
+        "current_lat": 25.2755,
+        "current_lon": 91.6853,
+        "preferred_type": "all",
+        "max_distance_km": 40.0
+    }
+    plan_resp = client.post("/api/infrastructure/plan-evacuation", json=plan_payload)
+    assert plan_resp.status_code == 200
+    plan = plan_resp.json()
+
+    assert plan["success"] is True
+    assert "target_facility" in plan
+    assert "nearest_shelter" in plan
+    assert "nearest_hospital" in plan
+    assert len(plan["facilities"]) > 0
+
+    # Verify evacuation route details
+    route = plan["evacuation_route"]
+    assert route["total_distance_km"] > 0
+    assert route["estimated_drive_min"] > 0
+    assert len(route["waypoints"]) >= 3
+    assert len(route["steps"]) >= 2
+    assert "avoided_hazards" in route
+
+    # Verify emergency contacts
+    contacts = plan["emergency_contacts"]
+    assert "state_disaster_control" in contacts
+    assert "sdrf_meghalaya" in contacts
+
+
+
+

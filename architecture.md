@@ -47,7 +47,7 @@
 | Layer | Choice | Notes |
 |---|---|---|
 | Backend/API | Python + FastAPI | async support, good for polling jobs |
-| Database | PostgreSQL + PostGIS | fallback: SQLite w/ lat-lon columns if PostGIS setup blocks progress |
+| Database | PostgreSQL + PostGIS | Primary: `postgis/postgis:15-3.3-alpine` container with `psycopg2` connection pooling; resilient automatic fallback to SQLite for offline standalone local dev |
 | ML | scikit-learn / XGBoost | Random Forest baseline first |
 | Dashboard | React + Leaflet.js | OSM tiles, no API key |
 | Field app | React (mobile-responsive), offline-first via local queue | native app only if time remains |

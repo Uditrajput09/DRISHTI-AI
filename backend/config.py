@@ -4,18 +4,31 @@ Configuration and environment variable management for DRISHTI-AI.
 Reads from system environment and .env file with intelligent defaults.
 """
 
+import os
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 PLACEHOLDER_SECRET_VALUES = {"", "none", "null", "undefined"}
 
 
 class Settings(BaseSettings):
     """Application configuration settings loaded from environment or .env."""
 
-    # Database
-    DATABASE_URL: str = Field(default="sqlite:///./drishti_landslide.db")
+    # Project root directory
+    @property
+    def BASE_DIR(self) -> str:
+        return BASE_DIR
+
+    # Database (Default: PostgreSQL; falls back to SQLite if PostgreSQL daemon is unavailable)
+    DATABASE_URL: str = Field(default="postgresql://postgres:postgres@localhost:5432/drishti_landslide")
+    POSTGRES_USER: str = Field(default="postgres")
+    POSTGRES_PASSWORD: str = Field(default="postgres")
+    POSTGRES_DB: str = Field(default="drishti_landslide")
+    POSTGRES_HOST: str = Field(default="localhost")
+    POSTGRES_PORT: int = Field(default=5432)
+    REDIS_URL: str = Field(default="redis://localhost:6379/0")
 
     # Pilot District (Default: East Khasi Hills, Meghalaya)
     PILOT_DISTRICT_NAME: str = Field(default="East Khasi Hills, Meghalaya")

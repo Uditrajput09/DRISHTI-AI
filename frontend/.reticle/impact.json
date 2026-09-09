@@ -1,0 +1,114 @@
+{
+  "counts": {
+    "calls": 186,
+    "verdicts": 57,
+    "passed": 32,
+    "failed": 23,
+    "unknown": 2,
+    "refusals": 0,
+    "marks": 0,
+    "sessions": 30,
+    "tokensReturned": 119462,
+    "drivingMs": 76522
+  },
+  "days": [
+    {
+      "date": "2026-09-08",
+      "counts": {
+        "calls": 178,
+        "verdicts": 57,
+        "passed": 32,
+        "failed": 23,
+        "unknown": 2,
+        "refusals": 0,
+        "marks": 0,
+        "sessions": 25,
+        "tokensReturned": 119004,
+        "drivingMs": 76398
+      }
+    },
+    {
+      "date": "2026-09-09",
+      "counts": {
+        "calls": 8,
+        "verdicts": 0,
+        "passed": 0,
+        "failed": 0,
+        "unknown": 0,
+        "refusals": 0,
+        "marks": 0,
+        "sessions": 5,
+        "tokensReturned": 458,
+        "drivingMs": 124
+      }
+    }
+  ],
+  "records": {
+    "longestRunMs": 532137,
+    "bestVerdictDay": 57,
+    "bestDefectDay": 23,
+    "streakDays": 2,
+    "bestStreakDays": 2
+  },
+  "savings": {
+    "tokens": {
+      "value": 0,
+      "basis": "vs an agent reading the app through screenshots"
+    },
+    "minutes": {
+      "value": 92,
+      "basis": "vs one re-prompt cycle per defect caught"
+    }
+  },
+  "since": 1788862579631,
+  "defects": [
+    {
+      "at": 1788868118478,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788868109063,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788868100244,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788868065505,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788868004315,
+      "title": "🚨 Broadcast SOS Beacon",
+      "detail": "no element matched {\"text\":\"Broadcast via WhatsApp\"}",
+      "source": "src/components/ui/Button.jsx:120"
+    },
+    {
+      "at": 1788867999926,
+      "title": "Escape Route",
+      "detail": "no element matched {\"text\":\"Safe Evacuation Corridor\"}",
+      "source": "src/views/EvacuationView.jsx:1356"
+    },
+    {
+      "at": 1788867995721,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788867231266,
+      "title": "🚨 Broadcast SOS Beacon",
+      "detail": "no element matched {\"text\":\"Emergency Rescue Dispatch\"}",
+      "source": "src/components/ui/Button.jsx:120"
+    },
+    {
+      "at": 1788867227004,
+      "title": "the declared consequence did not hold"
+    },
+    {
+      "at": 1788867226882,
+      "title": "Tourist & Evacuation Guide SOS",
+      "detail": "no element matched {\"text\":\"TOURIST EMERGENCY & EVACUATION GUIDE\"}",
+      "source": "src/components/ui/Sidebar.jsx:307"
+    }
+  ]
+}

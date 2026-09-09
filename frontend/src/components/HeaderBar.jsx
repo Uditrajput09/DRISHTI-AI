@@ -14,11 +14,11 @@ export default function HeaderBar({
   return (
     <header
       style={{
-        height: 54,
-        background: 'rgba(7, 10, 16, 0.92)',
+        height: 56,
+        background: 'rgba(8, 8, 10, 0.94)',
         backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(120, 140, 180, 0.18)',
-        padding: '0 20px',
+        borderBottom: '1px solid var(--border-command)',
+        padding: '0 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -28,14 +28,15 @@ export default function HeaderBar({
       }}
     >
       {/* Title & Route Indicator */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <h2
           style={{
-            fontSize: '0.94rem',
-            fontWeight: 900,
-            color: '#FFFFFF',
-            fontFamily: 'Space Grotesk, sans-serif',
-            letterSpacing: '0.04em',
+            fontSize: '1.05rem',
+            fontWeight: 400,
+            fontStyle: 'italic',
+            color: 'var(--text-primary)',
+            fontFamily: 'var(--font-serif)',
+            letterSpacing: '-0.02em',
             margin: 0
           }}
         >
@@ -43,9 +44,9 @@ export default function HeaderBar({
         </h2>
         <span
           style={{
-            fontSize: '0.74rem',
-            color: '#9AA5B8',
-            fontFamily: 'JetBrains Mono, monospace'
+            fontSize: '0.72rem',
+            color: 'var(--text-muted)',
+            fontFamily: 'monospace'
           }}
         >
           {routeTag}
@@ -53,7 +54,7 @@ export default function HeaderBar({
       </div>
 
       {/* Right Controls: Live Dot, User Info, Alerts Bell, Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {/* Live Status */}
         <div
           style={{
@@ -62,12 +63,12 @@ export default function HeaderBar({
             gap: 6,
             background: 'rgba(57, 217, 138, 0.1)',
             border: '1px solid rgba(57, 217, 138, 0.3)',
-            padding: '3px 8px',
-            borderRadius: 6,
+            padding: '3px 10px',
+            borderRadius: 999,
             fontSize: '0.68rem',
-            fontWeight: 800,
+            fontWeight: 700,
             color: '#39D98A',
-            fontFamily: 'Space Grotesk, sans-serif'
+            fontFamily: 'var(--font-sans)'
           }}
         >
           <span className="live-indicator-dot" />
@@ -79,18 +80,18 @@ export default function HeaderBar({
           onClick={onOpenProfile}
           style={{
             fontSize: '0.74rem',
-            color: '#CBD5E1',
+            color: 'var(--text-primary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6
           }}
         >
-          <span style={{ fontWeight: 700 }}>
+          <span style={{ fontWeight: 600 }}>
             {currentUser?.name || 'Lee Montaria'}
           </span>
-          <span style={{ color: '#5C677D' }}>•</span>
-          <span style={{ color: '#9AA5B8' }}>East Khasi Hills</span>
+          <span style={{ color: 'var(--text-muted)' }}>•</span>
+          <span style={{ color: 'var(--text-secondary)' }}>East Khasi Hills</span>
         </div>
 
         {/* Refresh button */}
@@ -102,7 +103,7 @@ export default function HeaderBar({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#35D8FF',
+              color: 'var(--color-copper)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -123,7 +124,7 @@ export default function HeaderBar({
           style={{
             background: 'transparent',
             border: 'none',
-            color: '#FF9D3D',
+            color: 'var(--color-copper)',
             cursor: 'pointer',
             position: 'relative',
             display: 'flex',
@@ -141,8 +142,8 @@ export default function HeaderBar({
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: '#FF3B6B',
-                boxShadow: '0 0 6px #FF3B6B'
+                background: 'var(--color-danger)',
+                boxShadow: '0 0 6px var(--color-danger)'
               }}
             />
           )}
@@ -156,9 +157,9 @@ export default function HeaderBar({
             height: 28,
             borderRadius: '50%',
             overflow: 'hidden',
-            border: '1.5px solid #35D8FF',
+            border: '1.5px solid var(--color-copper)',
             cursor: 'pointer',
-            boxShadow: '0 0 8px rgba(53, 216, 255, 0.4)'
+            boxShadow: '0 0 8px rgba(200, 150, 62, 0.3)'
           }}
         >
           <img

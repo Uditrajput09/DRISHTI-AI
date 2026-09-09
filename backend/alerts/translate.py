@@ -56,10 +56,14 @@ class TranslationService:
         zone_name: str,
         risk_score: float,
         risk_level: str,
-        rainfall_24h: float
+        rainfall_24h: float,
+        imd_warning_level: Optional[str] = None,
+        nearest_road: Optional[str] = None,
+        slope_angle: Optional[float] = None
     ) -> str:
         """
         Format disaster warning in the requested language using cached regional templates.
+        Integrates IMD alert level, terrain slope angle, and OSM lifeline highway corridor context.
         Languages: en (English), hi (Hindi), kha (Khasi), as (Assamese).
         """
         lang = language.lower().strip()
@@ -79,7 +83,40 @@ class TranslationService:
         )
         action = template.get("action", "")
 
-        return f"{header}\n{body}\n{action}"
+        # Append multi-source telemetry context if available
+        context_parts = []
+        if imd_warning_level:
+            context_parts.append(f"IMD: {imd_warning_level}")
+        if slope_angle:
+            context_parts.append(f"Slope: {slope_angle:.1f}°")
+        if nearest_road:
+            context_parts.append(f"Corridor: {nearest_road}")
+
+        context_str = f"\n[Telemetry: {' | '.join(context_parts)}]" if context_parts else ""
+
+        return f"{header}\n{body}{context_str}\n{action}"
+
+    def translate_imd_bulletin(self, bulletin_text: str, target_lang: str) -> str:
+        """
+        Translate or localize an official IMD district meteorological bulletin.
+        Utilizes live LibreTranslate if available, with dialect-appropriate emergency fallbacks.
+        """
+        lang = target_lang.lower().strip()
+        if lang == "en":
+            return bulletin_text
+
+        # Try live translation first
+        live = self.live_translate(bulletin_text, target_lang=lang, source_lang="en")
+        if live:
+            return live
+
+        # Regional fallbacks for Meghalaya pilot
+        fallbacks = {
+            "hi": f"भारत मौसम विज्ञान विभाग (IMD) परामर्श: {bulletin_text}",
+            "kha": f"Ka kyrwoh na ka IMD: Ka jinghikai ban long kiba pynkhreh na ka bynta ka jinghap slap jur ha East Khasi Hills.",
+            "as": f"ভাৰতীয় বতৰ বিজ্ঞান বিভাগৰ (IMD) জাননী: পূব খাচী পাহাৰত প্ৰচণ্ড বৰষুণৰ সতৰ্কতা।"
+        }
+        return fallbacks.get(lang, bulletin_text)
 
     def live_translate(self, text: str, target_lang: str, source_lang: str = "en") -> Optional[str]:
         """
@@ -112,3 +149,4 @@ class TranslationService:
 
 
 translation_service = TranslationService()
+

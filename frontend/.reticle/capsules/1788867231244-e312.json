@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "1788867231244-e312",
+  "createdAt": 1788867231244,
+  "origin": "failed-assert",
+  "expected": "declared consequence",
+  "observed": "no element matched {\"text\":\"Emergency Rescue Dispatch\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e312",
+        "source": {
+          "file": "src/components/ui/Button.jsx",
+          "line": 120,
+          "column": 10
+        }
+      },
+      "action": "click"
+    }
+  ]
+}

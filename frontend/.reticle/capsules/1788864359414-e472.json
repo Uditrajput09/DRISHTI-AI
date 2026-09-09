@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "1788864359414-e472",
+  "createdAt": 1788864359415,
+  "origin": "failed-assert",
+  "expected": "declared consequence",
+  "observed": "no element matched {\"text\":\"DRISHTI-AI Android Device Simulator\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e472",
+        "source": {
+          "file": "src/components/AndroidAppModal.jsx",
+          "line": 423,
+          "column": 19
+        }
+      },
+      "action": "click"
+    }
+  ]
+}

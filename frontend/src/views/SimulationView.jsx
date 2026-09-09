@@ -13,7 +13,9 @@ import {
   ArrowRight,
   TrendingUp,
   Sparkles,
-  Info
+  Info,
+  Zap,
+  ArrowUpRight
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -24,8 +26,18 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
+import { 
+  Card, 
+  PageHeader, 
+  MetricCard, 
+  Button, 
+  SecondaryButton, 
+  FilterChip, 
+  RiskBadge, 
+  DataTable, 
+  Badge 
+} from '../components/ui';
 import { api } from '../api';
-import RiskMetricCard from '../components/RiskMetricCard';
 
 export default function SimulationView({
   zones = [],
@@ -112,7 +124,6 @@ export default function SimulationView({
       });
     } catch (err) {
       console.warn('Backend simulate error, applying physics formula fallback:', err);
-      // Deterministic fallback
       const proj = Math.min(99, Math.round(75 + (rainfallIntensity / 180) * 23));
       setSimResults(prev => ({
         ...prev,
@@ -125,7 +136,7 @@ export default function SimulationView({
     }
   };
 
-  // Hydrograph curve data based on simulation parameters
+  // Hydrograph curve data
   const hydrographData = Array.from({ length: Math.min(24, Math.max(6, duration * 2)) }, (_, idx) => {
     const hr = idx + 1;
     const peakHour = Math.max(1, Math.round(duration * 0.6));
@@ -138,425 +149,349 @@ export default function SimulationView({
       hour: `+${hr}h`,
       rain,
       porePressure,
-      risk: riskFactor
+      riskFactor
     };
   });
 
+  const deltaColumns = [
+    {
+      key: 'name',
+      label: 'Zone Corridor',
+      render: (val) => <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{val}</span>
+    },
+    {
+      key: 'currentRisk',
+      label: 'Baseline Risk',
+      align: 'left',
+      render: (val) => <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{val}%</span>
+    },
+    {
+      key: 'projRisk',
+      label: 'Projected Risk',
+      align: 'left',
+      render: (val, row) => (
+        <span
+          className="font-mono"
+          style={{
+            fontWeight: 600,
+            color: val >= 80 ? 'var(--risk-critical)' : 'var(--risk-high)'
+          }}
+        >
+          {val}%
+        </span>
+      )
+    },
+    {
+      key: 'delta',
+      label: 'Risk Escalation',
+      render: (val) => (
+        <span className="font-mono" style={{ color: 'var(--risk-critical)', fontWeight: 600 }}>
+          ▲ +{val}%
+        </span>
+      )
+    },
+    {
+      key: 'level',
+      label: 'Projected Severity',
+      render: (val) => <RiskBadge level={val} size="sm" />
+    },
+    {
+      key: 'roads',
+      label: 'Affected Road Network',
+      render: (val) => <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{val}</span>
+    },
+    {
+      key: 'actions',
+      label: 'Action',
+      render: (_, row) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            if (onSelectZone) onSelectZone(row);
+            if (onNavigateToGIS) onNavigateToGIS();
+          }}
+        >
+          Inspect
+        </Button>
+      )
+    }
+  ];
+
   return (
-    <div
-      style={{
-        maxWidth: 1680,
-        margin: '0 auto',
-        padding: '16px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16
-      }}
-    >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: 'rgba(255, 77, 184, 0.15)',
-                border: '1px solid rgba(255, 77, 184, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* 1. Page Header */}
+      <PageHeader
+        breadcrumbs={['Operations', 'Kinematic Modeling', 'Cloudburst Studio']}
+        title="Cloudburst Stress Simulation Studio"
+        subtitle="Hydrological stress-testing, pore pressure saturation, and catastrophic slope failure modeling"
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Badge variant="info">Infinite Slope Stability Engine</Badge>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={RotateCcw}
+              onClick={() => {
+                setRainfallIntensity(85);
+                setDuration(6);
+                setSoilMoisture(88);
+                setActivePreset('custom');
               }}
             >
-              <Sliders size={20} color="#FF4DB8" />
-            </div>
-            <div>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', fontFamily: 'Space Grotesk, sans-serif' }}>
-                CLOUDBURST SIMULATION STUDIO
-              </h1>
-              <span style={{ fontSize: '0.74rem', color: '#9AA5B8' }}>
-                Physics-informed precipitation stress testing & geotechnical infrastructure hazard projection • East Khasi Hills
-              </span>
-            </div>
+              Reset Defaults
+            </Button>
           </div>
-        </div>
+        }
+      />
 
-        {/* 24h Accumulation & Mode Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span
-            style={{
-              background: 'rgba(53, 216, 255, 0.12)',
-              border: '1px solid rgba(53, 216, 255, 0.35)',
-              color: '#35D8FF',
-              fontSize: '0.76rem',
-              fontWeight: 800,
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontFamily: 'Space Grotesk, sans-serif'
-            }}
-          >
-            Total Precipitation: {Math.round(rainfallIntensity * duration)} mm
+      {/* 2. Preset Scenarios Quick Selector */}
+      <Card padding={14}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Historical & Stress Presets:
           </span>
-          <button
-            onClick={() => onNavigateToGIS && onNavigateToGIS()}
-            className="btn-surface"
-            style={{ fontSize: '0.76rem', padding: '6px 12px' }}
-          >
-            Back to GIS Hero
-          </button>
+          {presets.map((p) => (
+            <FilterChip
+              key={p.id}
+              label={p.label}
+              active={activePreset === p.id}
+              onClick={() => applyPreset(p)}
+            />
+          ))}
         </div>
-      </div>
+      </Card>
 
-      {/* Top 4 Simulation Impact KPI Cards */}
+      {/* 3. Main 2-Column Layout: Parameter Sliders | Projected Impact Strip */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 12
-        }}
-      >
-        <RiskMetricCard
-          label="Projected Peak Risk"
-          value={`${simResults.projectedRisk}%`}
-          indicatorColor="#FF3B6B"
-          icon={ShieldAlert}
-          trend="Critical Exceedance"
-        />
-        <RiskMetricCard
-          label="High Hazard Zones"
-          value={`${simResults.affectedZonesCount} / ${zones.length || 10}`}
-          indicatorColor="#FF9D3D"
-          icon={AlertTriangle}
-          trend="+3 zones escalated"
-        />
-        <RiskMetricCard
-          label="Roads at Risk"
-          value={`${simResults.roadsAtRiskCount} Corridors`}
-          indicatorColor="#35D8FF"
-          icon={Compass}
-          trend="NH-6, NH-106, SH-5"
-        />
-        <RiskMetricCard
-          label="Shelters in Area"
-          value={`${simResults.sheltersInImpact} Active`}
-          indicatorColor="#39D98A"
-          icon={Home}
-          trend="Evacuation Ready"
-        />
-      </div>
-
-      {/* Main Studio Split: Left Parameter Sandbox | Right Hydrograph & Zone Matrix */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(320px, 1.1fr) minmax(0, 1.9fr)',
-          gap: 16
+          gridTemplateColumns: 'minmax(0, 1.2fr) minmax(360px, 1fr)',
+          gap: 16,
+          alignItems: 'start'
         }}
         className="simulation-xai-grid"
       >
-        {/* Left: Simulation Controls & Presets */}
-        <div className="command-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Parameter Sliders Card */}
+        <Card padding={20} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif' }}>
-              STORM PARAMETERS
-            </span>
-            <span style={{ fontSize: '0.68rem', color: '#8B6CFF', fontWeight: 700 }}>
-              PHYSICS ENGINE ACTIVE
-            </span>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Hydrological Stress Parameters
+            </h3>
+            <Badge variant="neutral" size="sm">Configurable</Badge>
           </div>
 
-          {/* Presets Row */}
-          <div>
-            <span style={{ fontSize: '0.72rem', color: '#9AA5B8', fontWeight: 600, display: 'block', marginBottom: 8 }}>
-              Quick Scenario Presets:
-            </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-              {presets.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => applyPreset(p)}
-                  style={{
-                    background: activePreset === p.id ? 'rgba(255, 77, 184, 0.15)' : 'rgba(21, 27, 41, 0.8)',
-                    border: `1px solid ${activePreset === p.id ? '#FF4DB8' : 'rgba(120, 140, 180, 0.2)'}`,
-                    borderRadius: 8,
-                    padding: '8px 10px',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: activePreset === p.id ? '#FF4DB8' : '#F4F6FB', fontFamily: 'Space Grotesk, sans-serif' }}>
-                    {p.label}
-                  </div>
-                  <div style={{ fontSize: '0.64rem', color: '#9AA5B8', marginTop: 2 }}>
-                    {p.rain}mm/h • {p.dur}h
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sliders */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {/* Slider 1: Rainfall Intensity */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Intensity */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: 6 }}>
-                <span style={{ color: '#9AA5B8' }}>Rainfall Intensity</span>
-                <span style={{ color: '#35D8FF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Rainfall Intensity</span>
+                <span className="font-mono" style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>
                   {rainfallIntensity} mm/h
                 </span>
               </div>
               <input
                 type="range"
-                min="10"
-                max="180"
+                min={20}
+                max={200}
+                step={5}
                 value={rainfallIntensity}
                 onChange={(e) => {
                   setRainfallIntensity(Number(e.target.value));
                   setActivePreset('custom');
                 }}
-                style={{ width: '100%' }}
+                style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.64rem', color: '#5C677D', marginTop: 2 }}>
-                <span>10 mm/h (Light)</span>
-                <span>80 mm/h (Heavy)</span>
-                <span>180 mm/h (Cloudburst)</span>
-              </div>
             </div>
 
-            {/* Slider 2: Duration */}
+            {/* Duration */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: 6 }}>
-                <span style={{ color: '#9AA5B8' }}>Storm Duration</span>
-                <span style={{ color: '#8B6CFF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Continuous Event Duration</span>
+                <span className="font-mono" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                   {duration} Hours
                 </span>
               </div>
               <input
                 type="range"
-                min="1"
-                max="24"
+                min={1}
+                max={24}
+                step={1}
                 value={duration}
                 onChange={(e) => {
                   setDuration(Number(e.target.value));
                   setActivePreset('custom');
                 }}
-                style={{ width: '100%' }}
+                style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.64rem', color: '#5C677D', marginTop: 2 }}>
-                <span>1 Hour</span>
-                <span>12 Hours</span>
-                <span>24 Hours</span>
-              </div>
             </div>
 
-            {/* Slider 3: Affected District Coverage */}
+            {/* Antecedent Soil Moisture */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: 6 }}>
-                <span style={{ color: '#9AA5B8' }}>Geographic Extent</span>
-                <span style={{ color: '#FF4DB8', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
-                  {affectedAreaPct}% of District
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12 }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Antecedent Soil Moisture Saturation</span>
+                <span className="font-mono" style={{ color: 'var(--risk-high)', fontWeight: 600 }}>
+                  {soilMoisture}%
                 </span>
               </div>
               <input
                 type="range"
-                min="10"
-                max="100"
-                value={affectedAreaPct}
-                onChange={(e) => {
-                  setAffectedAreaPct(Number(e.target.value));
-                  setActivePreset('custom');
-                }}
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            {/* Slider 4: Antecedent Soil Moisture */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: 6 }}>
-                <span style={{ color: '#9AA5B8' }}>Initial Soil Moisture</span>
-                <span style={{ color: '#FFD84D', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
-                  {soilMoisture}% Saturation
-                </span>
-              </div>
-              <input
-                type="range"
-                min="40"
-                max="99"
+                min={40}
+                max={100}
+                step={1}
                 value={soilMoisture}
                 onChange={(e) => {
                   setSoilMoisture(Number(e.target.value));
                   setActivePreset('custom');
                 }}
-                style={{ width: '100%' }}
+                style={{ width: '100%', accentColor: 'var(--brand-primary)' }}
               />
             </div>
           </div>
 
-          {/* Action CTA */}
-          <button
+          <Button
+            variant="primary"
+            fullWidth
+            icon={Play}
+            loading={isSimulating}
             onClick={handleRunSimulation}
-            disabled={isSimulating}
-            className="btn-primary-pink"
-            style={{ width: '100%', padding: '12px 0', fontSize: '0.86rem', marginTop: 6 }}
+            style={{ marginTop: 4 }}
           >
-            <Play size={16} />
-            <span>{isSimulating ? 'COMPUTING HYDROLOGICAL IMPACT...' : 'RUN PHYSICS SIMULATION'}</span>
-          </button>
+            {isSimulating ? 'Computing Hydrological Physics...' : 'Execute Stress Simulation'}
+          </Button>
+        </Card>
 
-          {/* Operational Advisory Box */}
-          <div
-            style={{
-              background: 'rgba(255, 59, 107, 0.08)',
-              border: '1px solid rgba(255, 59, 107, 0.25)',
-              borderRadius: 10,
-              padding: '12px 14px',
-              display: 'flex',
-              gap: 10
-            }}
-          >
-            <AlertTriangle size={18} color="#FF3B6B" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div>
-              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#FF3B6B', fontFamily: 'Space Grotesk, sans-serif' }}>
-                SDMA SIMULATION ADVISORY
-              </span>
-              <p style={{ fontSize: '0.68rem', color: '#CBD5E1', margin: '4px 0 0', lineHeight: 1.4 }}>
-                At {rainfallIntensity} mm/h intensity, pore water pressure in Sohra & Mawsynram steep gorge colluvium exceeds safety threshold within 2.5 hours. Lifeline corridors NH-6 & SH-5 face high risk of blockage.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Projected Impact KPI Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          <MetricCard
+            label="Peak Projected Risk"
+            value={`${simResults.projectedRisk}%`}
+            variant="critical"
+            icon={ShieldAlert}
+            trend="▲ Failure"
+            trendDirection="critical"
+            trendLabel="imminent"
+            description="Exceeds shear strength envelope"
+          />
 
-        {/* Right: Hydrograph Chart & Simulated Zone Impact Matrix */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Hydrograph Chart */}
-          <div className="command-panel" style={{ padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif' }}>
-                PRECIPITATION RUNOFF & PORE-WATER PRESSURE HYDROGRAPH
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: '0.7rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#35D8FF' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#35D8FF' }} />
-                  Precipitation (mm)
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#FF4DB8' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF4DB8' }} />
-                  Pore Pressure (%)
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#FF3B6B' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF3B6B' }} />
-                  Risk Index (%)
-                </span>
-              </div>
-            </div>
+          <MetricCard
+            label="Escalated Zones"
+            value={`${simResults.affectedZonesCount} Micro-Zones`}
+            variant="high"
+            icon={AlertTriangle}
+            trend="Severe"
+            trendDirection="critical"
+            trendLabel="impact"
+            description="Reaching Critical/High threshold"
+          />
 
-            <div style={{ width: '100%', height: 190 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={hydrographData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="simRainGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#35D8FF" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#35D8FF" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="simRiskGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FF3B6B" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#FF3B6B" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(120, 140, 180, 0.15)" />
-                  <XAxis dataKey="hour" stroke="#5C677D" tick={{ fontSize: 10 }} />
-                  <YAxis stroke="#5C677D" tick={{ fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#101521',
-                      border: '1px solid rgba(53, 216, 255, 0.4)',
-                      borderRadius: 8,
-                      fontSize: '0.74rem'
-                    }}
-                  />
-                  <Area type="monotone" dataKey="rain" stroke="#35D8FF" fillOpacity={1} fill="url(#simRainGrad)" />
-                  <Area type="monotone" dataKey="risk" stroke="#FF3B6B" fillOpacity={1} fill="url(#simRiskGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <MetricCard
+            label="Road Networks At Risk"
+            value={`${simResults.roadsAtRiskCount} Corridors`}
+            icon={MapPin}
+            trend="NH-6, NH-40"
+            trendDirection="down"
+            trendLabel="cut-off"
+            description="High risk of arterial blockage"
+          />
 
-          {/* Zone-by-Zone Simulated Delta Table */}
-          <div className="command-panel" style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif' }}>
-                MICRO-ZONE IMPACT & ESCALATION MATRIX
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#9AA5B8' }}>
-                Sorted by Projected Risk
-              </span>
-            </div>
-
-            <div style={{ overflowX: 'auto', flex: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.76rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(120, 140, 180, 0.2)', color: '#9AA5B8' }}>
-                    <th style={{ padding: '8px 10px' }}>Zone</th>
-                    <th style={{ padding: '8px 10px' }}>Current</th>
-                    <th style={{ padding: '8px 10px' }}>Projected</th>
-                    <th style={{ padding: '8px 10px' }}>Delta</th>
-                    <th style={{ padding: '8px 10px' }}>Status</th>
-                    <th style={{ padding: '8px 10px' }}>Roads Affected</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {simResults.zoneDeltas.map(zd => (
-                    <tr
-                      key={zd.id}
-                      style={{ borderBottom: '1px solid rgba(120, 140, 180, 0.1)', transition: 'background 0.15s ease' }}
-                      className="table-row-hover"
-                    >
-                      <td style={{ padding: '10px', fontWeight: 700, color: '#F4F6FB' }}>
-                        {zd.name}
-                      </td>
-                      <td style={{ padding: '10px', color: '#9AA5B8', fontFamily: 'Space Grotesk, sans-serif' }}>
-                        {zd.currentRisk}%
-                      </td>
-                      <td style={{ padding: '10px', fontWeight: 900, color: zd.projRisk >= 85 ? '#FF3B6B' : '#FF9D3D', fontFamily: 'Space Grotesk, sans-serif' }}>
-                        {zd.projRisk}%
-                      </td>
-                      <td style={{ padding: '10px', color: '#35D8FF', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif' }}>
-                        +{zd.delta}%
-                      </td>
-                      <td style={{ padding: '10px' }}>
-                        <span className={zd.projRisk >= 85 ? 'badge-critical' : 'badge-high'}>
-                          {zd.level}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px', color: '#CBD5E1', fontSize: '0.72rem' }}>
-                        {zd.roads}
-                      </td>
-                      <td style={{ padding: '10px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => {
-                            if (onSelectZone) {
-                              const found = zones.find(z => z.id === zd.id);
-                              if (found) onSelectZone(found);
-                            }
-                            if (onNavigateToGIS) onNavigateToGIS();
-                          }}
-                          className="btn-surface"
-                          style={{ padding: '4px 8px', fontSize: '0.68rem' }}
-                        >
-                          Inspect GIS
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <MetricCard
+            label="Threatened Shelters"
+            value={`${simResults.sheltersInImpact} Havens`}
+            variant="critical"
+            icon={Home}
+            trend="Relocate"
+            trendDirection="critical"
+            trendLabel="notice"
+            description="Secondary evacuation advised"
+          />
         </div>
       </div>
+
+      {/* 4. Hydrograph Simulation Curve */}
+      <Card padding={20}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Simulated Hydrograph & Failure Probability Curve
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+              Projected hourly precipitation vs. pore pressure accumulation across the duration window
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 11 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--brand-primary)' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Precipitation Rate (mm/h)</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--risk-critical)' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Slope Failure Risk (%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ width: '100%', height: 260 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={hydrographData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="rainGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0.0} />
+                </linearGradient>
+                <linearGradient id="riskGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--risk-critical)" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="var(--risk-critical)" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
+              <XAxis dataKey="hour" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+              <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  borderColor: 'var(--border-primary)',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  color: 'var(--text-primary)'
+                }}
+              />
+              <Area type="monotone" dataKey="rain" stroke="var(--brand-primary)" strokeWidth={2} fillOpacity={1} fill="url(#rainGrad)" name="Rainfall (mm/h)" />
+              <Area type="monotone" dataKey="riskFactor" stroke="var(--risk-critical)" strokeWidth={2} fillOpacity={1} fill="url(#riskGrad)" name="Failure Risk (%)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      {/* 5. Escalated Micro-Zones Table */}
+      <Card padding={0} style={{ overflow: 'hidden' }}>
+        <div
+          style={{
+            padding: '14px 20px',
+            borderBottom: '1px solid var(--border-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: 'var(--bg-surface-elevated)'
+          }}
+        >
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Escalated Micro-Zone Vulnerability Register
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+              Specific sectors where simulated conditions exceed critical Factor of Safety (FS &lt; 1.0)
+            </p>
+          </div>
+          <Badge variant="critical">7 Micro-Zones Escalated</Badge>
+        </div>
+
+        <DataTable
+          columns={deltaColumns}
+          data={simResults.zoneDeltas}
+          keyField="id"
+        />
+      </Card>
     </div>
   );
 }

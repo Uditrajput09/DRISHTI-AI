@@ -5,12 +5,21 @@ import {
   Users,
   Building2,
   Home,
-  Navigation,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
-  FileText
+  FileText,
+  MapPin,
+  Compass,
+  Layers,
+  ArrowUpRight
 } from 'lucide-react';
+import { 
+  Card, 
+  PageHeader, 
+  Button, 
+  SearchInput, 
+  RiskBadge, 
+  Badge, 
+  DataTable 
+} from '../components/ui';
 import ZoneComparison from '../components/ZoneComparison';
 import { exportZoneRiskPDF } from '../utils/pdfExport';
 
@@ -22,7 +31,7 @@ export default function RiskIntelligenceView({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedZone, setSelectedZone] = useState(null);
 
-  // Exact 10 zones matching Screen 2 table
+  // Exact 10 monitored micro-zones
   const exactRiskZones = [
     { id: 1, name: 'Sohra (Cherrapunji) Escarpment', risk_score: 100, level: 'Critical', prob: '100%', rain: '186 mm', moisture: '72%', trend: 'up', status: 'Active', area: '452.6 km²', elevation: '1,640 m', slope: '31.7°', geology: 'Gneiss & Shale', drainage: '2.8 km/km²' },
     { id: 2, name: 'Mawsynram Ridge', risk_score: 87, level: 'High', prob: '87%', rain: '142 mm', moisture: '68%', trend: 'up', status: 'Active', area: '310.2 km²', elevation: '1,420 m', slope: '28.4°', geology: 'Quartzite', drainage: '3.1 km/km²' },
@@ -42,152 +51,134 @@ export default function RiskIntelligenceView({
     z.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getLevelBadge = (lvl) => {
-    switch (lvl) {
-      case 'Critical': return 'badge-critical';
-      case 'High': return 'badge-high';
-      case 'Medium': return 'badge-medium';
-      default: return 'badge-safe';
+  const columns = [
+    {
+      key: 'name',
+      label: 'Zone Corridor',
+      render: (val, row) => (
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+          {val}
+        </span>
+      )
+    },
+    {
+      key: 'risk_score',
+      label: 'Risk Score',
+      align: 'left',
+      render: (val, row) => (
+        <span
+          className="font-mono"
+          style={{
+            fontWeight: 600,
+            fontSize: 14,
+            color: val >= 80 ? 'var(--risk-critical)' : val >= 60 ? 'var(--risk-high)' : val >= 30 ? 'var(--risk-medium)' : 'var(--risk-safe)'
+          }}
+        >
+          {val}%
+        </span>
+      )
+    },
+    {
+      key: 'level',
+      label: 'Severity Level',
+      render: (val) => <RiskBadge level={val} size="sm" />
+    },
+    {
+      key: 'prob',
+      label: 'AI Probability',
+      render: (val) => <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{val}</span>
+    },
+    {
+      key: 'rain',
+      label: 'Rainfall (24h)',
+      render: (val) => <span className="font-mono" style={{ color: 'var(--brand-primary)', fontWeight: 500 }}>{val}</span>
+    },
+    {
+      key: 'moisture',
+      label: 'Soil Moisture',
+      render: (val) => <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{val}</span>
+    },
+    {
+      key: 'trend',
+      label: 'Trend',
+      align: 'center',
+      render: (val) => {
+        if (val === 'up') return <span style={{ color: 'var(--risk-critical)', fontWeight: 600 }}>▲ UP</span>;
+        if (val === 'down') return <span style={{ color: 'var(--risk-safe)', fontWeight: 600 }}>▼ DOWN</span>;
+        return <span style={{ color: 'var(--text-muted)' }}>— STABLE</span>;
+      }
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (val) => <Badge variant="live" size="sm">{val}</Badge>
     }
-  };
+  ];
 
   return (
-    <div
-      style={{
-        maxWidth: 1680,
-        margin: '0 auto',
-        padding: '16px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16
-      }}
-    >
-      {/* Header & KPI Summary Strip */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', fontFamily: 'Space Grotesk, sans-serif', margin: 0 }}>
-            RISK INTELLIGENCE
-          </h1>
-          <span style={{ fontSize: '0.74rem', color: '#9AA5B8' }}>
-            East Khasi Hills • 10 Monitored Zones • Live Analysis
-          </span>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* 1. Page Header */}
+      <PageHeader
+        breadcrumbs={['Command Center', 'Geotechnical Matrix', 'Risk Intelligence']}
+        title="Risk Intelligence & Analysis"
+        subtitle="East Khasi Hills • 10 Monitored Micro-Zones • Telemetry & Susceptibility Matrix"
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <Badge variant="neutral">Total: 10</Badge>
+            <Badge variant="critical">Critical: 2</Badge>
+            <Badge variant="high">High Risk: 4</Badge>
+            <Badge variant="medium">Medium: 3</Badge>
+            <Badge variant="safe">Safe: 1</Badge>
+          </div>
+        }
+      />
 
-        {/* 5 KPI Summary Pills matching Screen 2 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid rgba(120, 140, 180, 0.2)', padding: '5px 12px', borderRadius: 6, fontSize: '0.74rem', display: 'flex', gap: 6 }}>
-            <span style={{ color: '#9AA5B8' }}>Total Zones:</span>
-            <strong style={{ color: '#35D8FF', fontFamily: 'Space Grotesk, sans-serif' }}>10</strong>
+      {/* 2. Top Risk Zones Table matching Reference Image Table Spec */}
+      <Card padding={0} style={{ overflow: 'hidden' }}>
+        <div
+          style={{
+            padding: '14px 20px',
+            borderBottom: '1px solid var(--border-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            backgroundColor: 'var(--bg-surface-elevated)'
+          }}
+        >
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Top Landslide Hazard Zones
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+              Micro-zone severity hierarchy ranked by geotechnical slope failure probability
+            </p>
           </div>
 
-          <div style={{ background: 'rgba(255, 59, 107, 0.12)', border: '1px solid rgba(255, 59, 107, 0.35)', padding: '5px 12px', borderRadius: 6, fontSize: '0.74rem', display: 'flex', gap: 6 }}>
-            <span style={{ color: '#FF3B6B' }}>Critical Zones:</span>
-            <strong style={{ color: '#FF3B6B', fontFamily: 'Space Grotesk, sans-serif' }}>2</strong>
-          </div>
-
-          <div style={{ background: 'rgba(255, 157, 61, 0.12)', border: '1px solid rgba(255, 157, 61, 0.35)', padding: '5px 12px', borderRadius: 6, fontSize: '0.74rem', display: 'flex', gap: 6 }}>
-            <span style={{ color: '#FF9D3D' }}>High Risk:</span>
-            <strong style={{ color: '#FF9D3D', fontFamily: 'Space Grotesk, sans-serif' }}>4</strong>
-          </div>
-
-          <div style={{ background: 'rgba(255, 216, 77, 0.12)', border: '1px solid rgba(255, 216, 77, 0.35)', padding: '5px 12px', borderRadius: 6, fontSize: '0.74rem', display: 'flex', gap: 6 }}>
-            <span style={{ color: '#FFD84D' }}>Medium Risk:</span>
-            <strong style={{ color: '#FFD84D', fontFamily: 'Space Grotesk, sans-serif' }}>3</strong>
-          </div>
-
-          <div style={{ background: 'rgba(57, 217, 138, 0.12)', border: '1px solid rgba(57, 217, 138, 0.35)', padding: '5px 12px', borderRadius: 6, fontSize: '0.74rem', display: 'flex', gap: 6 }}>
-            <span style={{ color: '#39D98A' }}>Low Risk:</span>
-            <strong style={{ color: '#39D98A', fontFamily: 'Space Grotesk, sans-serif' }}>1</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* TOP RISK ZONES Table matching Screen 2 */}
-      <div className="command-panel" style={{ overflow: 'hidden' }}>
-        <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(120, 140, 180, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.04em', fontFamily: 'Space Grotesk, sans-serif' }}>
-            TOP RISK ZONES
-          </span>
-          <div style={{ position: 'relative', width: 200 }}>
-            <Search size={13} color="#5C677D" style={{ position: 'absolute', left: 8, top: 9 }} />
-            <input
-              type="text"
+          <div style={{ width: 220 }}>
+            <SearchInput
+              size="sm"
               placeholder="Filter zone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="command-input"
-              style={{ paddingLeft: 26, fontSize: '0.74rem', height: 30 }}
+              onClear={() => setSearchTerm('')}
             />
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.76rem' }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-surface-elevated)', borderBottom: '1px solid rgba(120, 140, 180, 0.2)', color: '#9AA5B8', fontFamily: 'Space Grotesk, sans-serif' }}>
-                <th style={{ padding: '10px 14px' }}>Zone</th>
-                <th style={{ padding: '10px 14px' }}>Risk Score</th>
-                <th style={{ padding: '10px 14px' }}>Level</th>
-                <th style={{ padding: '10px 14px' }}>Probability</th>
-                <th style={{ padding: '10px 14px' }}>Rainfall (24h)</th>
-                <th style={{ padding: '10px 14px' }}>Soil Moisture</th>
-                <th style={{ padding: '10px 14px' }}>Trend</th>
-                <th style={{ padding: '10px 14px' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredZones.map((z) => {
-                const isSelected = activeInspectorZone.id === z.id;
-                return (
-                  <tr
-                    key={z.id}
-                    onClick={() => setSelectedZone(z)}
-                    style={{
-                      borderBottom: '1px solid rgba(120, 140, 180, 0.1)',
-                      cursor: 'pointer',
-                      background: isSelected ? 'rgba(53, 216, 255, 0.08)' : 'transparent',
-                      transition: 'background 0.15s ease'
-                    }}
-                    className="table-row-hover"
-                  >
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#FFFFFF' }}>
-                      {z.name}
-                    </td>
-                    <td style={{ padding: '10px 14px', fontWeight: 900, fontFamily: 'Space Grotesk, sans-serif', color: z.risk_score >= 80 ? '#FF3B6B' : (z.risk_score >= 60 ? '#FF9D3D' : (z.risk_score >= 30 ? '#FFD84D' : '#39D98A')) }}>
-                      {z.risk_score}%
-                    </td>
-                    <td style={{ padding: '10px 14px' }}>
-                      <span className={getLevelBadge(z.level)}>
-                        {z.level}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 14px', color: '#CBD5E1', fontFamily: 'JetBrains Mono, monospace' }}>
-                      {z.prob}
-                    </td>
-                    <td style={{ padding: '10px 14px', color: '#35D8FF', fontFamily: 'JetBrains Mono, monospace' }}>
-                      {z.rain}
-                    </td>
-                    <td style={{ padding: '10px 14px', color: '#8B6CFF', fontFamily: 'JetBrains Mono, monospace' }}>
-                      {z.moisture}
-                    </td>
-                    <td style={{ padding: '10px 14px' }}>
-                      {z.trend === 'up' && <span style={{ color: '#FF3B6B', fontWeight: 800 }}>↑</span>}
-                      {z.trend === 'neutral' && <span style={{ color: '#FFD84D', fontWeight: 800 }}>→</span>}
-                      {z.trend === 'down' && <span style={{ color: '#39D98A', fontWeight: 800 }}>↓</span>}
-                    </td>
-                    <td style={{ padding: '10px 14px', color: '#39D98A', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#39D98A' }} />
-                      <span>{z.status}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <DataTable
+          columns={columns}
+          data={filteredZones}
+          keyField="id"
+          onSelectKey={(id) => {
+            const found = exactRiskZones.find(z => z.id === id);
+            if (found) setSelectedZone(found);
+          }}
+        />
+      </Card>
 
-      {/* BOTTOM SPLIT: Zone Comparison Radar on Left | Vulnerability & Inspector on Right */}
+      {/* 3. Bottom Split: Zone Comparison Radar | Vulnerability & Inspector */}
       <div
         style={{
           display: 'grid',
@@ -197,126 +188,231 @@ export default function RiskIntelligenceView({
         }}
         className="simulation-xai-grid"
       >
-        {/* Left: ZONE COMPARISON Radar Chart */}
-        <div>
+        {/* Left: Zone Comparison Radar Chart */}
+        <Card padding={18}>
           <ZoneComparison zones={zones.length > 0 ? zones : exactRiskZones} />
-        </div>
+        </Card>
 
-        {/* Right Column: VULNERABILITY OVERVIEW (Top) + ZONE INSPECTOR (Bottom) */}
+        {/* Right Column: Vulnerability Overview + Zone Inspector */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* VULNERABILITY OVERVIEW (3 Cards in a Row matching Screen 2) */}
-          <div className="command-panel" style={{ padding: '14px 16px' }}>
-            <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#9AA5B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 10 }}>
-              VULNERABILITY OVERVIEW
+          {/* Vulnerability Overview (4 metric boxes) */}
+          <Card padding={16}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 12
+              }}
+            >
+              Vulnerability Assessment
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-              {/* Card 1: Population at Risk */}
-              <div style={{ background: 'var(--bg-surface-elevated)', padding: '10px 10px', borderRadius: 8, border: '1px solid rgba(120, 140, 180, 0.15)' }}>
-                <span style={{ fontSize: '0.62rem', color: '#9AA5B8', textTransform: 'uppercase', display: 'block' }}>Population at Risk</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FF3B6B', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.1, marginTop: 4 }}>
+              {/* Population */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-input)'
+                }}
+              >
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+                  Population
+                </span>
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: 'var(--risk-critical)',
+                    lineHeight: 1.1,
+                    marginTop: 4
+                  }}
+                >
                   12,842
                 </div>
-                <span style={{ fontSize: '0.62rem', color: '#39D98A', fontWeight: 700 }}>+ 1,234</span>
+                <span style={{ fontSize: 10, color: 'var(--risk-safe)', fontWeight: 500 }}>+1,234 live</span>
               </div>
 
-              {/* Card 2: Critical Infrastructure */}
-              <div style={{ background: 'var(--bg-surface-elevated)', padding: '10px 10px', borderRadius: 8, border: '1px solid rgba(120, 140, 180, 0.15)' }}>
-                <span style={{ fontSize: '0.62rem', color: '#9AA5B8', textTransform: 'uppercase', display: 'block' }}>Critical Infra</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FF9D3D', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.1, marginTop: 4 }}>
+              {/* Critical Infrastructure */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-input)'
+                }}
+              >
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+                  Critical Infra
+                </span>
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: 'var(--risk-high)',
+                    lineHeight: 1.1,
+                    marginTop: 4
+                  }}
+                >
                   24
                 </div>
-                <span style={{ fontSize: '0.6rem', color: '#5C677D' }}>Bridges, Schools</span>
+                <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>Bridges, Schools</span>
               </div>
 
-              {/* Card 3: Settlements */}
-              <div style={{ background: 'var(--bg-surface-elevated)', padding: '10px 10px', borderRadius: 8, border: '1px solid rgba(120, 140, 180, 0.15)' }}>
-                <span style={{ fontSize: '0.62rem', color: '#9AA5B8', textTransform: 'uppercase', display: 'block' }}>Settlements</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#35D8FF', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.1, marginTop: 4 }}>
+              {/* Settlements */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-input)'
+                }}
+              >
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+                  Settlements
+                </span>
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: 'var(--brand-primary)',
+                    lineHeight: 1.1,
+                    marginTop: 4
+                  }}
+                >
                   36
                 </div>
-                <span style={{ fontSize: '0.6rem', color: '#5C677D' }}>Villages</span>
+                <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>Villages</span>
               </div>
 
-              {/* Card 4: Road Length at Risk */}
-              <div style={{ background: 'var(--bg-surface-elevated)', padding: '10px 10px', borderRadius: 8, border: '1px solid rgba(120, 140, 180, 0.15)' }}>
-                <span style={{ fontSize: '0.62rem', color: '#9AA5B8', textTransform: 'uppercase', display: 'block' }}>Road at Risk</span>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FF4DB8', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.1, marginTop: 4 }}>
+              {/* Road at Risk */}
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-primary)',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-input)'
+                }}
+              >
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block' }}>
+                  Road at Risk
+                </span>
+                <div
+                  className="font-mono"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: 'var(--brand-light)',
+                    lineHeight: 1.1,
+                    marginTop: 4
+                  }}
+                >
                   48.6 km
                 </div>
-                <span style={{ fontSize: '0.6rem', color: '#5C677D' }}>NH-6 & NH-106</span>
+                <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>NH-6 & NH-106</span>
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* ZONE INSPECTOR matching Screen 2 */}
-          <div className="command-panel" style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          {/* Zone Inspector Card */}
+          <Card
+            padding={18}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: 14
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#9AA5B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Space Grotesk, sans-serif' }}>
-                  ZONE INSPECTOR
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand-primary)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  Zone Inspector
                 </span>
-                <span className={getLevelBadge(activeInspectorZone.level)}>
-                  {activeInspectorZone.level}
-                </span>
+                <RiskBadge level={activeInspectorZone.level} size="sm" />
               </div>
 
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif', margin: '0 0 12px' }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 12px 0' }}>
                 {activeInspectorZone.name}
               </h3>
 
-              {/* Metrics Grid matching Screen 2 */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
-                <div style={{ background: 'var(--bg-surface-elevated)', padding: '8px 10px', borderRadius: 6 }}>
-                  <span style={{ fontSize: '0.62rem', color: '#9AA5B8' }}>Area</span>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'Space Grotesk, sans-serif' }}>
+              {/* Geotechnical Parameters Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Surface Area</span>
+                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
                     {activeInspectorZone.area}
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-surface-elevated)', padding: '8px 10px', borderRadius: 6 }}>
-                  <span style={{ fontSize: '0.62rem', color: '#9AA5B8' }}>Max Elevation</span>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#35D8FF', fontFamily: 'Space Grotesk, sans-serif' }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Elevation</span>
+                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-primary)', marginTop: 2 }}>
                     {activeInspectorZone.elevation}
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-surface-elevated)', padding: '8px 10px', borderRadius: 6 }}>
-                  <span style={{ fontSize: '0.62rem', color: '#9AA5B8' }}>Avg Slope</span>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#FF9D3D', fontFamily: 'Space Grotesk, sans-serif' }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Avg Slope</span>
+                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--risk-high)', marginTop: 2 }}>
                     {activeInspectorZone.slope}
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-surface-elevated)', padding: '8px 10px', borderRadius: 6 }}>
-                  <span style={{ fontSize: '0.62rem', color: '#9AA5B8' }}>Geology</span>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#CBD5E1' }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Geology</span>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginTop: 2 }}>
                     {activeInspectorZone.geology}
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-surface-elevated)', padding: '8px 10px', borderRadius: 6, gridColumn: 'span 2' }}>
-                  <span style={{ fontSize: '0.62rem', color: '#9AA5B8' }}>Drainage Density</span>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#8B6CFF', fontFamily: 'Space Grotesk, sans-serif' }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)', gridColumn: 'span 2' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Drainage Density</span>
+                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-light)', marginTop: 2 }}>
                     {activeInspectorZone.drainage}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* View Detailed Report Button */}
-            <button
-              onClick={() => {
-                const found = zones.find(z => z.id === activeInspectorZone.id) || activeInspectorZone;
-                exportZoneRiskPDF(found);
-              }}
-              className="btn-primary-cyan"
-              style={{ width: '100%', padding: '9px 0', fontSize: '0.78rem', justifyContent: 'center' }}
-            >
-              <FileText size={14} />
-              <span>View Detailed Report</span>
-            </button>
-          </div>
+            {/* Action Buttons: Locate on Map + Export Dossier */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              {onNavigateToGIS && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={ArrowUpRight}
+                  onClick={() => {
+                    if (onSelectZone) onSelectZone(activeInspectorZone);
+                    onNavigateToGIS();
+                  }}
+                  style={{ flex: 1 }}
+                >
+                  Locate on GIS
+                </Button>
+              )}
+              <Button
+                variant="primary"
+                size="sm"
+                icon={FileText}
+                onClick={() => {
+                  const found = zones.find(z => z.id === activeInspectorZone.id) || activeInspectorZone;
+                  exportZoneRiskPDF(found);
+                }}
+                style={{ flex: 1 }}
+              >
+                Export Dossier
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

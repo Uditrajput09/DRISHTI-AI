@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "1788865739583-e204",
+  "createdAt": 1788865739583,
+  "origin": "failed-assert",
+  "expected": "declared consequence",
+  "observed": "no element matched {\"text\":\"Close navigation\"}",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "e204",
+        "source": {
+          "file": "src/components/ui/TopNavigation.jsx",
+          "line": 102,
+          "column": 35
+        }
+      },
+      "action": "click"
+    }
+  ]
+}

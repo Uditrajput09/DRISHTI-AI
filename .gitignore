@@ -37,3 +37,10 @@ Thumbs.db
 .DS_Store
 .idea/
 *.iml
+scratch/
+.agents/scratch/
+.playwright-cli/
+.playwright-mcp/
+*.timestamp-*.mjs
+.claude/
+
