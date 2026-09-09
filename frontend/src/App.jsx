@@ -85,6 +85,26 @@ function AppContent() {
       if (e.data?.type === 'DRISHTI_SIMULATOR_NAVIGATE') {
         handleSelectSection(e.data.payload);
       }
+      if (e.data?.type === 'DRISHTI_SIMULATOR_AUTH_SWITCH' && e.data.payload) {
+        const { email, password, guest, logout } = e.data.payload;
+        if (logout) {
+          authService.logout();
+          setCurrentUser(null);
+          handleSelectSection('login');
+          if (showToast) showToast('Logged out of simulated Android session', 'info');
+        } else if (guest) {
+          handleSelectSection('gis');
+          if (showToast) showToast('Entered Command Center as Guest / Evaluator', 'success');
+        } else if (email && password) {
+          authService.login(email, password).then((u) => {
+            setCurrentUser(u);
+            handleSelectSection('gis');
+            if (showToast) showToast(`Simulated Login: ${u.name} (${u.role})`, 'success');
+          }).catch(() => {
+            handleSelectSection('login');
+          });
+        }
+      }
       if (e.data?.type === 'DRISHTI_SIMULATOR_NOTIFICATION' && e.data.payload) {
         const notif = e.data.payload;
         if (showToast) {

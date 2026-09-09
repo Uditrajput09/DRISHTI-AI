@@ -18,7 +18,10 @@ import {
   Radio,
   ExternalLink,
   MapPin,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Layers
 } from 'lucide-react';
 import { 
   Card, 
@@ -38,6 +41,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showMobilePillars, setShowMobilePillars] = useState(false);
 
   // Login form states — default to Citizen Scientist Volunteer
   const [emailOrPhone, setEmailOrPhone] = useState('responder@drishti.ai');
@@ -108,6 +112,9 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
   };
 
   const handleQuickFill = (type) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
     setErrorMsg('');
     if (type === 'responder') {
       setEmailOrPhone(PRESET_USERS.responder.email);
@@ -140,7 +147,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 32px 20px;
+          padding: 24px 16px;
           box-sizing: border-box;
           font-family: var(--font-body, -apple-system, BlinkMacSystemFont, sans-serif);
           color: var(--text-primary, #F5F5F5);
@@ -151,30 +158,93 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
           max-width: 1240px;
           display: flex;
           flex-direction: column;
-          gap: 32px;
+          gap: 20px;
           margin: 0 auto;
         }
 
+        /* Mobile First Order: Auth Card first on mobile screens */
+        .login-card-pane {
+          order: 1;
+          width: 100%;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        .login-hero-pane {
+          order: 2;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          padding: 8px 4px;
+        }
+
+        .mobile-architecture-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: rgba(18, 20, 26, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 12px 16px;
+          cursor: pointer;
+          color: #F5F5F5;
+          margin-bottom: 12px;
+          transition: all 0.2s ease;
+          user-select: none;
+        }
+
+        .mobile-architecture-toggle:hover {
+          background: rgba(24, 28, 38, 0.95);
+          border-color: rgba(79, 111, 255, 0.4);
+        }
+
+        .hero-collapsible-body {
+          display: none;
+        }
+
+        .hero-collapsible-body.open {
+          display: block;
+          animation: fadeInSlide 0.25s ease-out;
+        }
+
+        @keyframes fadeInSlide {
+          from { opacity: 0; transform: translateY(-6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Desktop Layout (>= 980px): Classic Split Screen */
         @media (min-width: 980px) {
+          .login-landing-root {
+            padding: 32px 24px;
+          }
+
           .login-landing-wrapper {
             flex-direction: row;
             align-items: stretch;
             gap: 48px;
           }
+
           .login-hero-pane {
+            order: 1;
             flex: 1.15;
+            padding: 16px 8px;
+            justify-content: space-between;
           }
+
           .login-card-pane {
+            order: 2;
             flex: 0.95;
             max-width: 480px;
+            margin: 0;
           }
-        }
 
-        .login-hero-pane {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 16px 8px;
+          .mobile-architecture-toggle {
+            display: none;
+          }
+
+          .hero-collapsible-body {
+            display: block !important;
+          }
         }
 
         .pulse-beacon {
@@ -236,23 +306,109 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
           border-radius: 12px;
           padding: 14px 18px;
           cursor: pointer;
-          color: #F5F5F5;
-          text-decoration: none;
           transition: all 0.2s ease;
         }
 
         .direct-jury-cta:hover {
-          background: linear-gradient(135deg, rgba(79, 111, 255, 0.28) 0%, rgba(108, 131, 255, 0.18) 100%);
+          background: linear-gradient(135deg, rgba(79, 111, 255, 0.25) 0%, rgba(108, 131, 255, 0.15) 100%);
           border-color: rgba(79, 111, 255, 0.6);
           box-shadow: 0 0 20px rgba(79, 111, 255, 0.25);
-          transform: translateY(-2px);
+          transform: translateY(-1px);
+        }
+
+        .mobile-brand-banner {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .guest-bypass-btn {
+          width: 100%;
+          min-height: 42px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: rgba(79, 111, 255, 0.09);
+          border: 1px solid rgba(79, 111, 255, 0.3);
+          border-radius: 10px;
+          color: #F5F5F5;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          touch-action: manipulation;
+          margin-top: 8px;
+        }
+
+        .guest-bypass-btn:hover {
+          background: rgba(79, 111, 255, 0.2);
+          border-color: rgba(79, 111, 255, 0.55);
+          box-shadow: 0 0 16px rgba(79, 111, 255, 0.25);
+          transform: translateY(-1px);
+        }
+
+        .guest-bypass-btn:active {
+          transform: scale(0.99);
+        }
+
+        @media (min-width: 980px) {
+          .mobile-brand-banner {
+            display: none;
+          }
+          .desktop-only-cta {
+            display: flex !important;
+          }
+        }
+
+        @media (max-width: 979px) {
+          .desktop-only-cta {
+            display: none !important;
+          }
         }
       `}</style>
 
       <div className="login-landing-wrapper">
         {/* LEFT COLUMN: Mission Context & System Intelligence */}
         <div className="login-hero-pane">
-          <div>
+          {/* Mobile Accordion Switcher */}
+          <div
+            className="mobile-architecture-toggle"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+              setShowMobilePillars(!showMobilePillars);
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { 
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowMobilePillars(!showMobilePillars);
+              }
+            }}
+            aria-expanded={showMobilePillars}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(79, 111, 255, 0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5C78FF' }}>
+                <Activity size={16} />
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#F5F5F5' }}>
+                  System Architecture & 4 Core Pillars
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary, #A1A1A1)' }}>
+                  XGBoost + Dijkstra + 5 APIs + Zero-Signal Nav
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#5C78FF' }}>
+              <span style={{ fontSize: 11, fontWeight: 600 }}>{showMobilePillars ? 'Hide' : 'View'}</span>
+              {showMobilePillars ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
+
+          <div className={`hero-collapsible-body ${showMobilePillars ? 'open' : ''}`}>
             {/* National & State Government Accreditation Banner */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 9999, padding: '6px 14px', marginBottom: 20 }}>
               <span className="pulse-beacon" />
@@ -291,16 +447,16 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
             </div>
 
             {/* Core Mission Headline */}
-            <h2 style={{ fontSize: 32, fontWeight: 700, lineHeight: 1.25, margin: '18px 0 12px 0', letterSpacing: '-0.02em', textWrap: 'balance' }}>
+            <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.25, margin: '18px 0 12px 0', letterSpacing: '-0.02em', textWrap: 'balance' }}>
               Real-time Landslide Early Warning & Evacuation Intelligence
             </h2>
 
-            <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-secondary, #A1A1A1)', margin: '0 0 28px 0', maxWidth: 580, textWrap: 'pretty' }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary, #A1A1A1)', margin: '0 0 24px 0', maxWidth: 580, textWrap: 'pretty' }}>
               Protecting lives, arterial highways (<code style={{ color: '#5C78FF', background: 'rgba(79,111,255,0.1)', padding: '2px 6px', borderRadius: 4 }}>NH-6</code>, <code style={{ color: '#5C78FF', background: 'rgba(79,111,255,0.1)', padding: '2px 6px', borderRadius: 4 }}>NH-106</code>), and 10 mountainous micro-zones in Cherrapunji and Mawsynram with physics-informed AI modeling and zero-signal offline routing.
             </p>
 
             {/* 4 Core Pillars Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, marginBottom: 28 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 24 }}>
               <div className="pillar-card">
                 <div style={{ color: '#4F6FFF', padding: 4 }}><Activity size={20} /></div>
                 <div>
@@ -342,10 +498,10 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
               padding: '12px 18px',
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 20,
+              gap: 16,
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: 24
+              marginBottom: 20
             }}>
               <div>
                 <span style={{ fontSize: 11, color: '#6F6F6F', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block' }}>Sector</span>
@@ -364,47 +520,64 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                 <span style={{ fontSize: 13, fontWeight: 600, color: '#F59E0B' }}>96.5% Precision</span>
               </div>
             </div>
-          </div>
 
-          {/* Prominent Direct Guest / Jury Access CTA */}
-          <div 
-            className="direct-jury-cta"
-            onClick={() => navigateToGIS(currentUser)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') navigateToGIS(currentUser); }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(79, 111, 255, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5C78FF' }}>
-                <Sparkles size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>
-                  Explore Live Command Center
+            {/* Desktop Direct Jury Access CTA */}
+            <div 
+              className="direct-jury-cta desktop-only-cta"
+              onClick={() => {
+                if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                navigateToGIS(currentUser);
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') navigateToGIS(currentUser); }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(79, 111, 255, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5C78FF' }}>
+                  <Sparkles size={20} />
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.65)' }}>
-                  Instant Guest & Jury Evaluation Access (Bypass Login)
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>
+                    Explore Live Command Center
+                  </div>
+                  <div style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.65)' }}>
+                    Instant Guest & Jury Evaluation Access (Bypass Login)
+                  </div>
                 </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#5C78FF', fontWeight: 600, fontSize: 13 }}>
-              <span>Enter GIS Map</span>
-              <ArrowRight size={16} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#5C78FF', fontWeight: 600, fontSize: 13 }}>
+                <span>Enter GIS Map</span>
+                <ArrowRight size={16} />
+              </div>
             </div>
           </div>
         </div>
 
         {/* RIGHT COLUMN: Interactive Operator Access & Sign-In Card */}
         <div className="login-card-pane">
-          <Card padding={28} style={{ background: 'rgba(16, 17, 22, 0.95)', border: '1px solid rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(20px)', borderRadius: 16 }}>
+          {/* Mobile-Only Top Brand Header */}
+          <div className="mobile-brand-banner">
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
+              <span className="pulse-beacon" />
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#31B77A' }}>
+                Operational Early Warning Grid
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+              <span style={{ fontSize: 10, color: 'var(--text-secondary, #A1A1A1)' }}>
+                Meghalaya Pilot
+              </span>
+            </div>
+          </div>
+
+          <Card padding={24} style={{ background: 'rgba(16, 17, 22, 0.95)', border: '1px solid rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(20px)', borderRadius: 16 }}>
             {/* Card Brand Header */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 18 }}>
               <img
                 src="/logo.jpg"
                 alt="DRISHTI-AI"
                 style={{
-                  width: 48,
-                  height: 48,
+                  width: 46,
+                  height: 46,
                   borderRadius: 12,
                   objectFit: 'cover',
                   marginBottom: 10,
@@ -415,7 +588,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
               <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary, #F5F5F5)', margin: 0 }}>
                 Operator Authentication
               </h3>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary, #A1A1A1)', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary, #A1A1A1)', margin: '4px 0 0 0' }}>
                 Authorized SDMA, SDRF & Citizen Responder Gate
               </p>
             </div>
@@ -427,7 +600,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                 border: '1px solid rgba(49, 183, 122, 0.35)',
                 borderRadius: 10,
                 padding: '12px 14px',
-                marginBottom: 18,
+                marginBottom: 16,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8
@@ -445,7 +618,10 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   variant="primary"
                   size="sm"
                   fullWidth
-                  onClick={() => navigateToGIS(currentUser)}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                    navigateToGIS(currentUser);
+                  }}
                   style={{ marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                 >
                   <span>Continue to Command Center</span>
@@ -455,7 +631,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
             )}
 
             {/* Tab Switcher */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
               <Tabs
                 tabs={[
                   { id: 'login', label: 'Operator Sign In' },
@@ -513,10 +689,14 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
 
             {/* Sign In Form */}
             {activeTab === 'login' && (
-              <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <Input
                   label="Official Email or Phone"
                   icon={Mail}
+                  type="text"
+                  inputMode="email"
+                  autoComplete="email"
+                  spellCheck="false"
                   fullWidth
                   value={emailOrPhone}
                   onChange={(e) => setEmailOrPhone(e.target.value)}
@@ -529,6 +709,8 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                     label="Security Passcode"
                     icon={Lock}
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    spellCheck="false"
                     fullWidth
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -545,7 +727,8 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                       color: 'var(--text-muted, #6F6F6F)',
                       background: 'none',
                       border: 'none',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      padding: 4
                     }}
                     aria-label="Toggle password visibility"
                   >
@@ -573,10 +756,24 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   variant="primary"
                   fullWidth
                   loading={loading}
-                  style={{ marginTop: 4, height: 42, fontSize: 14, fontWeight: 600 }}
+                  style={{ marginTop: 4, height: 44, fontSize: 14, fontWeight: 600, touchAction: 'manipulation' }}
                 >
                   {loading ? 'Verifying Credentials...' : 'Sign In to Command Center'}
                 </Button>
+
+                {/* Instant Guest / Jury Access CTA directly inside Card */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+                    navigateToGIS(currentUser);
+                  }}
+                  className="guest-bypass-btn"
+                >
+                  <Sparkles size={15} style={{ color: '#5C78FF' }} />
+                  <span>Explore as Guest / Jury (Bypass Login)</span>
+                  <ArrowRight size={14} style={{ color: '#5C78FF' }} />
+                </button>
               </form>
             )}
 
@@ -586,6 +783,8 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                 <Input
                   label="Full Name"
                   icon={User}
+                  autoComplete="name"
+                  spellCheck="false"
                   fullWidth
                   value={signupName}
                   onChange={(e) => setSignupName(e.target.value)}
@@ -609,6 +808,9 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   label="Official Email"
                   icon={Mail}
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  spellCheck="false"
                   fullWidth
                   value={signupEmail}
                   onChange={(e) => setSignupEmail(e.target.value)}
@@ -620,6 +822,9 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   label="Contact Phone"
                   icon={Phone}
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  spellCheck="false"
                   fullWidth
                   value={signupPhone}
                   onChange={(e) => setSignupPhone(e.target.value)}
@@ -631,6 +836,8 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   label="Create Passcode"
                   icon={Lock}
                   type="password"
+                  autoComplete="new-password"
+                  spellCheck="false"
                   fullWidth
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
@@ -642,6 +849,8 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   label="Confirm Passcode"
                   icon={Lock}
                   type="password"
+                  autoComplete="new-password"
+                  spellCheck="false"
                   fullWidth
                   value={signupConfirmPassword}
                   onChange={(e) => setSignupConfirmPassword(e.target.value)}
@@ -654,7 +863,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   variant="primary"
                   fullWidth
                   loading={loading}
-                  style={{ marginTop: 6, height: 42, fontSize: 14, fontWeight: 600 }}
+                  style={{ marginTop: 6, height: 44, fontSize: 14, fontWeight: 600, touchAction: 'manipulation' }}
                 >
                   {loading ? 'Registering...' : 'Register Responder Profile'}
                 </Button>
@@ -662,18 +871,24 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
             )}
 
             {/* Demo Operator Presets (1-Click for Jury / Demo) */}
-            <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted, #6F6F6F)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Demo Operator Presets
                 </span>
-                <span style={{ fontSize: 11, color: '#4F6FFF' }}>1-Click Load</span>
+                <span style={{ fontSize: 11, color: '#4F6FFF', fontWeight: 600 }}>1-Click Load</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="preset-chip-card" onClick={() => handleQuickFill('responder')}>
+                <div 
+                  className="preset-chip-card" 
+                  onClick={() => handleQuickFill('responder')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleQuickFill('responder'); }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#31B77A' }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#31B77A', boxShadow: '0 0 8px #31B77A' }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: '#F5F5F5' }}>Citizen Volunteer</div>
                       <div style={{ fontSize: 11, color: '#A1A1A1' }}>Sohra Escarpment Sector</div>
@@ -682,9 +897,15 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   <Badge variant="safe" size="sm">Field Active</Badge>
                 </div>
 
-                <div className="preset-chip-card" onClick={() => handleQuickFill('officer')}>
+                <div 
+                  className="preset-chip-card" 
+                  onClick={() => handleQuickFill('officer')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleQuickFill('officer'); }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4F6FFF' }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4F6FFF', boxShadow: '0 0 8px #4F6FFF' }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: '#F5F5F5' }}>SDMA Operations Officer</div>
                       <div style={{ fontSize: 11, color: '#A1A1A1' }}>State Emergency HQ</div>
@@ -693,9 +914,15 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
                   <Badge variant="info" size="sm">Admin Level</Badge>
                 </div>
 
-                <div className="preset-chip-card" onClick={() => handleQuickFill('sdrf')}>
+                <div 
+                  className="preset-chip-card" 
+                  onClick={() => handleQuickFill('sdrf')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleQuickFill('sdrf'); }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF4D5A' }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF4D5A', boxShadow: '0 0 8px #FF4D5A' }} />
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: '#F5F5F5' }}>SDRF Quick Response Lead</div>
                       <div style={{ fontSize: 11, color: '#A1A1A1' }}>Search & Rescue Squad</div>
@@ -707,7 +934,7 @@ export default function LoginView({ currentUser, onLoginSuccess, onNavigate }) {
             </div>
 
             {/* National Emergency Hotline Strip */}
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: '#6F6F6F' }}>
+            <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: '#6F6F6F' }}>
               <span>🚨 National Emergency: <strong style={{ color: '#F5F5F5' }}>112</strong></span>
               <span>SDMA Helpline: <strong style={{ color: '#F5F5F5' }}>1070</strong></span>
             </div>

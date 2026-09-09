@@ -299,7 +299,6 @@
     - Made Login the primary landing page on root `http://localhost:5173/` (`/`) and `/login` in `App.jsx`, maintaining full accessibility to deep links (`/app`, `/risk`, `/evacuation`, etc.).
     - Overhauled `LoginView.jsx` using the Refero Design methodology into a mission-critical aerospace & geospatial operations portal:
       - **Left Hero & Mission Panel**: MDoNER/SDMA government accreditation badge, headline, 4 core pillar cards (Physics-Informed XGBoost Ensemble, Dijkstra Safe Corridors, 5-Source Ingestion, Zero-Signal Offline Nav), live pilot region telemetry strip (10 micro-zones, 28 shelters, 96.5% precision), and a prominent **⚡ Explore Live Command Center (Guest / Jury Evaluation Access)** 1-click bypass button.
-      - **Right Operator Gate Card**: Glassmorphic auth card with Operator Sign In vs Register Responder tabs, Active Session Detector ("Continue to Command Center as [Name]"), 1-click demo evaluation presets (Citizen Volunteer, SDMA Officer, SDRF Lead), and national emergency hotlines (112 / 1070).
 - 2026-09-09: Integrated Official DRISHTI-AI Brand Logo (Option 7 — Minimalist Linear Contour Ribbon & Crest):
     - Selected official logo concept (Option 7) and deployed to public assets (`frontend/public/logo.jpg` and `frontend/public/drishti-logo.jpg`).
     - Updated `frontend/index.html`: configured browser tab favicon (`rel="icon"`), Apple Touch Icon (`rel="apple-touch-icon"`), and OpenGraph / Twitter Card preview meta tags.
@@ -307,6 +306,23 @@
     - Integrated logo into `frontend/src/components/ui/Sidebar.jsx` (top brand rail lockup) and `frontend/src/components/ui/TopNavigation.jsx` (root breadcrumb path).
     - Integrated branded app icon into `frontend/src/components/AndroidAppModal.jsx`, `frontend/src/components/AndroidDeviceSimulator.jsx`, and `frontend/src/views/ProfileView.jsx`.
     - Validated production bundle with 0 errors (`npm run build`, 2,551 modules bundled in 10.41s) and synchronized native Android container via `npx cap sync android` (0.201s).
+
+- 2026-09-09: Optimized Login Screen for Mobile & Android Device Simulator (Refero Design):
+    - **Mobile-First Responsive Layout (`LoginView.jsx`)**:
+      - Restructured mobile viewports (`< 980px` and mobile simulator iframe) with `.login-card-pane` rendered with `order: 1` directly at the top above the fold, eliminating the 900px+ vertical scroll barrier on phones.
+      - Added compact `.mobile-brand-banner` with live pulsing green beacon: `OPERATIONAL EARLY WARNING GRID • Meghalaya Pilot`.
+      - Touch ergonomics: Added `inputMode="email"`, `autoComplete="email"`, `autoComplete="current-password"`, `spellCheck="false"`, 44px+ touch targets, and `navigator.vibrate(15)` tactile feedback on presets and login.
+      - Prominent Guest & Jury Evaluation CTA: Added full-width `.guest-bypass-btn` (`⚡ Explore Live Command Center (Guest Bypass)`) directly inside the Card on both mobile and desktop.
+      - Collapsible Mission Intelligence: Converted the 4 core pillars and live East Khasi Hills telemetry into an expandable accordion (`.mobile-architecture-toggle`) on mobile with `ChevronDown` / `ChevronUp` icons, while preserving the full split-screen on desktop viewports (`>= 980px`).
+    - **Android Device Simulator Optimization (`AndroidDeviceSimulator.jsx`)**:
+      - Expanded the Quick Screen Jump dock from 9 views to a symmetrical 5x2 grid: `GIS Command`, `Risk Radar`, `48H Forecast`, `Incidents`, `Alerts`, `Field Report`, `Simulation`, `🚨 Evac`, `Profile`, and `🔐 Login` (`isAuth: true`).
+      - Added "Operator & Persona Simulation" 1-click test card in `TAB 5: HARDWARE & DISPLAY SETTINGS` allowing instant testing as Citizen Volunteer, SDMA Officer, SDRF SAR Lead, or Return to Gate (Logout).
+      - Connected `DRISHTI_SIMULATOR_AUTH_SWITCH` bridge event in `App.jsx` supporting instant cross-window authentication state changes.
+    - **Verification & Parity**:
+      - Validated 390px mobile viewport in Playwright with clean rendering above the fold, verified accordion expand/collapse interaction, and verified preset loading.
+      - Validated desktop split-screen layout and simulated Google Pixel 8 Pro device frame in Playwright.
+      - Vite production build passed cleanly (`✓ built in 13.60s`, 2,551 modules).
+      - Native Android Capacitor container synced cleanly (`npx cap sync android` in 0.319s).
 
 ---
 

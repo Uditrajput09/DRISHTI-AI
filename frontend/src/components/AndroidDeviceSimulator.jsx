@@ -122,6 +122,27 @@ export default function AndroidDeviceSimulator({ isOpen, onClose }) {
     showToast(`Simulated Android: Switched to ${section.toUpperCase()} View`, 'info');
   };
 
+  // Simulate Operator Authentication / Role Switch
+  const handleSimulateAuth = (role, email, password, label) => {
+    if (iframeRef.current?.contentWindow) {
+      try {
+        if (role === 'logout') {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'DRISHTI_SIMULATOR_AUTH_SWITCH',
+            payload: { logout: true }
+          }, '*');
+          showToast('Simulated Android: Logged out & Returned to Operator Gate', 'info');
+        } else {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'DRISHTI_SIMULATOR_AUTH_SWITCH',
+            payload: { email, password, role }
+          }, '*');
+          showToast(`Simulated Android: Authenticated as ${label}`, 'success');
+        }
+      } catch (e) {}
+    }
+  };
+
   // Trigger Simulated Push Notification
   const triggerPushNotification = (type) => {
     let notif = {
@@ -617,39 +638,40 @@ export default function AndroidDeviceSimulator({ isOpen, onClose }) {
               </span>
             </div>
 
-            {/* Symmetrical 3x3 Quick Screen Jump Grid (All 9 Core Views) */}
+            {/* Symmetrical 5x2 Quick Screen Jump Grid (All 10 Core Views) */}
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Quick Screen Jump (9 Views)
+                  Quick Screen Jump (10 Views)
                 </span>
                 <span style={{ fontSize: '0.62rem', color: 'var(--brand-primary)', fontWeight: 600 }}>
                   Sync Mobile Route
                 </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 5 }}>
                 {[
                   { id: 'gis', label: 'GIS Command' },
                   { id: 'risk', label: 'Risk Radar' },
                   { id: 'forecast', label: '48H Forecast' },
                   { id: 'incidents', label: 'Incidents' },
-                  { id: 'alerts', label: 'Alerts Center' },
+                  { id: 'alerts', label: 'Alerts' },
                   { id: 'reports', label: 'Field Report' },
                   { id: 'simulation', label: 'Simulation' },
-                  { id: 'evacuation', label: '🚨 Evac Guide', isSpecial: true },
-                  { id: 'profile', label: 'Profile Hub' }
+                  { id: 'evacuation', label: '🚨 Evac', isSpecial: true },
+                  { id: 'profile', label: 'Profile' },
+                  { id: 'login', label: '🔐 Login', isAuth: true }
                 ].map(s => (
                   <button
                     key={s.id}
                     onClick={() => navigateSimulatedApp(s.id)}
                     style={{
-                      padding: '5px 4px',
-                      backgroundColor: s.isSpecial ? 'rgba(239, 68, 68, 0.12)' : 'var(--bg-surface-secondary)',
-                      border: s.isSpecial ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid var(--border-primary)',
+                      padding: '5px 3px',
+                      backgroundColor: s.isSpecial ? 'rgba(239, 68, 68, 0.12)' : s.isAuth ? 'rgba(79, 111, 255, 0.14)' : 'var(--bg-surface-secondary)',
+                      border: s.isSpecial ? '1px solid rgba(239, 68, 68, 0.35)' : s.isAuth ? '1px solid rgba(79, 111, 255, 0.38)' : '1px solid var(--border-primary)',
                       borderRadius: 'var(--radius-sm)',
-                      color: s.isSpecial ? '#f87171' : 'var(--text-secondary)',
-                      fontSize: '0.66rem',
-                      fontWeight: s.isSpecial ? 600 : 500,
+                      color: s.isSpecial ? '#f87171' : s.isAuth ? '#5C78FF' : 'var(--text-secondary)',
+                      fontSize: '0.64rem',
+                      fontWeight: (s.isSpecial || s.isAuth) ? 600 : 500,
                       cursor: 'pointer',
                       textAlign: 'center',
                       whiteSpace: 'nowrap',
@@ -663,9 +685,9 @@ export default function AndroidDeviceSimulator({ isOpen, onClose }) {
                       e.currentTarget.style.backgroundColor = 'var(--brand-tint)';
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.borderColor = 'var(--border-primary)';
-                      e.currentTarget.style.backgroundColor = 'var(--bg-surface-secondary)';
+                      e.currentTarget.style.color = s.isSpecial ? '#f87171' : s.isAuth ? '#5C78FF' : 'var(--text-secondary)';
+                      e.currentTarget.style.borderColor = s.isSpecial ? 'rgba(239, 68, 68, 0.35)' : s.isAuth ? 'rgba(79, 111, 255, 0.38)' : 'var(--border-primary)';
+                      e.currentTarget.style.backgroundColor = s.isSpecial ? 'rgba(239, 68, 68, 0.12)' : s.isAuth ? 'rgba(79, 111, 255, 0.14)' : 'var(--bg-surface-secondary)';
                     }}
                   >
                     {s.label}
@@ -1117,6 +1139,88 @@ export default function AndroidDeviceSimulator({ isOpen, onClose }) {
                         {Math.round(s * 100)}%
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Operator Persona & Quick Auth Switcher */}
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', padding: '12px 14px', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Operator & Persona Simulation
+                    </span>
+                    <span style={{ fontSize: '0.62rem', color: 'var(--brand-primary)', fontWeight: 600 }}>
+                      1-Click Switch
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <button
+                      onClick={() => handleSimulateAuth('responder', 'responder@drishti.ai', 'drishti2026', 'Citizen Volunteer')}
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'rgba(49, 183, 122, 0.1)',
+                        border: '1px solid rgba(49, 183, 122, 0.35)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: '#31B77A',
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      🟢 Citizen Volunteer
+                    </button>
+
+                    <button
+                      onClick={() => handleSimulateAuth('officer', 'officer@drishti.ai', 'drishti2026', 'SDMA Operations Officer')}
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'rgba(79, 111, 255, 0.1)',
+                        border: '1px solid rgba(79, 111, 255, 0.35)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: '#5C78FF',
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      🔵 SDMA Officer
+                    </button>
+
+                    <button
+                      onClick={() => handleSimulateAuth('sdrf', 'sdrf@drishti.ai', 'drishti2026', 'SDRF Quick Response Lead')}
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'rgba(255, 77, 90, 0.1)',
+                        border: '1px solid rgba(255, 77, 90, 0.35)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: '#FF4D5A',
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      🔴 SDRF SAR Lead
+                    </button>
+
+                    <button
+                      onClick={() => handleSimulateAuth('logout', null, null, 'Logged Out')}
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'var(--bg-surface-secondary)',
+                        border: '1px solid var(--border-secondary)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      🚪 Return to Gate
+                    </button>
                   </div>
                 </div>
               </div>

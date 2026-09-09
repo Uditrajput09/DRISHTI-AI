@@ -17,6 +17,15 @@ export default defineConfig({
         ws: true,
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            // Silently ignore benign socket aborts caused by tab refresh / navigation
+            if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') {
+              return;
+            }
+            console.warn('[vite ws proxy]', err.message);
+          });
+        }
       }
     }
   }
