@@ -11,3 +11,6 @@ entrypoint = "backend.main:app"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.uv]
+link-mode = "copy"

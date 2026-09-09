@@ -12,6 +12,7 @@ import signal
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
+os.environ["UV_LINK_MODE"] = "copy"
 
 
 def main():
