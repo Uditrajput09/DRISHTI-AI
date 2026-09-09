@@ -28,5 +28,18 @@ export default defineConfig({
         }
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-maps': ['leaflet', 'react-leaflet', 'leaflet.heat'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2', 'recharts'],
+          'vendor-pdf': ['jspdf', 'jspdf-autotable']
+        }
+      }
+    }
   }
 });
