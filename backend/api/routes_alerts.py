@@ -14,6 +14,7 @@ from backend.models import AlertLog, Zone, Subscriber
 from backend.schemas import ManualAlertRequest, SubscriberCreate
 from backend.alerts.engine import alert_engine
 from backend.alerts.push import push_service
+from backend.security import mask_contact, verify_admin_key
 
 router = APIRouter(prefix="/api/alerts", tags=["Alerts & Notifications"])
 
@@ -33,7 +34,7 @@ def get_alert_history(limit: int = Query(50), db: Session = Depends(get_db)):
             "risk_score": item.risk_score,
             "risk_level": item.risk_level,
             "channel": item.channel,
-            "recipient": item.recipient,
+            "recipient": mask_contact(item.recipient),
             "language": item.language,
             "message_text": item.message_text,
             "status": item.status,
@@ -45,10 +46,15 @@ def get_alert_history(limit: int = Query(50), db: Session = Depends(get_db)):
 
 
 @router.post("/trigger-manual")
-def trigger_manual_alert(req: ManualAlertRequest, db: Session = Depends(get_db)):
+def trigger_manual_alert(
+    req: ManualAlertRequest,
+    db: Session = Depends(get_db),
+    admin_auth: bool = Depends(verify_admin_key)
+):
     """
     Manually trigger an emergency alert broadcast for live hackathon demonstration.
     Generates SMS and push notifications across Khasi, Assamese, Hindi, and English.
+    Requires valid X-Admin-Key authorization.
     """
     zone = db.query(Zone).filter(Zone.id == req.zone_id).first()
     if not zone:
@@ -79,8 +85,8 @@ def list_subscribers(db: Session = Depends(get_db)):
     return [{
         "id": s.id,
         "name": s.name,
-        "phone": s.phone,
-        "email": s.email,
+        "phone": mask_contact(s.phone),
+        "email": mask_contact(s.email),
         "role": s.role,
         "preferred_language": s.preferred_language,
         "is_active": s.is_active,

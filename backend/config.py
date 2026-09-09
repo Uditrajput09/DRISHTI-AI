@@ -61,10 +61,19 @@ class Settings(BaseSettings):
     RISK_ALERT_THRESHOLD: float = Field(default=70.0)
     ALERT_LANGUAGES: str = Field(default="en,hi,kha,as")
 
+    # Security & Admin Access
+    ADMIN_API_KEY: str = Field(default="drishti-demo-admin-key-2026")
+    ALLOWED_ORIGINS: str = Field(default="http://localhost:5173,http://localhost:3000")
+
     # App Environment
     ENVIRONMENT: str = Field(default="development")
     DEBUG: bool = Field(default=True)
     PORT: int = Field(default=8000)
+
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        """Return parsed list of allowed CORS origins."""
+        return [orig.strip() for orig in self.ALLOWED_ORIGINS.split(",") if orig.strip()]
 
     @property
     def alert_languages_list(self) -> List[str]:

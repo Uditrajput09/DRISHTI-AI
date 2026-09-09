@@ -46,11 +46,9 @@ from backend.api.routes_ws import router as ws_router
 from backend.api.routes_anomaly import router as anomaly_router
 from backend.api.ws_manager import ws_manager
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-
-limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
+from backend.rate_limiter import limiter
 scheduler = BackgroundScheduler()
 
 
@@ -148,10 +146,28 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Enable CORS for frontend dashboard and field-app
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+# Enable secure CORS for frontend dashboard, preview deployments, and local dev
+allowed_cors_origins = list(set([
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    *settings.allowed_origins_list
+]))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_cors_origins,
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

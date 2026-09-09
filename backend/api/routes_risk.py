@@ -209,18 +209,10 @@ def simulate_landslide_risk(req: RiskSimulationRequest, db: Session = Depends(ge
         db.refresh(risk_record)
 
 
-        # Dispatch alerts if requested or critical threshold met
+        # Simulation safeguard: simulations are sandbox runs and never trigger live external SMS/FCM broadcasts
         alert_dispatches = []
-        if req.trigger_alerts or (new_score >= 75.0 and req.trigger_alerts is not False):
-            alert_dispatches = alert_engine.evaluate_and_dispatch(
-                db=db,
-                zone=z,
-                risk_score=new_score,
-                risk_level=new_level,
-                rainfall_24h=r24_sim,
-                risk_score_id=risk_record.id,
-                force_dispatch=True
-            )
+        if req.trigger_alerts:
+            logger.info(f"[Simulation] Alert dispatch suppressed for simulated zone {z.name} to protect live subscribers.")
 
         simulated_results.append({
             "zone_id": z.id,

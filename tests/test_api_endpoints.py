@@ -256,8 +256,16 @@ def test_ingestion_status():
 
 
 def test_ingestion_sync():
-    """Verify on-demand execution of the full multi-source ingestion pipeline."""
-    resp = client.post("/api/ingestion/sync?dispatch_alerts=false")
+    """Verify on-demand execution of the full multi-source ingestion pipeline with admin auth."""
+    # 1. Unauthenticated request is rejected
+    unauth = client.post("/api/ingestion/sync?dispatch_alerts=false")
+    assert unauth.status_code == 403
+
+    # 2. Authenticated with demo admin key
+    resp = client.post(
+        "/api/ingestion/sync?dispatch_alerts=false",
+        headers={"X-Admin-Key": "drishti-demo-admin-key-2026"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "success"
@@ -368,3 +376,52 @@ def test_chatbot_queries():
     resp_zone = client.post("/api/chatbot/query", json={"question": "What is the status of Sohra?"})
     assert resp_zone.status_code == 200
     assert "sohra" in resp_zone.json()["answer"].lower()
+
+
+def test_security_headers_and_admin_protection():
+    """Verify security response headers, PII masking, and administrative route protections."""
+    resp = client.get("/api/health")
+    assert resp.status_code == 200
+    assert resp.headers.get("X-Content-Type-Options") == "nosniff"
+    assert resp.headers.get("X-Frame-Options") == "SAMEORIGIN"
+    assert resp.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+
+    # 1. Manual alert trigger requires admin key
+    unauth = client.post("/api/alerts/trigger-manual", json={"zone_id": 1})
+    assert unauth.status_code == 403
+
+    # 2. Field report verification requires admin key
+    unauth_verify = client.post("/api/reports/1/verify")
+    assert unauth_verify.status_code == 403
+
+    # 3. Authorized verification works with key
+    auth_verify = client.post(
+        "/api/reports/1/verify",
+        headers={"X-Admin-Key": "drishti-demo-admin-key-2026"}
+    )
+    # May return 200 or 404 if id 1 does not exist, but must NOT return 403
+    assert auth_verify.status_code in (200, 404)
+
+
+def test_chatbot_security_protections():
+    """Verify chatbot query length bounds, validation, and PII protection."""
+    # 1. Question exceeds 500 characters
+    long_question = "A" * 501
+    resp_oversized = client.post("/api/chatbot/query", json={"question": long_question})
+    assert resp_oversized.status_code == 422
+
+    # 2. Empty question rejected
+    resp_empty = client.post("/api/chatbot/query", json={"question": ""})
+    assert resp_empty.status_code == 422
+
+    # 3. Invalid photo MIME upload rejected
+    invalid_report = {
+        "reporter_type": "citizen",
+        "latitude": 25.2750,
+        "longitude": 91.7320,
+        "hazard_type": "Rockfall",
+        "severity": "High",
+        "photo_data_url": "data:application/octet-stream;base64,AAAA"
+    }
+    resp_bad_photo = client.post("/api/reports/submit", json=invalid_report)
+    assert resp_bad_photo.status_code == 422

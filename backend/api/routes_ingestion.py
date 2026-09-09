@@ -14,6 +14,7 @@ from backend.ingestion.pipeline import ingestion_pipeline
 from backend.ingestion.osm import osm_service
 from backend.ingestion.imd import imd_service
 from backend.ingestion.terrain import terrain_service
+from backend.security import verify_admin_key
 
 router = APIRouter(prefix="/api/ingestion", tags=["Unified Ingestion Pipeline"])
 
@@ -34,7 +35,8 @@ def get_ingestion_status():
 @router.post("/sync")
 def trigger_full_ingestion_sync(
     dispatch_alerts: bool = Query(True, description="Automatically dispatch SMS/Push alerts if risk threshold is crossed"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin_auth: bool = Depends(verify_admin_key)
 ):
     """
     Trigger an on-demand, end-to-end multi-source data ingestion and risk synchronization cycle:

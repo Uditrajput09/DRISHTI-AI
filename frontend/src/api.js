@@ -7,6 +7,9 @@ const RAW_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AP
   ? import.meta.env.VITE_API_BASE.replace(/\/$/, '') 
   : '';
 const API_BASE = RAW_BASE.endsWith('/api') ? RAW_BASE : (RAW_BASE ? `${RAW_BASE}/api` : '/api');
+const ADMIN_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_API_KEY)
+  ? import.meta.env.VITE_ADMIN_API_KEY
+  : 'drishti-demo-admin-key-2026';
 
 export const api = {
   // ─── Risk Endpoints ──────────────────────────────────────────
@@ -95,7 +98,10 @@ export const api = {
 
   async syncIngestion(dispatchAlerts = true) {
     const res = await fetch(`${API_BASE}/ingestion/sync?dispatch_alerts=${dispatchAlerts}`, {
-      method: 'POST'
+      method: 'POST',
+      headers: {
+        'X-Admin-Key': ADMIN_API_KEY
+      }
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
@@ -189,6 +195,17 @@ export const api = {
     }
   },
 
+  async verifyReport(reportId, status = 'verified') {
+    const res = await fetch(`${API_BASE}/reports/${reportId}/verify?status=${encodeURIComponent(status)}`, {
+      method: 'POST',
+      headers: {
+        'X-Admin-Key': ADMIN_API_KEY
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
   // ─── Alerts & History ────────────────────────────────────────
   async getAlertHistory() {
     try {
@@ -214,7 +231,10 @@ export const api = {
   async triggerManualAlert(payload) {
     const res = await fetch(`${API_BASE}/alerts/trigger-manual`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': ADMIN_API_KEY
+      },
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

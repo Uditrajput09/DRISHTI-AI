@@ -14,6 +14,7 @@ from sqlalchemy import desc
 from backend.database import get_db
 from backend.models import FieldReport, Zone
 from backend.schemas import FieldReportCreate, BatchReportSyncRequest
+from backend.security import mask_contact, verify_admin_key
 
 router = APIRouter(prefix="/api/reports", tags=["Field Reports"])
 
@@ -178,7 +179,7 @@ def list_field_reports(
             "zone_name": r.zone.name if r.zone else "District Wide",
             "reporter_type": r.reporter_type,
             "reporter_name": r.reporter_name,
-            "reporter_contact": r.reporter_contact,
+            "reporter_contact": mask_contact(r.reporter_contact),
             "latitude": r.latitude,
             "longitude": r.longitude,
             "hazard_type": r.hazard_type,
@@ -195,7 +196,12 @@ def list_field_reports(
 
 
 @router.post("/{report_id}/verify")
-def verify_field_report(report_id: int, status: str = Query("verified"), db: Session = Depends(get_db)):
+def verify_field_report(
+    report_id: int,
+    status: str = Query("verified"),
+    db: Session = Depends(get_db),
+    admin_auth: bool = Depends(verify_admin_key)
+):
     """Update verification status of a report by district disaster management authorities."""
     report = db.query(FieldReport).filter(FieldReport.id == report_id).first()
     if not report:

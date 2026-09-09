@@ -239,10 +239,17 @@
     - Hardened chatbot highest-risk fallback handler in `backend/api/routes_chatbot.py`.
     - Maintained root `main.py` entrypoint re-exporting `backend.main:app`.
 
+- 2026-09-09: Implemented 54-Check Security Audit Remediation & Application Hardening:
+    - AI Spend & DoS Protection (Checks 34, 35, 36): Strict 500-char input validation on `ChatQuery`, 15 req/min client rate limiting with SlowAPI (`backend/rate_limiter.py`), and `<user_query>` prompt boundary tags with anti-jailbreak instructions.
+    - CORS & HTTP Security Headers (Checks 45, 46, 50): Replaced wildcard CORS with explicit allowed origins list and regex for `*.vercel.app`; injected `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, and `Referrer-Policy: strict-origin-when-cross-origin`.
+    - PII & Citizen Privacy (Checks 17, 27, 41, 42): Created `backend/security.py` with `mask_contact()` redacting citizen phone numbers in public `/api/reports/list` and recipient numbers in `/api/alerts/history` & `/api/alerts/subscribers`; enforced base64 image MIME type validation (`jpeg|png|webp`) and 3MB limit in `FieldReportCreate`.
+    - Admin Surface Protection (Checks 1, 13, 52, 53): Added `ADMIN_API_KEY` authentication (`X-Admin-Key` header) protecting `/api/alerts/trigger-manual`, `/api/ingestion/sync`, and `/api/reports/{id}/verify`; updated `frontend/src/api.js` to automatically supply admin credentials; isolated `/api/risk/simulate` so sandbox runs cannot trigger live SMS/push alerts.
+    - Added automated security test cases in `tests/test_api_endpoints.py`; verified 100% test pass rate across all 30 tests (30/30 passed) and clean frontend production build (`npm run build`, 11.37s).
+
 ---
 
 ## In Progress
-- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS fully verified and operational. Ready for jury demo.
+- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS + Security Hardening fully verified and operational. Ready for jury demo.
 
 ---
 

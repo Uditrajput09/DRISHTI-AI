@@ -5,7 +5,7 @@ Pydantic schemas for API request validation and serialization.
 
 from typing import List, Optional, Any, Dict, Union
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 # ─── Zone Schemas ────────────────────────────────────────────────
@@ -104,6 +104,19 @@ class FieldReportCreate(BaseModel):
     description: Optional[str] = None
     photo_data_url: Optional[str] = None
     device_created_at: Optional[datetime] = None
+
+    @field_validator("photo_data_url")
+    @classmethod
+    def validate_photo_data_url(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        if len(v) > 4_500_000:
+            raise ValueError("Photo payload exceeds 3MB limit")
+        if v.startswith("data:"):
+            allowed = ("data:image/jpeg;base64,", "data:image/jpg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+            if not any(v.startswith(p) for p in allowed):
+                raise ValueError("Invalid image MIME type. Allowed formats: JPEG, PNG, WebP.")
+        return v
 
 
 class FieldReportOut(BaseModel):
