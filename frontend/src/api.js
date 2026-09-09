@@ -362,5 +362,21 @@ export const api = {
       console.warn('API getProbabilisticForecast error:', err);
       return { zone_id: zoneId, days: [] };
     }
+  },
+
+  // ─── AI Chatbot ───────────────────────────────────────────────
+  async chatWithBot(question, context = '', zoneId = null) {
+    const res = await fetch(`${API_BASE}/chatbot/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question,
+        context,
+        zone_id: zoneId
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
   }
 };
+

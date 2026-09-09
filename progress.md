@@ -226,10 +226,17 @@
         - Production-hardened `docker-compose.yml` with Redis container, healthchecks, and restart policies.
         - Created automated test suite `tests/test_intelligence_and_infrastructure_upgrades.py` with 4 test cases; achieved 100% test pass rate across all 27 automated tests (27/27 passed) and verified clean Vite production build (`✓ built in 9.20s`).
 
+- 2026-09-09: Fixed and upgraded AI Disaster Intelligence Chatbot:
+    - Added missing `api.chatWithBot(question, context, zoneId)` method to `frontend/src/api.js`.
+    - Resolved `AIAssistantDrawer.jsx` failure by wiring real backend responses, markdown rendering (bold highlights, line breaks, bullet lists), and context forwarding.
+    - Updated `backend/api/routes_chatbot.py` with `build_district_telemetry_context` to ground Gemini API in live zone risk levels, rainfall, soil saturation, and evacuation shelters.
+    - Added fast 4s fallback with intelligent local domain responder covering greetings, live alerts, specific zone queries, triggers, shelters/evacuation, cloudburst simulations, and field reporting.
+    - Added automated test `test_chatbot_queries` in `tests/test_api_endpoints.py` (28/28 tests passed 100%).
+
 ---
 
 ## In Progress
-- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching fully built and verified. Ready for jury demo.
+- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant fully verified and operational.
 
 ---
 
@@ -240,8 +247,9 @@
 
 ## Next Session Starting Point
 1. Backend running on `http://127.0.0.1:8000` (`python -m uvicorn backend.main:app --reload`).
-2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates and anomaly banners.
+2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates, AI chatbot drawer, and anomaly banners.
 3. Test XGBoost ensemble predictions (`v2.0-rf-xgb-ensemble`, ROC-AUC 0.9941) with SHAP attribution.
 4. Test 7-day probabilistic trajectory and 90% CI bands on `http://localhost:5173/forecast`.
-5. Test Isolation Forest anomaly scanning via `GET /api/anomaly/scan` and trigger automated WebSocket alerts.
-6. Follow `DEMO_SCRIPT.md` to present the upgraded system to hackathon juries.
+5. Test AI Assistant via the floating FAB button or Top Navigation bar.
+6. Follow `DEMO_SCRIPT.md` to present the system.
+

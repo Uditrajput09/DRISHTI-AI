@@ -140,6 +140,8 @@ export default function ChatbotPanel({ zones = [], onClose }) {
                 fontWeight: m.role === "user" ? 600 : 400,
                 fontSize: "0.82rem",
                 lineHeight: 1.5,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
                 border: m.role === "assistant" ? "1px solid var(--border-command)" : "none",
                 boxShadow: m.role === "user" ? "0 4px 14px rgba(200, 150, 62, 0.25)" : "none"
               }}

@@ -346,5 +346,25 @@ def test_tourist_hotspots_and_evacuation_planner():
     assert "sdrf_meghalaya" in contacts
 
 
+def test_chatbot_queries():
+    """Verify disaster AI chatbot query endpoint, live telemetry grounding, and fallback."""
+    # 1. Greetings query
+    resp = client.post("/api/chatbot/query", json={"question": "Hello"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "answer" in data
+    assert "DRISHTI-AI" in data["answer"]
+    assert "source" in data
 
+    # 2. Highest risk question
+    resp_risk = client.post("/api/chatbot/query", json={"question": "Which zone is most at risk today?"})
+    assert resp_risk.status_code == 200
+    data_risk = resp_risk.json()
+    assert "answer" in data_risk
+    ans_lower = data_risk["answer"].lower()
+    assert any(w in ans_lower for w in ["risk", "rainfall", "slope", "alert", "critical", "danger", "sohra", "pynursla"])
 
+    # 3. Zone specific question
+    resp_zone = client.post("/api/chatbot/query", json={"question": "What is the status of Sohra?"})
+    assert resp_zone.status_code == 200
+    assert "sohra" in resp_zone.json()["answer"].lower()

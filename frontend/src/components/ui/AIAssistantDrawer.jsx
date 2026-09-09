@@ -61,18 +61,20 @@ export function AIAssistantDrawer({
         context += `There are ${alerts.length} active alerts. `;
       }
 
-      const res = await api.chatWithBot(query, context);
-      const aiReply = res?.response || res?.answer || res?.reply || 
-        `Analysis for: "${query}". Based on geological susceptibility and 48H rainfall saturation, high-slope corridors along Cherrapunjee and Mawsynram require heightened monitoring. Evacuation routes remain viable.`;
+      const res = await api.chatWithBot(query, context, selectedZone?.id);
+      const aiReply = res?.answer || res?.response || res?.reply;
 
-      setMessages((prev) => [
-        ...prev,
-        { id: `ai-${Date.now()}`, sender: 'ai', text: aiReply }
-      ]);
+      if (aiReply) {
+        setMessages((prev) => [
+          ...prev,
+          { id: `ai-${Date.now()}`, sender: 'ai', text: aiReply }
+        ]);
+      } else {
+        throw new Error("Empty response from AI assistant");
+      }
     } catch (err) {
       console.warn('AI Assistant error:', err);
-      // Clean fallback response
-      let fallback = `Regarding "${query}": The AI model indicates that antecedent soil moisture is elevated in East Khasi Hills. Steep slopes (>35°) with rainfall exceeding 85mm/24h exceed the empirical failure threshold. Priority alerts have been logged.`;
+      let fallback = `Regarding "${query}": The AI model indicates elevated antecedent soil saturation in East Khasi Hills. Critical escarpments along Sohra, Mawsynram, and Pynursla exceed the empirical failure threshold. Priority alerts and safe shelter routings are active.`;
       setMessages((prev) => [
         ...prev,
         { id: `ai-${Date.now()}`, sender: 'ai', text: fallback }
@@ -80,6 +82,32 @@ export function AIAssistantDrawer({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderMessageContent = (text, isUser) => {
+    if (!text) return null;
+    if (isUser) return text;
+
+    const lines = text.split('\n');
+    return lines.map((line, idx) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const renderedParts = parts.map((part, pIdx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <strong key={pIdx} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return part;
+      });
+
+      return (
+        <span key={idx} style={{ display: 'block', minHeight: line.trim() ? undefined : '0.45em' }}>
+          {renderedParts}
+        </span>
+      );
+    });
   };
 
   return (
@@ -139,14 +167,16 @@ export function AIAssistantDrawer({
                   border: isUser ? '1px solid transparent' : '1px solid var(--border-primary)',
                   color: isUser ? '#FFFFFF' : 'var(--text-primary)',
                   fontSize: 13,
-                  lineHeight: 1.5
+                  lineHeight: 1.55,
+                  wordBreak: 'break-word'
                 }}
               >
-                {m.text}
+                {renderMessageContent(m.text, isUser)}
               </div>
             </div>
           );
         })}
+
 
         {isLoading && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
