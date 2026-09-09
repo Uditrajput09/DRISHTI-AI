@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     def BASE_DIR(self) -> str:
         return BASE_DIR
 
-    # Database (Default: PostgreSQL; falls back to SQLite if PostgreSQL daemon is unavailable)
+    # Database (Enterprise PostgreSQL + PostGIS)
     DATABASE_URL: str = Field(default="postgresql://postgres:postgres@localhost:5432/drishti_landslide")
     POSTGRES_USER: str = Field(default="postgres")
     POSTGRES_PASSWORD: str = Field(default="postgres")

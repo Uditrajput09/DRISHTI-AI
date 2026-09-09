@@ -233,10 +233,18 @@
     - Added fast 4s fallback with intelligent local domain responder covering greetings, live alerts, specific zone queries, triggers, shelters/evacuation, cloudburst simulations, and field reporting.
     - Added automated test `test_chatbot_queries` in `tests/test_api_endpoints.py` (28/28 tests passed 100%).
 
+- 2026-09-09: Completely replaced SQLite with live cloud PostgreSQL 17.6 + PostGIS on Supabase:
+    - Provisioned and connected to Supabase PostgreSQL (`aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require`).
+    - Verified PostGIS extension enabled (`POSTGIS="3.3.7"`).
+    - Rewrote `backend/database.py` with enterprise `psycopg2` connection pooling (`pool_size=10`, `max_overflow=20`, `pool_pre_ping=True`, `pool_recycle=3600`) and removed all SQLite fallback code.
+    - Initialized all schemas and seeded all 10 micro-zones, historical landslide records, and 21 infrastructure items (shelters, hospitals, lifeline routes) directly into Supabase PostgreSQL.
+    - Removed obsolete local `drishti_landslide.db` file.
+    - Successfully ran full automated test suite against the live PostgreSQL database (28/28 tests passed 100%).
+
 ---
 
 ## In Progress
-- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant fully verified and operational.
+- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS fully verified and operational. Ready for jury demo.
 
 ---
 
@@ -246,10 +254,11 @@
 ---
 
 ## Next Session Starting Point
-1. Backend running on `http://127.0.0.1:8000` (`python -m uvicorn backend.main:app --reload`).
+1. Backend running on `http://127.0.0.1:8000` (`python -m uvicorn backend.main:app --reload`) connected to Supabase PostgreSQL.
 2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates, AI chatbot drawer, and anomaly banners.
 3. Test XGBoost ensemble predictions (`v2.0-rf-xgb-ensemble`, ROC-AUC 0.9941) with SHAP attribution.
 4. Test 7-day probabilistic trajectory and 90% CI bands on `http://localhost:5173/forecast`.
 5. Test AI Assistant via the floating FAB button or Top Navigation bar.
 6. Follow `DEMO_SCRIPT.md` to present the system.
+
 

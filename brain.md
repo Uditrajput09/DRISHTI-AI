@@ -35,6 +35,7 @@ The North Eastern Region (NER) of India regularly faces landslides, flash floods
 | Alert Languages: Khasi (`kha`), Hindi (`hi`), Assamese (`as`), English (`en`) | Khasi is the indigenous language of East Khasi Hills; Assamese is widely used in regional transit; Hindi & English for administrative & national coordination | 2026-09-02 |
 | Offline Field Sync: LocalStorage/IndexedDB Queue | Allows field officers and citizens without cell reception in mountain ravines to record geo-tagged photo reports and auto-sync upon returning to network range | 2026-09-02 |
 | PostgreSQL + PostGIS Configured as Primary DB | Configured PostgreSQL with `psycopg2` connection pooling (`pool_size=10`, `max_overflow=20`, `pool_pre_ping=True`), dedicated Docker Compose `db` container (`postgis/postgis:15-3.3-alpine`), and automatic SQLite fallback for standalone local dev when PostgreSQL daemon is offline | 2026-09-08 |
+| Full Migration to PostgreSQL + PostGIS (SQLite Completely Removed) | Migrated to live cloud PostgreSQL 17.6 + PostGIS on Supabase with psycopg2 pooling; removed SQLite fallback entirely from backend and developer workflows | 2026-09-09 |
 
 ## Assumptions (mark clearly as such in code/README too)
 - No live IoT soil/slope sensors exist for this project — sensor data is mocked/simulated
