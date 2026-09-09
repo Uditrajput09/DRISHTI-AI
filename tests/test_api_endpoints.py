@@ -425,3 +425,86 @@ def test_chatbot_security_protections():
     }
     resp_bad_photo = client.post("/api/reports/submit", json=invalid_report)
     assert resp_bad_photo.status_code == 422
+
+
+def test_dijkstra_evacuation_routing():
+    """Verify Dijkstra algorithm returns ranked, cost-weighted evacuation corridors."""
+    req = {
+        "origin_zone_id": "EKH-Z01",
+        "target_type": "shelter",
+        "k": 3
+    }
+    resp = client.post("/api/evacuation/dijkstra", json=req)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["algorithm"] == "dijkstra"
+    assert len(data["paths"]) >= 1
+
+    rank1 = data["paths"][0]
+    assert rank1["rank"] == 1
+    assert "destination_shelter" in rank1
+    assert rank1["distance_km"] > 0
+    assert rank1["total_cost"] > 0
+    assert len(rank1["waypoints"]) >= 2
+    assert "eta_minutes" in rank1
+    assert "drive" in rank1["eta_minutes"]
+    assert "walk" in rank1["eta_minutes"]
+    assert "safety_rating" in rank1
+    assert len(rank1["steps"]) >= 1
+
+
+def test_dijkstra_road_blockage_and_rerouting():
+    """Verify Dijkstra routes avoid blocked roads and reroute dynamically."""
+    # 1. Block a key corridor
+    block_resp = client.post("/api/evacuation/blockage", json={
+        "road_identifier": "E_SOHRA_01",
+        "blocked": True,
+        "reason": "Massive mudslide blocking road"
+    })
+    assert block_resp.status_code == 200
+    block_data = block_resp.json()
+    assert block_data["status"] == "success"
+    assert block_data["affected_segments"] >= 1
+
+    # 2. Plan evacuation while road is blocked
+    route_resp = client.post("/api/evacuation/dijkstra", json={
+        "origin_zone_id": "EKH-Z01",
+        "target_type": "all",
+        "k": 3
+    })
+    assert route_resp.status_code == 200
+    route_data = route_resp.json()
+    assert len(route_data["paths"]) >= 1
+
+    # Verify avoided segment is noted in metadata
+    rank1 = route_data["paths"][0]
+    assert any("E_SOHRA_01" in s for s in rank1["blocked_segments_avoided"])
+
+    # 3. Clear all blockages
+    clear_resp = client.post("/api/evacuation/clear-blockages")
+    assert clear_resp.status_code == 200
+    assert clear_resp.json()["status"] == "success"
+
+
+def test_evacuation_graph_and_weights_endpoints():
+    """Verify GeoJSON graph and tabular weights breakdown endpoints."""
+    # 1. GeoJSON Graph endpoint
+    geo_resp = client.get("/api/evacuation/graph")
+    assert geo_resp.status_code == 200
+    geo_data = geo_resp.json()
+    assert geo_data["type"] == "FeatureCollection"
+    assert len(geo_data["features"]) >= 10
+
+    # 2. XAI weights breakdown endpoint
+    weights_resp = client.get("/api/evacuation/graph/weights")
+    assert weights_resp.status_code == 200
+    w_data = weights_resp.json()
+    assert w_data["status"] == "success"
+    assert w_data["total_segments"] >= 10
+    first_seg = w_data["segments"][0]
+    assert "road_name" in first_seg
+    assert "distance_km" in first_seg
+    assert "risk_penalty" in first_seg
+    assert "terrain_penalty" in first_seg
+    assert "total_weight" in first_seg

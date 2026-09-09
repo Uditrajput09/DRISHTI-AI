@@ -84,7 +84,7 @@ export function TopNavigation({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 20px',
+        padding: '0 14px',
         position: 'sticky',
         top: 0,
         zIndex: 'var(--z-header)',
@@ -94,7 +94,7 @@ export function TopNavigation({
       className={`ui-top-nav ${className}`}
     >
       {/* Left: Mobile hamburger + Breadcrumb path */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flexShrink: 1 }}>
         {onToggleSidebarMobile && (
           <button
             type="button"
@@ -110,7 +110,8 @@ export function TopNavigation({
               border: `1px solid ${isSidebarOpen ? 'var(--brand-primary)' : 'var(--border-secondary)'}`,
               color: isSidebarOpen ? 'var(--brand-primary)' : 'var(--text-primary)',
               cursor: 'pointer',
-              transition: 'all var(--transition-fast)'
+              transition: 'all var(--transition-fast)',
+              flexShrink: 0
             }}
             className="mobile-hamburger-btn"
             aria-label={isSidebarOpen ? "Close Navigation Menu" : "Toggle Navigation Menu"}
@@ -120,13 +121,13 @@ export function TopNavigation({
           </button>
         )}
 
-        <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
           {crumbs.map((crumb, idx) => {
             const isLast = idx === crumbs.length - 1;
             return (
               <React.Fragment key={idx}>
                 {idx > 0 && (
-                  <span className={!isLast ? 'hidden-mobile' : ''} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span className={!isLast ? 'hidden-mobile' : ''} style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
                     <ChevronRight size={12} style={{ color: 'var(--text-disabled)' }} />
                   </span>
                 )}
@@ -134,9 +135,11 @@ export function TopNavigation({
                   className={!isLast ? 'hidden-mobile' : ''}
                   style={{
                     fontSize: 12,
-                    fontWeight: isLast ? 500 : 400,
+                    fontWeight: isLast ? 600 : 400,
                     color: isLast ? 'var(--text-primary)' : 'var(--text-muted)',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {crumb}
@@ -148,7 +151,7 @@ export function TopNavigation({
       </div>
 
       {/* Right: Search, Refresh, Shortcuts, Theme, Notifications, Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
         {/* Compact Search Bar */}
         <div className="top-nav-search hidden-mobile" style={{ width: 180 }}>
           <SearchInput
@@ -180,10 +183,11 @@ export function TopNavigation({
           />
         )}
 
-        {/* Tourist Emergency & Evacuation Guide Quick Action */}
+        {/* Tourist Emergency & Evacuation Guide Quick Action (Hidden on mobile where Evac is in Bottom Nav) */}
         {onOpenEvacuation && (
           <button
             onClick={onOpenEvacuation}
+            className="hidden-mobile"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -203,7 +207,7 @@ export function TopNavigation({
             aria-label="Tourist Evacuation Guide"
           >
             <Compass size={14} style={{ animation: activeSection === 'evacuation' ? 'spin 6s linear infinite' : 'none' }} />
-            <span className="hidden-mobile">Evac Guide</span>
+            <span>Evac Guide</span>
           </button>
         )}
 

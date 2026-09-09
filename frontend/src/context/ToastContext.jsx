@@ -55,7 +55,7 @@ export function ToastProvider({ children }) {
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
-    return { showToast: (msg) => console.log('Toast:', msg) };
+    return { showToast: (msg) => { if (import.meta.env.DEV) console.info('Toast fallback:', msg); } };
   }
   return context;
 }

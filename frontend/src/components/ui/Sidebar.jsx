@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Radio,
-  Compass
+  Compass,
+  Download
 } from 'lucide-react';
 import { Avatar } from './Avatar';
 
@@ -60,7 +61,8 @@ export function Sidebar({
       items: [
         { id: 'reports', label: 'Field Reports', icon: FileText, badge: null },
         { id: 'simulation', label: 'Cloudburst Simulation', icon: Zap, badge: 'SIM' },
-        { id: 'evacuation', label: 'Tourist & Evacuation Guide', icon: Compass, badge: 'SOS', badgeVariant: 'critical' }
+        { id: 'evacuation', label: 'Tourist & Evacuation Guide', icon: Compass, badge: 'SOS', badgeVariant: 'critical' },
+        { id: 'offline-maps', label: 'Offline Maps & GPS Nav', icon: Download, badge: 'OFFLINE', badgeVariant: 'safe' }
       ]
     },
     {

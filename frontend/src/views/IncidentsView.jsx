@@ -144,7 +144,7 @@ export default function IncidentsView({
       <PageHeader
         breadcrumbs={['Command Center', 'Ground Observations', 'Live Incidents']}
         title="Live Incident Feed"
-        subtitle="Real-time crowdsourced reports, ground ground-truthing, and road blockage reports"
+        subtitle="Real-time crowdsourced reports, ground-truthing, and road blockage reports"
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Badge variant="live">Live Telemetry</Badge>
@@ -172,13 +172,15 @@ export default function IncidentsView({
           gap: 12
         }}
       >
-        <Tabs
-          tabs={filterTabs}
-          activeTab={filterType}
-          onChange={setFilterType}
-        />
+        <div style={{ flex: '1 1 auto', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 2 }}>
+          <Tabs
+            tabs={filterTabs}
+            activeTab={filterType}
+            onChange={setFilterType}
+          />
+        </div>
 
-        <div style={{ width: 240 }}>
+        <div style={{ flex: '1 1 200px', minWidth: 160, maxWidth: 320 }}>
           <SearchInput
             size="sm"
             placeholder="Search road, hazard, ID..."
@@ -214,18 +216,18 @@ export default function IncidentsView({
                 key={inc.id}
                 hoverable
                 onClick={() => onLocateOnMap && onLocateOnMap(inc)}
-                padding={14}
+                padding={12}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  gap: 16
+                  alignItems: 'flex-start',
+                  gap: 12
                 }}
               >
                 {/* Photo Thumbnail */}
                 <div
                   style={{
-                    width: 84,
-                    height: 68,
+                    width: 76,
+                    height: 76,
                     borderRadius: 'var(--radius-input)',
                     overflow: 'hidden',
                     flexShrink: 0,
@@ -244,40 +246,55 @@ export default function IncidentsView({
                 </div>
 
                 {/* Text Content */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span className="font-mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {inc.id}
-                      </span>
-                      <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                        {inc.title}
-                      </h4>
-                    </div>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {/* Top Row: ID Badge + Severity Badges */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                    <span
+                      className="font-mono"
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        color: 'var(--brand-primary)',
+                        backgroundColor: 'var(--brand-tint)',
+                        padding: '1px 6px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--brand-border)',
+                        letterSpacing: '0.04em'
+                      }}
+                    >
+                      {inc.id}
+                    </span>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                       <RiskBadge level={inc.severity} size="sm" />
                       <StatusBadge status={inc.verified ? 'VERIFIED' : 'PENDING'} size="sm" />
                       <CopyButton text={`[${inc.id}] ${inc.title} - ${inc.desc}`} label="Incident" />
                     </div>
                   </div>
 
+                  {/* Title */}
+                  <h4 style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>
+                    {inc.title}
+                  </h4>
+
+                  {/* Description */}
                   <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
                     {inc.desc}
                   </p>
 
+                  {/* Metadata Chips */}
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 8,
+                      gap: 6,
                       fontSize: 11,
                       color: 'var(--text-muted)',
                       flexWrap: 'wrap',
                       marginTop: 2
                     }}
                   >
-                    <span style={{ color: 'var(--brand-primary)', fontWeight: 500 }}>
+                    <span style={{ color: 'var(--brand-light)', fontWeight: 500 }}>
                       Hazard: {inc.hazard}
                     </span>
                     <span>•</span>

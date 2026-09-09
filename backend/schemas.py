@@ -92,16 +92,16 @@ class WeatherReadingOut(BaseModel):
 
 # ─── Field Report Schemas ───────────────────────────────────────
 class FieldReportCreate(BaseModel):
-    report_uid: Optional[str] = None
+    report_uid: Optional[str] = Field(None, max_length=50)
     zone_id: Optional[int] = None
-    reporter_type: str = "citizen"
-    reporter_name: str = "Anonymous Citizen"
-    reporter_contact: Optional[str] = None
+    reporter_type: str = Field("citizen", max_length=50)
+    reporter_name: str = Field("Anonymous Citizen", max_length=200)
+    reporter_contact: Optional[str] = Field(None, max_length=100)
     latitude: float
     longitude: float
-    hazard_type: str = "Soil Creep"
-    severity: str = "Moderate"
-    description: Optional[str] = None
+    hazard_type: str = Field("Soil Creep", max_length=100)
+    severity: str = Field("Moderate", max_length=50)
+    description: Optional[str] = Field(None, max_length=5000)
     photo_data_url: Optional[str] = None
     device_created_at: Optional[datetime] = None
 

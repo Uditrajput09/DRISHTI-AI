@@ -44,7 +44,9 @@ from backend.api.routes_cap import router as cap_router
 from backend.api.routes_ingestion import router as ingestion_router
 from backend.api.routes_ws import router as ws_router
 from backend.api.routes_anomaly import router as anomaly_router
+from backend.api.routes_dijkstra import router as dijkstra_router
 from backend.api.ws_manager import ws_manager
+from backend.ml.evacuation_graph import evacuation_graph
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -153,6 +155,16 @@ async def add_security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com; "
+        "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.com https://api.open-meteo.com https://overpass-api.de https://generativelanguage.googleapis.com; "
+        "frame-ancestors 'self'"
+    )
+    response.headers["Permissions-Policy"] = "geolocation=(self), camera=(self), microphone=()"
     return response
 
 # Enable secure CORS for frontend dashboard, preview deployments, and local dev
@@ -169,8 +181,8 @@ app.add_middleware(
     allow_origins=allowed_cors_origins,
     allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Admin-Key", "X-Requested-With"],
 )
 
 # Include Routers
@@ -193,6 +205,7 @@ app.include_router(cap_router)
 app.include_router(ingestion_router)
 app.include_router(ws_router)
 app.include_router(anomaly_router)
+app.include_router(dijkstra_router)
 
 
 @app.get("/")
@@ -204,7 +217,7 @@ def root():
         "status": "Operational",
         "docs_url": "/docs",
         "supported_languages": settings.alert_languages_list,
-        "modules": ["ingestion", "ml", "api", "alerts", "field_reports", "unified_pipeline", "anomaly_detection", "probabilistic_forecast"]
+        "modules": ["ingestion", "ml", "api", "alerts", "field_reports", "unified_pipeline", "anomaly_detection", "probabilistic_forecast", "dijkstra_evacuation"]
     }
 
 
@@ -235,19 +248,14 @@ def health_check():
 
 @app.get("/api/download/apk")
 def download_apk():
-    """Download the official DRISHTI-AI Android APK bundle."""
+    """Download the official DRISHTI-AI Android APK bundle (pre-built static file only)."""
     from fastapi.responses import FileResponse
     from fastapi import HTTPException
-    
+
     apk_path = os.path.join(settings.BASE_DIR, "frontend", "public", "downloads", "drishti-ai-v1.0.apk")
     if not os.path.exists(apk_path):
-        # Fallback to building APK on the fly if needed
-        import subprocess
-        subprocess.run(["python", os.path.join(settings.BASE_DIR, "package_apk.py")], check=False)
-        
-    if not os.path.exists(apk_path):
-        raise HTTPException(status_code=404, detail="Android APK package is currently being built. Please try again shortly.")
-        
+        raise HTTPException(status_code=404, detail="Android APK package not found. Run 'python package_apk.py' locally to build it.")
+
     return FileResponse(
         path=apk_path,
         media_type="application/vnd.android.package-archive",

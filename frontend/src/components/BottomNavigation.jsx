@@ -78,46 +78,52 @@ export default function BottomNavigation({
               transition: 'color var(--transition-fast)'
             }}
           >
-            <IconComponent
-              size={17}
-              color={isActive ? (tab.id === 'evacuation' ? 'var(--risk-critical)' : 'var(--brand-primary)') : 'var(--text-muted)'}
-              style={{ transition: 'transform var(--transition-fast)' }}
-            />
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <IconComponent
+                size={16}
+                color={isActive ? (tab.id === 'evacuation' ? 'var(--risk-critical)' : 'var(--brand-primary)') : 'var(--text-muted)'}
+                style={{ transition: 'transform var(--transition-fast)' }}
+              />
+
+              {/* Notification Badge pinned to Icon */}
+              {tab.badge > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -7,
+                    minWidth: 13,
+                    height: 13,
+                    borderRadius: 'var(--radius-pill)',
+                    backgroundColor: 'var(--risk-critical)',
+                    color: '#FFFFFF',
+                    fontSize: '0.55rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 3px',
+                    fontFamily: 'var(--font-mono)',
+                    boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)',
+                    lineHeight: 1
+                  }}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </div>
+
             <span
               style={{
-                fontSize: '0.62rem',
+                fontSize: '0.60rem',
                 fontWeight: isActive ? 600 : 500,
                 letterSpacing: '-0.01em',
-                fontFamily: 'var(--font-sans)'
+                fontFamily: 'var(--font-sans)',
+                lineHeight: 1
               }}
             >
               {tab.label}
             </span>
-
-            {/* Notification Badge */}
-            {tab.badge > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 4,
-                  right: '22%',
-                  minWidth: 14,
-                  height: 14,
-                  borderRadius: 'var(--radius-pill)',
-                  backgroundColor: 'var(--risk-critical)',
-                  color: '#FFFFFF',
-                  fontSize: '0.55rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0 3px',
-                  fontFamily: 'var(--font-mono)'
-                }}
-              >
-                {tab.badge}
-              </span>
-            )}
 
             {/* Active Indicator Line */}
             {isActive && (
@@ -125,11 +131,11 @@ export default function BottomNavigation({
                 style={{
                   position: 'absolute',
                   bottom: 0,
-                  width: 24,
+                  width: 20,
                   height: 2.5,
                   borderRadius: '2px 2px 0 0',
-                  backgroundColor: 'var(--brand-primary)',
-                  boxShadow: '0 0 8px var(--brand-glow)'
+                  backgroundColor: tab.id === 'evacuation' ? 'var(--risk-critical)' : 'var(--brand-primary)',
+                  boxShadow: `0 0 8px ${tab.id === 'evacuation' ? 'rgba(239, 68, 68, 0.6)' : 'var(--brand-glow)'}`
                 }}
               />
             )}

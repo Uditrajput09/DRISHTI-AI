@@ -10,6 +10,7 @@ import ProfileView from './views/ProfileView';
 import LoginView from './views/LoginView';
 import SimulationView from './views/SimulationView';
 import EvacuationView from './views/EvacuationView';
+import OfflineMapsView from './views/OfflineMapsView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import AndroidDeviceSimulator from './components/AndroidDeviceSimulator';
@@ -135,7 +136,7 @@ function AppContent() {
   useEffect(() => {
     const handlePopState = () => {
       const raw = window.location.pathname.replace(/^\//, '');
-      if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'login', 'evacuation', 'shelters'].includes(raw)) {
+      if (['gis', 'risk', 'forecast', 'simulation', 'incidents', 'alerts', 'reports', 'profile', 'login', 'evacuation', 'shelters', 'offline-maps'].includes(raw)) {
         setActiveSection(raw === 'shelters' ? 'evacuation' : raw);
       } else {
         setActiveSection('gis');
@@ -256,6 +257,7 @@ function AppContent() {
       case 'profile': return { title: '7. PROFILE', routeTag: '(/profile)' };
       case 'evacuation': return { title: '8. TOURIST & EVACUATION GUIDE', routeTag: '(/evacuation)' };
       case 'simulation': return { title: 'CLOUDBURST SIMULATION', routeTag: '(/simulation)' };
+      case 'offline-maps': return { title: 'OFFLINE MAPS & GPS NAVIGATION', routeTag: '(/offline-maps)' };
       default: return { title: 'GIS COMMAND CENTER', routeTag: '(/app)' };
     }
   };
@@ -398,6 +400,15 @@ function AppContent() {
               facilities={facilities}
               onNavigateToGIS={() => handleSelectSection('gis')}
               onOpenAlerts={() => handleSelectSection('alerts')}
+              onNavigate={handleSelectSection}
+            />
+          )}
+
+          {/* Screen 9: Offline Maps Downloader & Zero-Signal GPS Navigation */}
+          {activeSection === 'offline-maps' && (
+            <OfflineMapsView
+              onNavigateToGIS={() => handleSelectSection('gis')}
+              onNavigateToEvac={() => handleSelectSection('evacuation')}
             />
           )}
         </>

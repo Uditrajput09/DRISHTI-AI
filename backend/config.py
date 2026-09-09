@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     ALERT_LANGUAGES: str = Field(default="en,hi,kha,as")
 
     # Security & Admin Access
-    ADMIN_API_KEY: str = Field(default="drishti-demo-admin-key-2026")
+    ADMIN_API_KEY: str = Field(default="")
     ALLOWED_ORIGINS: str = Field(default="http://localhost:5173,http://localhost:3000")
 
     # App Environment

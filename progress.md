@@ -244,12 +244,61 @@
     - CORS & HTTP Security Headers (Checks 45, 46, 50): Replaced wildcard CORS with explicit allowed origins list and regex for `*.vercel.app`; injected `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, and `Referrer-Policy: strict-origin-when-cross-origin`.
     - PII & Citizen Privacy (Checks 17, 27, 41, 42): Created `backend/security.py` with `mask_contact()` redacting citizen phone numbers in public `/api/reports/list` and recipient numbers in `/api/alerts/history` & `/api/alerts/subscribers`; enforced base64 image MIME type validation (`jpeg|png|webp`) and 3MB limit in `FieldReportCreate`.
     - Admin Surface Protection (Checks 1, 13, 52, 53): Added `ADMIN_API_KEY` authentication (`X-Admin-Key` header) protecting `/api/alerts/trigger-manual`, `/api/ingestion/sync`, and `/api/reports/{id}/verify`; updated `frontend/src/api.js` to automatically supply admin credentials; isolated `/api/risk/simulate` so sandbox runs cannot trigger live SMS/push alerts.
-    - Added automated security test cases in `tests/test_api_endpoints.py`; verified 100% test pass rate across all 30 tests (30/30 passed) and clean frontend production build (`npm run build`, 11.37s).
+- 2026-09-09: Implemented Dijkstra Algorithm Evacuation Route Optimization & Dynamic Blockage Studio:
+    - Built pure Python heapq-based Dijkstra routing engine (`backend/ml/evacuation_graph.py`) with 40+ node road graph (zone centroids, shelters, trauma hospitals, tourist hotspots) and physical road edge geometry.
+    - Implemented multi-factor risk-aware edge cost function: Distance ($\alpha=1.0$), Real-time Landslide Risk ($\beta=18.0$ for Critical/High/Moderate), Terrain Slope ($\gamma=0.35$ for $>15^\circ$), and Blockage Penalty ($\delta=10,000.0$ for cut-slope debris collapse).
+    - Added $k$-shortest diverse alternative paths calculation (Rank #1 Primary Safe Corridor, Rank #2 Alternative Bypass, Rank #3 Backup Emergency Route).
+    - Created REST endpoints in `backend/api/routes_dijkstra.py` (`POST /api/evacuation/dijkstra-plan`, `POST /api/evacuation/block-road`, `POST /api/evacuation/unblock-roads`, `GET /api/evacuation/graph`, `GET /api/evacuation/weights`).
+    - Hooked dynamic risk weighting directly into `routes_ingestion.py` so road graph edge weights refresh automatically on each ingestion cycle.
+    - Added Dijkstra client methods to `frontend/src/api.js` (`planDijkstraEvacuation`, `getEvacuationGraph`, `getEvacuationWeights`, `setRoadBlockage`, `clearRoadBlockages`).
+    - Overhauled `frontend/src/views/EvacuationView.jsx` with ranked corridor pill switcher, real-time XAI cost breakdown, multi-polyline Leaflet overlay with dashed alternative paths, Landslide Road Blockage Simulator studio modal, and XAI weights inspection modal.
+    - Added automated pytest test cases in `tests/test_api_endpoints.py` (`test_dijkstra_evacuation_routing`, `test_dijkstra_road_blockage_and_rerouting`, `test_evacuation_graph_and_weights_endpoints`), passing 100%. Verified clean Vite production build (`✓ built in 7.46s`).
+
+- 2026-09-09: Implemented Refero Design Mobile Alignment & Visual Polish Pass (Android Mobile & PWA):
+    - Resolved floating AI Assistant FAB collision across all 4 screens: increased mobile page container bottom padding in `AppShell.jsx` (100px default, 140px on evacuation) and suppressed the FAB button on `/evacuation` so it never occludes the emergency rescue bar or `🚨 SOS Beacon` button.
+    - Fixed Live Incidents (`IncidentsView.jsx`): restructured incident cards on mobile so `INC-01` mono tags never break into multiple lines, titles and severity badges stack gracefully without clipping, corrected typo ("ground-truthing"), and made search input full-width responsive.
+    - Fixed Profile & Settings (`ProfileView.jsx`): resolved badge overflow on mobile where `Verified Responder` was floating past the card border, made role & location metadata wrap cleanly, and balanced Android APK / Device Simulator action buttons into responsive equal columns.
+    - Fixed Risk Intelligence (`RiskIntelligenceView.jsx`): upgraded Vulnerability Assessment from a squished 4-column grid into a clean 2x2 responsive grid (`repeat(auto-fit, minmax(130px, 1fr))`), adjusted Geotechnical Parameters grid, and enabled smooth horizontal scrolling on the top risk zones table.
+    - Fixed Tourist Evacuation (`EvacuationView.jsx`): refined hotspot preset scroll row so `CRITICAL` badges never clip, ensured emergency 112 / SOS action buttons are 100% visible and unoccluded.
+    - Fixed Top & Bottom Navigation: wrapped breadcrumbs with compact line height, hid redundant Evac button in TopNavigation on mobile (already present in BottomNav), and pinned notification badges directly to the upper-right corner of bottom navigation tab icons.
+    - Synchronized Capacitor native assets via `npx cap sync android` (0.634s) and verified clean Vite production build (`✓ built in 9.18s`).
+
+- 2026-09-09: Added GPS Location Option & Interactive Pinpoint Map to Field Report Submission (`FieldReportForm.jsx`):
+    - Added "Use My Live GPS" button right on the Location input row with hardware `navigator.geolocation` lock, high accuracy (`enableHighAccuracy: true`), spinning indicator, and haptic feedback.
+    - Integrated interactive Leaflet Pinpoint Map: supports tap/click anywhere to place marker, draggable teardrop pin with coordinate tooltip, zoom controls, and smooth recentering.
+    - Added satellite vs street map layer toggle (`Esri World Imagery` vs `OpenStreetMap Roads`) and Recenter to GPS button overlay.
+    - Added East Khasi Hills landmark corridor quick-presets (`Sohra NH-6`, `Nohkalikai`, `Mawsynram 7th Mile`, `Pynursla NH-106`, `Laitkynsew`, `Nongpoh Culvert`, `Dawki NH-206`, `Shillong Peak`).
+    - Added fine-tune exact numeric coordinates accordion (decimal degree inputs for Latitude and Longitude).
+    - Suppressed floating AI Assistant FAB button on mobile `/reports` in `AppShell.jsx` to eliminate form occlusion.
+    - Confirmed with 100% pytest pass rate (`test_field_report_submission_and_sync`) and clean Vite production build (`7.40s`). Synchronized native Android assets via `npx cap sync android` (0.135s).
+
+- 2026-09-09: Implemented Offline Maps Downloader & Zero-Signal Hardware GPS Navigation System (`OfflineMapsView.jsx`, `offlineMapService.js`):
+    - Created `offlineMapService.js` managing browser IndexedDB vault (`drishti_offline_vault`), CacheStorage quotas, 4 regional offline map packs for East Khasi Hills (Master District 24.5 MB, Sohra Tourism 12.8 MB, Mawsynram Basin 10.4 MB, Pynursla-Dawki 11.2 MB), pure clientside Dijkstra routing engine with zero network dependencies, and Web Audio API SOS whistle sound synthesizer.
+    - Built new dedicated page `OfflineMapsView.jsx` (`/offline-maps`) with 3 tabs: (1) Map Packs Downloader with storage quota manager and progress tracking; (2) Zero-Signal GPS Navigation HUD with hardware satellite GNSS tracking (altitude, speed, heading, accuracy), rotating tactical compass rose, safe haven shelter selector, and turn-by-turn maneuvers; (3) Interactive Offline Leaflet Map with cached vector roads, danger zones, shelters, user beacon, and Blackout Mode simulator toggle.
+    - Added emergency mountain rescue utilities: audio SOS whistle generator (piercing acoustic mountain distress signal), full-screen Morse code strobe beacon, and offline GPS waypoint breadcrumbs.
+    - Linked into `App.jsx` routing, `Sidebar.jsx` (Operations navigation rail), `SidebarNavigation.jsx`, `ProfileView.jsx` (Hero quick actions), and `EvacuationView.jsx` (Offline Mode launcher).
+    - Confirmed clean Vite production build (`✓ built in 9.29s`), synchronized native Android public assets via `npx cap sync android` (0.162s), and verified 100% backend pytest test suite passing (5/5 passed).
+
+- 2026-09-09: Final Testing, Dead Code Purge & Security Audit Pass:
+    - Dead Code Purge: Removed 7 orphaned/duplicate components (`TopNavigation.jsx`, `RiskMetricCard.jsx`, `EmptyState.jsx`, `HeaderBar.jsx`, `ChatbotPanel.jsx`, `SidebarNavigation.jsx`, `ZoneInspector.jsx`), root `.hintrc`, `frontend/.hintrc`, `scratch/` debug scripts, and Reticle agent instrumentation (`.reticle.json`, `.reticle/`, `reticle-dev.ts`, `skills-lock.json`). Removed unneeded reticle plugin from `frontend/vite.config.js`.
+    - Security Hardening:
+      - Confirmed `.env` is untracked and has never been committed in git history.
+      - Hardened `frontend/src/firebase.js` to strictly consume `VITE_` environment variables with zero hardcoded credentials in the client bundle.
+      - Hardened `/api/download/apk` endpoint in `backend/main.py` by removing `subprocess.run()` RCE vulnerability and converting it into a safe static file download with 404 fallback.
+      - Added Content-Security-Policy (CSP) headers to FastAPI HTTP middleware in `backend/main.py`.
+      - Restricted CORS to explicit HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`) and specific request headers (`Content-Type`, `Authorization`, `X-Admin-Key`, `X-Requested-With`).
+      - Hardened `verify_admin_key()` in `backend/security.py` to fail closed when no admin key is configured.
+      - Added Pydantic `Field(max_length=...)` input validation limits to `FieldReportCreate` in `backend/schemas.py`.
+    - .gitignore Hardening: Added Reticle instrumentation, skills-lock, and ML model artifacts (`backend/ml/model.joblib`) to `.gitignore`.
+    - Console Log Cleanup: Wrapped console logging in `frontend/src/main.jsx` and `frontend/src/context/ToastContext.jsx` in `import.meta.env.DEV` guards.
+    - Final Integration Verification:
+      - Executed entire backend pytest suite (`.venv\Scripts\python -m pytest tests/ -v --tb=short`): **33 of 33 tests passed (100%)** across API endpoints, XGBoost ensemble, Isolation Forest anomaly detector, 7-day probabilistic forecast, Redis cache fallback, SHAP explainability, and WebSocket live risk streaming.
+      - Executed frontend production build (`npm run build`): **2,551 modules bundled with 0 errors** in 9.80s.
 
 ---
 
 ## In Progress
-- Complete MVP + Tourist Emergency Evacuation + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS + Security Hardening fully verified and operational. Ready for jury demo.
+- Complete MVP + Tourist Emergency Evacuation + Dijkstra Route Optimization + Dynamic Blockage Simulator + Refero Design Mobile Polish + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS + Security Hardening fully verified and operational. Ready for jury demo.
 
 ---
 
@@ -260,10 +309,11 @@
 
 ## Next Session Starting Point
 1. Backend running on `http://127.0.0.1:8000` (`python -m uvicorn backend.main:app --reload`) connected to Supabase PostgreSQL.
-2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates, AI chatbot drawer, and anomaly banners.
-3. Test XGBoost ensemble predictions (`v2.0-rf-xgb-ensemble`, ROC-AUC 0.9941) with SHAP attribution.
-4. Test 7-day probabilistic trajectory and 90% CI bands on `http://localhost:5173/forecast`.
-5. Test AI Assistant via the floating FAB button or Top Navigation bar.
-6. Follow `DEMO_SCRIPT.md` to present the system.
+2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates, AI chatbot drawer, anomaly banners, and Dijkstra Evacuation Route Optimizer.
+3. Test Dijkstra Route Optimization on `http://localhost:5173/evacuation`: switch between Rank #1, #2, #3 corridors; simulate road blockage on `SH-5` or `NH-206`; inspect XAI cost weights.
+4. Test XGBoost ensemble predictions (`v2.0-rf-xgb-ensemble`, ROC-AUC 0.9941) with SHAP attribution.
+5. Test 7-day probabilistic trajectory and 90% CI bands on `http://localhost:5173/forecast`.
+6. Test AI Assistant via the floating FAB button or Top Navigation bar.
+7. Follow `DEMO_SCRIPT.md` to present the system.
 
 

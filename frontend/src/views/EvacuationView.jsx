@@ -38,7 +38,12 @@ import {
   MessageSquare,
   Volume2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Zap,
+  AlertOctagon,
+  RotateCcw,
+  Sliders,
+  Layers
 } from 'lucide-react';
 import {
   Card,
@@ -137,6 +142,7 @@ const createHospitalPin = (isTarget) => L.divIcon({
 export default function EvacuationView({
   currentUser,
   onNavigateToGIS,
+  onNavigate,
   zones = [],
   facilities = []
 }) {
@@ -170,6 +176,16 @@ export default function EvacuationView({
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [evacuationPlan, setEvacuationPlan] = useState(null);
   const [isLoadingPlan, setIsLoadingPlan] = useState(false);
+
+  // Dijkstra Evacuation Engine State
+  const [useDijkstra, setUseDijkstra] = useState(true);
+  const [dijkstraData, setDijkstraData] = useState(null);
+  const [selectedPathRank, setSelectedPathRank] = useState(1);
+  const [isBlockageModalOpen, setIsBlockageModalOpen] = useState(false);
+  const [isWeightsModalOpen, setIsWeightsModalOpen] = useState(false);
+  const [weightsData, setWeightsData] = useState(null);
+  const [isLoadingWeights, setIsLoadingWeights] = useState(false);
+  const [activeBlockages, setActiveBlockages] = useState([]);
 
   // Survival Phrasebook Language
   const [phraseLang, setPhraseLang] = useState('kha'); // 'kha' (Khasi) | 'hi' (Hindi) | 'as' (Assamese) | 'en'
@@ -207,16 +223,37 @@ export default function EvacuationView({
     async function fetchPlan() {
       setIsLoadingPlan(true);
       try {
-        const plan = await api.planEvacuation(
-          touristCoords.lat,
-          touristCoords.lon,
-          facilityFilter,
-          45.0
-        );
-        if (plan) {
-          setEvacuationPlan(plan);
-          if (!selectedFacility && plan.target_facility) {
-            setSelectedFacility(plan.target_facility);
+        const originId = selectedHotspot?.id?.startsWith('spot_') ? selectedHotspot.id : (selectedHotspot?.zone_id || null);
+
+        const [dPlan, hPlan] = await Promise.all([
+          api.planDijkstraEvacuation(
+            originId,
+            touristCoords.lat,
+            touristCoords.lon,
+            facilityFilter,
+            100.0,
+            3
+          ).catch(e => null),
+          api.planEvacuation(
+            touristCoords.lat,
+            touristCoords.lon,
+            facilityFilter,
+            45.0
+          ).catch(e => null)
+        ]);
+
+        if (dPlan && dPlan.paths && dPlan.paths.length > 0) {
+          setDijkstraData(dPlan);
+          const p1 = dPlan.paths[0];
+          if (p1?.destination) {
+            setSelectedFacility(p1.destination);
+          }
+        }
+
+        if (hPlan) {
+          setEvacuationPlan(hPlan);
+          if (!selectedFacility && hPlan.target_facility && (!dPlan || !dPlan.paths?.length)) {
+            setSelectedFacility(hPlan.target_facility);
           }
         }
       } catch (err) {
@@ -404,8 +441,81 @@ export default function EvacuationView({
     return [touristCoords.lat, touristCoords.lon];
   }, [touristCoords]);
 
-  const activeRoute = evacuationPlan?.evacuation_route;
+  const currentDijkstraPath = useMemo(() => {
+    if (!dijkstraData?.paths?.length) return null;
+    return dijkstraData.paths.find(p => p.rank === selectedPathRank) || dijkstraData.paths[0];
+  }, [dijkstraData, selectedPathRank]);
+
+  const activeRoute = useMemo(() => {
+    if (useDijkstra && currentDijkstraPath) {
+      return {
+        ...currentDijkstraPath,
+        route_status: currentDijkstraPath.safe ? 'CLEAR_OPTIMAL_CORRIDOR' : 'CAUTION_HIGH_RISK_SEGMENTS',
+        avoided_hazards: currentDijkstraPath.blocked_segments_avoided || [],
+        safety_rating: currentDijkstraPath.safety_rating,
+        total_distance_km: currentDijkstraPath.distance_km,
+        estimated_drive_min: currentDijkstraPath.eta_minutes?.drive || 15,
+        estimated_walk_min: currentDijkstraPath.eta_minutes?.walk || 60,
+        waypoints: currentDijkstraPath.waypoints,
+        steps: currentDijkstraPath.steps
+      };
+    }
+    return evacuationPlan?.evacuation_route;
+  }, [useDijkstra, currentDijkstraPath, evacuationPlan]);
+
   const facilityList = evacuationPlan?.facilities || [];
+
+  const handleOpenWeightsModal = async () => {
+    triggerHaptic([30]);
+    setIsWeightsModalOpen(true);
+    if (!weightsData) {
+      setIsLoadingWeights(true);
+      try {
+        const data = await api.getEvacuationWeights();
+        setWeightsData(data);
+      } catch (err) {
+        console.warn('Failed to load weights:', err);
+      } finally {
+        setIsLoadingWeights(false);
+      }
+    }
+  };
+
+  const handleToggleBlockage = async (roadIdentifier, blocked, reason = 'Active landslide debris') => {
+    triggerHaptic([50]);
+    showToast(`${blocked ? 'Simulating' : 'Clearing'} blockage on ${roadIdentifier}...`, 'info');
+    try {
+      if (blocked) {
+        await api.setRoadBlockage(roadIdentifier, true, reason);
+        setActiveBlockages(prev => [...prev.filter(b => b !== roadIdentifier), roadIdentifier]);
+        showToast(`Road Blocked: ${roadIdentifier}. Dijkstra rerouting now...`, 'warning');
+      } else {
+        await api.clearRoadBlockages();
+        setActiveBlockages([]);
+        showToast('All road blockages cleared and corridors restored.', 'success');
+      }
+
+      // Re-fetch Dijkstra plan
+      const originId = selectedHotspot?.id?.startsWith('spot_') ? selectedHotspot.id : (selectedHotspot?.zone_id || null);
+      const dPlan = await api.planDijkstraEvacuation(
+        originId,
+        touristCoords.lat,
+        touristCoords.lon,
+        facilityFilter,
+        100.0,
+        3
+      );
+      if (dPlan && dPlan.paths && dPlan.paths.length > 0) {
+        setDijkstraData(dPlan);
+        setSelectedPathRank(1);
+        if (dPlan.paths[0]?.destination) {
+          setSelectedFacility(dPlan.paths[0].destination);
+        }
+      }
+    } catch (err) {
+      showToast(`Blockage update failed: ${err.message}`, 'error');
+    }
+  };
 
   // Sub-Renderer: Recommended Safe Haven Card
   const renderSafeHavenCard = () => (
@@ -627,17 +737,183 @@ export default function EvacuationView({
   const renderTurnByTurnCard = () => (
     <Card padding={isMobile ? 14 : 20}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Header with Algorithm Engine Switch & XAI Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Route size={18} color="var(--brand-primary)" />
-            <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-              Hazard-Avoiding Navigation Steps
-            </h3>
+            <Zap size={18} color="var(--brand-primary)" />
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                {useDijkstra ? 'Dijkstra Optimal Evacuation Corridors' : 'Direct Distance Escape Route'}
+              </h3>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                {useDijkstra ? 'Cost-minimized routing over terrain slope & live landslide risk' : 'Straight-line proximity baseline'}
+              </div>
+            </div>
           </div>
-          <Badge variant="live" size="sm">
-            {activeRoute?.route_status || 'CLEAR_SAFE_CORRIDOR'}
-          </Badge>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {/* Algorithm Switcher */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic([30]);
+                setUseDijkstra(!useDijkstra);
+                showToast(`Switched to ${!useDijkstra ? 'Dijkstra Risk-Aware' : 'Haversine Direct'} Routing`, 'info');
+              }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-pill)',
+                border: '1px solid var(--border-secondary)',
+                backgroundColor: useDijkstra ? 'rgba(79, 111, 255, 0.15)' : 'var(--bg-main)',
+                color: useDijkstra ? 'var(--brand-light)' : 'var(--text-muted)',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              <Zap size={12} />
+              <span>{useDijkstra ? '⚡ Dijkstra Active' : 'Haversine Mode'}</span>
+            </button>
+
+            {/* XAI Edge Weights Matrix Button */}
+            <button
+              type="button"
+              onClick={handleOpenWeightsModal}
+              title="Inspect geotechnical and terrain edge weights"
+              style={{
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-pill)',
+                border: '1px solid var(--border-secondary)',
+                backgroundColor: 'var(--bg-surface-elevated)',
+                color: 'var(--text-secondary)',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              <Sliders size={12} />
+              <span>XAI Weights</span>
+            </button>
+
+            {/* Road Blockage Simulation Button */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic([30]);
+                setIsBlockageModalOpen(true);
+              }}
+              title="Simulate road cut-slope blockage or debris flow"
+              style={{
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-pill)',
+                border: activeBlockages.length > 0 ? '1px solid var(--risk-critical)' : '1px solid var(--border-secondary)',
+                backgroundColor: activeBlockages.length > 0 ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-surface-elevated)',
+                color: activeBlockages.length > 0 ? '#EF4444' : 'var(--text-secondary)',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              <AlertOctagon size={12} />
+              <span>{activeBlockages.length > 0 ? `${activeBlockages.length} Blocked` : 'Simulate Blockage'}</span>
+            </button>
+          </div>
         </div>
+
+        {/* Dijkstra Ranked Corridors Pill Selector */}
+        {useDijkstra && dijkstraData?.paths && dijkstraData.paths.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
+              Select Ranked Dijkstra Path ({dijkstraData.paths.length} Available):
+            </span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+              {dijkstraData.paths.map((p) => {
+                const isSelected = selectedPathRank === p.rank;
+                const rankColors = {
+                  1: { border: '#22C55E', bg: 'rgba(34, 197, 94, 0.12)', text: '#22C55E' },
+                  2: { border: '#06B6D4', bg: 'rgba(6, 182, 212, 0.12)', text: '#06B6D4' },
+                  3: { border: '#F59E0B', bg: 'rgba(245, 158, 11, 0.12)', text: '#F59E0B' }
+                };
+                const c = rankColors[p.rank] || rankColors[1];
+                return (
+                  <button
+                    key={p.rank}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic([30]);
+                      setSelectedPathRank(p.rank);
+                      if (p.destination) setSelectedFacility(p.destination);
+                    }}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: 'var(--radius-input)',
+                      border: `1px solid ${isSelected ? c.border : 'var(--border-secondary)'}`,
+                      backgroundColor: isSelected ? c.bg : 'var(--bg-surface-elevated)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 3,
+                      transition: 'all var(--transition-fast)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: c.text, textTransform: 'uppercase' }}>
+                        #{p.rank} {p.label}
+                      </span>
+                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                        Cost: {p.total_cost}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {p.destination_shelter}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                      {p.distance_km} km • {p.eta_minutes?.drive}m drive
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* XAI Dijkstra Cost Formula & Weights Bar */}
+        {useDijkstra && currentDijkstraPath && (
+          <div
+            style={{
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-input)',
+              backgroundColor: 'var(--bg-main)',
+              border: '1px solid var(--border-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 10,
+              fontSize: 11
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Total Dijkstra Cost:</span>
+              <strong style={{ color: 'var(--brand-light)' }}>{currentDijkstraPath.total_cost}</strong>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-secondary)' }}>
+              <span>Dist Cost: <strong>{(currentDijkstraPath.distance_km * 1.0).toFixed(1)}</strong></span>
+              <span>Risk Pen: <strong style={{ color: currentDijkstraPath.risk_penalty > 5 ? 'var(--risk-critical)' : 'inherit' }}>+{currentDijkstraPath.risk_penalty}</strong></span>
+              <span>Terrain Slope Pen: <strong>+{currentDijkstraPath.terrain_penalty}</strong></span>
+            </div>
+          </div>
+        )}
 
         {/* Avoided Hazards Warning Pill */}
         {activeRoute?.avoided_hazards && activeRoute.avoided_hazards.length > 0 && (
@@ -667,46 +943,53 @@ export default function EvacuationView({
             { step: 1, instruction: 'Ascend immediately away from waterfall/river gorge floor towards marked roadway.', distance_m: 350 },
             { step: 2, instruction: 'Follow reinforced bypass road avoiding saturated eastern cut-slopes.', distance_m: 1200 },
             { step: 3, instruction: 'Arrive at the designated high-ground shelter gates.', distance_m: 150 }
-          ]).map((s) => (
-            <div
-              key={s.step}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 12,
-                padding: '10px 12px',
-                borderRadius: 'var(--radius-input)',
-                backgroundColor: 'var(--bg-surface-elevated)',
-                border: '1px solid var(--border-secondary)'
-              }}
-            >
+          ]).map((s, sIdx) => {
+            const stepNum = s.step_number || s.step || (sIdx + 1);
+            const distLabel = s.distance_km ? `${s.distance_km} km` : (s.distance_m ? `~${s.distance_m} m` : '');
+
+            return (
               <div
+                key={stepNum}
                 style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--brand-primary)',
-                  color: '#FFFFFF',
-                  fontSize: 11,
-                  fontWeight: 700,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  padding: '10px 12px',
+                  borderRadius: 'var(--radius-input)',
+                  backgroundColor: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-secondary)'
                 }}
               >
-                {s.step}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-                  {s.instruction}
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--brand-primary)',
+                    color: '#FFFFFF',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  {stepNum}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
-                  Distance: ~{s.distance_m} meters
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                    {s.instruction}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {distLabel && <span>Distance: {distLabel}</span>}
+                    {s.road && <span>• Road: {s.road}</span>}
+                    {s.slope_deg && <span>• Avg Slope: {s.slope_deg}°</span>}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </Card>
@@ -835,7 +1118,9 @@ export default function EvacuationView({
         subtitle="Real-time proximity locator for high-ground shelters, trauma hubs, and vetted landslide-avoiding escape corridors across Meghalaya's tourist belt."
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <div
+            <button
+              type="button"
+              onClick={() => onNavigate && onNavigate('offline-maps')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -845,12 +1130,14 @@ export default function EvacuationView({
                 backgroundColor: 'rgba(34, 197, 94, 0.12)',
                 border: '1px solid rgba(34, 197, 94, 0.3)',
                 fontSize: 11,
-                color: '#22C55E'
+                color: '#22C55E',
+                cursor: onNavigate ? 'pointer' : 'default'
               }}
+              title="Switch to Zero-Signal Offline Maps & GPS Navigation"
             >
-              <Wifi size={12} />
-              <span>Offline Ready</span>
-            </div>
+              <WifiOff size={12} />
+              <span>Offline GPS Nav Mode →</span>
+            </button>
 
             <DangerButton
               size="sm"
@@ -910,7 +1197,17 @@ export default function EvacuationView({
           </div>
 
           {/* Quick Tourist Hotspot Pills & Live GPS Button */}
-          <div className="evac-hide-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+          <div
+            className="evac-hide-scrollbar"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              padding: '2px 2px 6px 2px'
+            }}
+          >
             {/* Live GPS Button */}
             <button
               type="button"
@@ -961,7 +1258,18 @@ export default function EvacuationView({
                 >
                   <span>{spot.name}</span>
                   {spot.risk === 'Critical' && (
-                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 10, backgroundColor: 'rgba(239, 68, 68, 0.3)', color: '#EF4444' }}>
+                    <span
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 700,
+                        padding: '2px 5px',
+                        borderRadius: 8,
+                        backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.3)' : 'rgba(239, 68, 68, 0.25)',
+                        color: isSelected ? '#FFFFFF' : '#EF4444',
+                        flexShrink: 0,
+                        lineHeight: 1
+                      }}
+                    >
                       CRITICAL
                     </span>
                   )}
@@ -1063,18 +1371,60 @@ export default function EvacuationView({
             );
           })}
 
-          {/* 3. Vetted Safe Escape Polyline (Solid Green) */}
-          {activeRoute?.waypoints && activeRoute.waypoints.length > 0 && (
-            <Polyline
-              positions={activeRoute.waypoints}
-              pathOptions={{
-                color: '#22C55E',
-                weight: 6,
-                opacity: 0.9,
-                lineCap: 'round',
-                lineJoin: 'round'
-              }}
-            />
+          {/* 3. Multi-Corridor Polyline Layers (Dijkstra Ranked Paths or Single Route) */}
+          {useDijkstra && dijkstraData?.paths && dijkstraData.paths.length > 0 ? (
+            dijkstraData.paths.map((p) => {
+              const isSelected = selectedPathRank === p.rank;
+              const color = p.rank === 1 ? '#22C55E' : (p.rank === 2 ? '#06B6D4' : '#F59E0B');
+              return (
+                <Polyline
+                  key={`dijkstra-poly-${p.rank}`}
+                  positions={p.waypoints}
+                  eventHandlers={{
+                    click: () => {
+                      setSelectedPathRank(p.rank);
+                      if (p.destination) setSelectedFacility(p.destination);
+                      triggerHaptic([30]);
+                    }
+                  }}
+                  pathOptions={{
+                    color,
+                    weight: isSelected ? 7 : 4,
+                    opacity: isSelected ? 0.95 : 0.45,
+                    dashArray: p.rank === 1 ? undefined : (p.rank === 2 ? '8, 6' : '5, 5'),
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                  }}
+                >
+                  <Popup>
+                    <div style={{ padding: 4, color: '#111' }}>
+                      <div style={{ fontWeight: 700, fontSize: 12, color }}>
+                        #{p.rank} {p.label}
+                      </div>
+                      <div style={{ fontSize: 11, marginTop: 2 }}>
+                        Target: <strong>{p.destination_shelter}</strong>
+                      </div>
+                      <div style={{ fontSize: 10, color: '#555' }}>
+                        {p.distance_km} km • Cost: {p.total_cost} • Safety: {p.safety_rating}/100
+                      </div>
+                    </div>
+                  </Popup>
+                </Polyline>
+              );
+            })
+          ) : (
+            activeRoute?.waypoints && activeRoute.waypoints.length > 0 && (
+              <Polyline
+                positions={activeRoute.waypoints}
+                pathOptions={{
+                  color: '#22C55E',
+                  weight: 6,
+                  opacity: 0.9,
+                  lineCap: 'round',
+                  lineJoin: 'round'
+                }}
+              />
+            )
           )}
         </MapContainer>
 
@@ -1121,10 +1471,27 @@ export default function EvacuationView({
                 <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#06B6D4' }} />
                 <span>Hospital & Trauma Post</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 14, height: 3, backgroundColor: '#22C55E', borderRadius: 2 }} />
-                <span>Vetted Escape Route</span>
-              </div>
+              {useDijkstra ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 14, height: 3, backgroundColor: '#22C55E', borderRadius: 2 }} />
+                    <span>#1 Primary Safe Corridor</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 14, height: 3, backgroundColor: '#06B6D4', borderRadius: 2 }} />
+                    <span>#2 Alternative Bypass</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 14, height: 3, backgroundColor: '#F59E0B', borderRadius: 2 }} />
+                    <span>#3 Backup Facility Corridor</span>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 14, height: 3, backgroundColor: '#22C55E', borderRadius: 2 }} />
+                  <span>Vetted Escape Route</span>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -1478,6 +1845,244 @@ export default function EvacuationView({
             >
               {sosLoading ? 'Transmitting...' : sosSent ? 'Distress Broadcast Sent!' : 'Transmit Live Distress Signal'}
             </DangerButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 7. XAI DIJKSTRA EDGE WEIGHTS MATRIX MODAL */}
+      <Modal
+        isOpen={isWeightsModalOpen}
+        onClose={() => setIsWeightsModalOpen(false)}
+        title="📊 Geotechnical & Topographical Edge Weights Matrix"
+        size="lg"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            DRISHTI-AI's Dijkstra routing engine minimizes total evacuation cost over a weighted directed graph using:
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: 'var(--brand-light)',
+                backgroundColor: 'var(--bg-main)',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-input)',
+                border: '1px solid var(--border-secondary)',
+                marginTop: 6
+              }}
+            >
+              Weight = (1.0 × Distance_km) + (0.5 × Zone_Risk_Penalty) + (0.3 × Slope_deg / 10) + [∞ if Blocked]
+            </div>
+          </div>
+
+          {/* Quick Metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div style={{ padding: '8px 10px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-secondary)' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Alpha (Distance)</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>1.0</div>
+            </div>
+            <div style={{ padding: '8px 10px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-secondary)' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Beta (Risk Pen)</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--risk-high)' }}>0.5</div>
+            </div>
+            <div style={{ padding: '8px 10px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-secondary)' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Gamma (Terrain)</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#06B6D4' }}>0.3</div>
+            </div>
+            <div style={{ padding: '8px 10px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-secondary)' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Active Blockages</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: activeBlockages.length > 0 ? 'var(--risk-critical)' : '#22C55E' }}>
+                {activeBlockages.length}
+              </div>
+            </div>
+          </div>
+
+          {/* Weights Scrollable Table */}
+          <div style={{ maxHeight: 340, overflowY: 'auto', border: '1px solid var(--border-secondary)', borderRadius: 'var(--radius-input)' }}>
+            {isLoadingWeights ? (
+              <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                Loading road network weights from PostGIS/OSM topology...
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-secondary)', color: 'var(--text-muted)' }}>
+                    <th style={{ padding: '8px 10px' }}>Road Corridor</th>
+                    <th style={{ padding: '8px 10px' }}>Zone</th>
+                    <th style={{ padding: '8px 10px' }}>Risk Level</th>
+                    <th style={{ padding: '8px 10px' }}>Slope</th>
+                    <th style={{ padding: '8px 10px' }}>Dist (km)</th>
+                    <th style={{ padding: '8px 10px' }}>Risk Pen</th>
+                    <th style={{ padding: '8px 10px' }}>Total Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(weightsData?.segments || []).map((seg) => {
+                    const isBlocked = seg.is_blocked || activeBlockages.some(b => seg.road_name.includes(b) || seg.edge_id.includes(b));
+                    return (
+                      <tr
+                        key={seg.edge_id}
+                        style={{
+                          borderBottom: '1px solid var(--border-secondary)',
+                          backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.08)' : 'transparent'
+                        }}
+                      >
+                        <td style={{ padding: '7px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                          {seg.road_name}
+                          {isBlocked && (
+                            <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 4px', borderRadius: 2, backgroundColor: '#EF4444', color: '#fff' }}>
+                              BLOCKED
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '7px 10px', color: 'var(--text-secondary)' }}>{seg.zone_id}</td>
+                        <td style={{ padding: '7px 10px' }}>
+                          <span style={{
+                            color: seg.zone_risk_level === 'Critical' ? '#EF4444' : (seg.zone_risk_level === 'High' ? '#F97316' : '#22C55E'),
+                            fontWeight: 600
+                          }}>
+                            {seg.zone_risk_level}
+                          </span>
+                        </td>
+                        <td style={{ padding: '7px 10px', color: 'var(--text-secondary)' }}>{seg.slope_deg}°</td>
+                        <td style={{ padding: '7px 10px', color: 'var(--text-secondary)' }}>{seg.distance_km}</td>
+                        <td style={{ padding: '7px 10px', color: seg.risk_penalty > 0 ? '#F97316' : 'var(--text-muted)' }}>+{seg.risk_penalty}</td>
+                        <td style={{ padding: '7px 10px', fontWeight: 700, color: isBlocked ? '#EF4444' : 'var(--brand-light)' }}>
+                          {isBlocked ? '∞ (Blocked)' : seg.total_weight}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+            <SecondaryButton onClick={() => setIsWeightsModalOpen(false)}>
+              Close
+            </SecondaryButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 8. ROAD BLOCKAGE SIMULATION STUDIO MODAL */}
+      <Modal
+        isOpen={isBlockageModalOpen}
+        onClose={() => setIsBlockageModalOpen(false)}
+        title="🚧 Landslide Road Blockage Simulator"
+        size="md"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            Simulate cut-slope collapse or massive debris flow on key Meghalaya highway sectors. Dijkstra's algorithm will dynamically assign infinite cost (∞) to the segment and recalculate alternative bypass routes.
+          </div>
+
+          {activeBlockages.length > 0 && (
+            <div
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: 'var(--radius-input)',
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#EF4444' }}>
+                <AlertOctagon size={16} />
+                <span>Currently Active: <strong>{activeBlockages.join(', ')}</strong></span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleBlockage('', false)}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#EF4444',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
+          {/* Quick Presets Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>
+              Select Road Sector to Block:
+            </div>
+            {[
+              { id: 'SH-5', name: 'SH-5 (Shillong-Sohra High Escarpment)', desc: 'Blocks primary descent from Mawphlang to Cherrapunji' },
+              { id: 'E_SOHRA_01', name: 'Sohra Shelter Direct Link (E_SOHRA_01)', desc: 'Forces detour via Nohkalikai Ridge Bypass' },
+              { id: 'NH-206', name: 'NH-206 (Laitlum Gorge to Pynursla)', desc: 'Blocks southern trade corridor to Dawki Border' },
+              { id: 'E_NH6_04', name: 'NH-6 (Shillong Bypass Cut-Slope)', desc: 'Blocks high-speed lifeline expressway to NEIGRIHMS' },
+              { id: 'E_MAWSYN_01', name: 'SH-1 (Mawphlang to Mawsynram Ridge)', desc: 'Blocks main access into Mawsynram Karst Valley' }
+            ].map((road) => {
+              const isBlocked = activeBlockages.includes(road.id);
+              return (
+                <div
+                  key={road.id}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 'var(--radius-input)',
+                    backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.12)' : 'var(--bg-surface-elevated)',
+                    border: `1px solid ${isBlocked ? 'var(--risk-critical)' : 'var(--border-secondary)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: isBlocked ? '#EF4444' : 'var(--text-primary)' }}>
+                      {road.name}
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {road.desc}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleBlockage(road.id, !isBlocked, 'Simulated Landslide Debris')}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: isBlocked ? '#22C55E' : 'rgba(239, 68, 68, 0.2)',
+                      border: `1px solid ${isBlocked ? '#22C55E' : 'rgba(239, 68, 68, 0.4)'}`,
+                      color: isBlocked ? '#fff' : '#EF4444',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {isBlocked ? 'Clear Blockage' : 'Simulate Block'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={RotateCcw}
+              onClick={() => handleToggleBlockage('', false)}
+            >
+              Reset All Roads
+            </Button>
+            <SecondaryButton onClick={() => setIsBlockageModalOpen(false)}>
+              Done
+            </SecondaryButton>
           </div>
         </div>
       </Modal>

@@ -135,11 +135,11 @@ export function AppShell({
           id="main-content"
           style={{
             flex: 1,
-            padding: isMobile ? '14px 14px 76px 14px' : '24px',
+            padding: isMobile ? `14px 14px ${activeSection === 'evacuation' ? 140 : (activeSection === 'reports' ? 120 : 100)}px 14px` : '24px',
             maxWidth: 'var(--content-max-width)',
             width: '100%',
-            margin: '0 auto',
-            position: 'relative'
+            boxSizing: 'border-box',
+            overflowX: 'hidden'
           }}
           className="drishti-page-container"
         >
@@ -159,8 +159,8 @@ export function AppShell({
         />
       )}
 
-      {/* 5. Floating Enterprise AI Assistant FAB Button (hidden when drawer is open to prevent overlapping input) */}
-      {!isAIDrawerOpen && (
+      {/* 5. Floating Enterprise AI Assistant FAB Button (hidden on evacuation & reports view on mobile to prevent blocking critical action bars & form controls) */}
+      {!isAIDrawerOpen && (!isMobile || (activeSection !== 'evacuation' && activeSection !== 'reports')) && (
         <button
           onClick={() => setIsAIDrawerOpen(true)}
           title="DRISHTI AI Assistant"

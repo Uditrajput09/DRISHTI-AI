@@ -99,35 +99,38 @@ export default function ProfileView({
       />
 
       {/* 2. Top Profile Hero Card */}
-      <Card padding={22}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Avatar name={userName} size={64} status="online" />
+      <Card padding={16}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+            <Avatar name={userName} size={54} status="online" />
 
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: 17, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
                   {userName}
                 </h2>
                 <Badge variant="live" size="sm">Verified Responder</Badge>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--brand-light)', marginTop: 3 }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 12, color: 'var(--brand-light)', marginTop: 3 }}>
                 <span>{userRole}</span>
                 <span style={{ color: 'var(--text-muted)' }}>•</span>
                 <span style={{ color: 'var(--text-secondary)' }}>{userDistrict}</span>
               </div>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+
+              <p style={{ fontSize: 11.5, color: 'var(--text-muted)', margin: '4px 0 0 0', lineHeight: 1.35 }}>
                 Active responder telemetry linked to East Khasi Hills emergency command network.
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {onOpenAndroidModal && (
               <SecondaryButton
                 size="sm"
                 icon={Smartphone}
                 onClick={onOpenAndroidModal}
+                style={{ flex: '1 1 130px' }}
               >
                 Android APK
               </SecondaryButton>
@@ -137,8 +140,19 @@ export default function ProfileView({
                 size="sm"
                 icon={Terminal}
                 onClick={onOpenSimulator}
+                style={{ flex: '1 1 130px' }}
               >
                 Device Simulator
+              </SecondaryButton>
+            )}
+            {onNavigate && (
+              <SecondaryButton
+                size="sm"
+                icon={Download}
+                onClick={() => onNavigate('offline-maps')}
+                style={{ flex: '1 1 130px' }}
+              >
+                Offline Maps & GPS
               </SecondaryButton>
             )}
           </div>
@@ -149,36 +163,36 @@ export default function ProfileView({
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 12,
+            gap: 6,
             borderTop: '1px solid var(--border-primary)',
-            paddingTop: 16,
-            marginTop: 18
+            paddingTop: 14,
+            marginTop: 14
           }}
         >
           <div style={{ textAlign: 'center' }}>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.1 }}>
+            <div className="font-mono" style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.1 }}>
               {currentUser?.stats?.reportsSubmitted ?? 14}
             </div>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>
+            <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginTop: 2 }}>
               Reports Submitted
             </span>
           </div>
 
           <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-primary)', borderRight: '1px solid var(--border-primary)' }}>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 600, color: 'var(--brand-primary)', lineHeight: 1.1 }}>
+            <div className="font-mono" style={{ fontSize: 20, fontWeight: 600, color: 'var(--brand-primary)', lineHeight: 1.1 }}>
               {currentUser?.stats?.alertsFollowed ?? 8}
             </div>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>
+            <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginTop: 2 }}>
               Alerts Monitored
             </span>
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 600, color: 'var(--risk-safe)', lineHeight: 1.1 }}>
+            <div className="font-mono" style={{ fontSize: 20, fontWeight: 600, color: 'var(--risk-safe)', lineHeight: 1.1 }}>
               {currentUser?.stats?.postsCount ?? 6}
             </div>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>
-              Field Ground Verifications
+            <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginTop: 2 }}>
+              Ground Verifications
             </span>
           </div>
         </div>

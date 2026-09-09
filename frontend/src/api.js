@@ -323,6 +323,86 @@ export const api = {
     }
   },
 
+  // ─── Dijkstra Evacuation Route Optimization ──────────────────
+  async planDijkstraEvacuation(originZoneId = null, lat = null, lon = null, targetType = 'all', maxRiskThreshold = 100.0, k = 3) {
+    const payload = {
+      origin_zone_id: originZoneId,
+      lat,
+      lon,
+      target_type: targetType,
+      max_risk_threshold: maxRiskThreshold,
+      k
+    };
+    try {
+      const res = await fetch(`${API_BASE}/evacuation/dijkstra`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      try { localStorage.setItem('drishti_last_dijkstra_plan', JSON.stringify(data)); } catch (e) {}
+      return data;
+    } catch (err) {
+      console.warn('Dijkstra evacuation API error, checking cached plan:', err);
+      try {
+        const cached = localStorage.getItem('drishti_last_dijkstra_plan');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+      return null;
+    }
+  },
+
+  async getEvacuationGraph() {
+    try {
+      const res = await fetch(`${API_BASE}/evacuation/graph`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getEvacuationGraph error:', err);
+      return { type: 'FeatureCollection', features: [] };
+    }
+  },
+
+  async getEvacuationWeights() {
+    try {
+      const res = await fetch(`${API_BASE}/evacuation/graph/weights`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getEvacuationWeights error:', err);
+      return { status: 'fallback', segments: [] };
+    }
+  },
+
+  async setRoadBlockage(roadIdentifier, blocked = true, reason = 'Landslide debris flow') {
+    try {
+      const res = await fetch(`${API_BASE}/evacuation/blockage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ road_identifier: roadIdentifier, blocked, reason })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API setRoadBlockage error:', err);
+      return { status: 'failed', error: err.message };
+    }
+  },
+
+  async clearRoadBlockages() {
+    try {
+      const res = await fetch(`${API_BASE}/evacuation/clear-blockages`, {
+        method: 'POST'
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API clearRoadBlockages error:', err);
+      return { status: 'failed' };
+    }
+  },
+
   async sendSOSBeacon(lat, lon, reporterName = 'Tourist in Need', contact = '', message = 'Emergency: Trapped in tourist corridor due to flash runoff/landslide.') {
     try {
       const res = await fetch(`${API_BASE}/sos/beacon`, {

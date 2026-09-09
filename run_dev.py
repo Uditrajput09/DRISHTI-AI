@@ -59,6 +59,16 @@ def main():
         env=os.environ.copy()
     )
 
+    # Wait for FastAPI backend to initialize and bind port before launching Vite
+    print(f"Waiting for backend to initialize on port {port}...")
+    for _ in range(30):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                print(f"✓ Backend ready on port {port}.")
+                break
+        time.sleep(0.5)
+
     # 3. Launch Frontend (Vite)
     print("\n[3/3] Starting React Vite Frontend on http://localhost:5173 ...")
     import shutil

@@ -34,10 +34,16 @@ def verify_admin_key(
 ) -> bool:
     """
     Verify administrative access key against configured settings.ADMIN_API_KEY.
-    Allows demo key 'drishti-demo-admin-key-2026' by default.
+    Fails closed: if no ADMIN_API_KEY is configured, all admin requests are rejected.
     """
-    configured = getattr(settings, "ADMIN_API_KEY", "drishti-demo-admin-key-2026").strip()
+    configured = getattr(settings, "ADMIN_API_KEY", "").strip()
     provided = (x_admin_key or admin_key or "").strip()
+
+    if not configured:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Admin access is not configured. Set ADMIN_API_KEY in your .env file."
+        )
 
     if not provided or provided != configured:
         raise HTTPException(

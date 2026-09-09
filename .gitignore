@@ -44,3 +44,10 @@ scratch/
 *.timestamp-*.mjs
 .claude/
 
+# Reticle agent instrumentation
+.reticle/
+.reticle.json
+skills-lock.json
+
+# ML model artifacts (regenerate via: python -m backend.ml.trainer)
+backend/ml/model.joblib

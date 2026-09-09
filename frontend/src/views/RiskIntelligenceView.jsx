@@ -210,7 +210,7 @@ export default function RiskIntelligenceView({
               Vulnerability Assessment
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
               {/* Population */}
               <div
                 style={{
@@ -345,38 +345,38 @@ export default function RiskIntelligenceView({
               </h3>
 
               {/* Geotechnical Parameters Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(95px, 1fr))', gap: 8, marginBottom: 14 }}>
                 <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Surface Area</span>
-                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
+                  <div className="font-mono" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
                     {activeInspectorZone.area}
                   </div>
                 </div>
 
                 <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Elevation</span>
-                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-primary)', marginTop: 2 }}>
+                  <div className="font-mono" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-primary)', marginTop: 2 }}>
                     {activeInspectorZone.elevation}
                   </div>
                 </div>
 
                 <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Avg Slope</span>
-                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--risk-high)', marginTop: 2 }}>
+                  <div className="font-mono" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--risk-high)', marginTop: 2 }}>
                     {activeInspectorZone.slope}
                   </div>
                 </div>
 
                 <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Geology</span>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginTop: 2 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 500, color: 'var(--text-secondary)', marginTop: 2 }}>
                     {activeInspectorZone.geology}
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)', gridColumn: 'span 2' }}>
+                <div style={{ backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', padding: '8px 10px', borderRadius: 'var(--radius-input)' }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Drainage Density</span>
-                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-light)', marginTop: 2 }}>
+                  <div className="font-mono" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-light)', marginTop: 2 }}>
                     {activeInspectorZone.drainage}
                   </div>
                 </div>

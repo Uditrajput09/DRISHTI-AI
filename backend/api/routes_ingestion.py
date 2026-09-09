@@ -46,6 +46,20 @@ def trigger_full_ingestion_sync(
     try:
         result = ingestion_pipeline.run_full_ingestion_sync(db, auto_dispatch_alerts=dispatch_alerts)
 
+        # Update Dijkstra evacuation graph weights with fresh zone risks
+        try:
+            from backend.ml.evacuation_graph import evacuation_graph
+            if "zone_evaluations" in result:
+                risk_map = {
+                    item["zone_code"]: {
+                        "risk_score": item["risk_score"],
+                        "risk_level": item["risk_level"]
+                    } for item in result.get("zone_evaluations", []) if "zone_code" in item
+                }
+                evacuation_graph.update_zone_risks(risk_map)
+        except Exception as graph_err:
+            print(f"[EvacuationGraph Warning] Failed to update graph risks on sync: {graph_err}")
+
         # Broadcast live zone risks to connected WebSocket dashboards
         try:
             import asyncio

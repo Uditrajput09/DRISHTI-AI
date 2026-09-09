@@ -35,8 +35,10 @@ export function PageHeader({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            fontSize: 12,
+            flexWrap: 'wrap',
+            gap: '3px 6px',
+            fontSize: 11.5,
+            lineHeight: 1.4,
             color: 'var(--text-muted)'
           }}
         >
