@@ -35,5 +35,15 @@
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
     "vite": "^5.1.6"
+  },
+  "allowScripts": {
+    "core-js": true,
+    "esbuild": true
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "core-js": true,
+      "esbuild": true
+    }
   }
 }
