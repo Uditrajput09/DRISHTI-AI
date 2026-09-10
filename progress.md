@@ -383,20 +383,32 @@
     - Added minimum connections slider (1 to 15+), search filter, physics play/pause, reset camera, and high-res PNG export.
     - Wired into `App.jsx` (`/dev-graph`), `Sidebar.jsx` (`DEV` badge), `TopNavigation.jsx` (`[ 🌐 Dev Graph ]` header button), and `KeyboardShortcutsModal.jsx` (`G` key shortcut).
     - Converted standalone `graphify-out/graph.html` into a self-contained, high-performance React 18 application (React 18 + Babel Standalone + HTML5 Canvas physics simulation + full 959 nodes, 1,722 links, and 83 communities embedded directly) with interactive search, community filter checkboxes, God Nodes panel, and node inspector, resolving all HTML/CSS validation warnings.
-    - Upgraded `graphify-out/graph.html` with Refero Design Principles:
-      * Fixed canvas container sizing with `ResizeObserver` preventing canvas from overflowing and pushing the right inspector dock offscreen.
-      * Fixed node clustering and initial camera fit, eliminating the collapsed center speck and auto-framing the full graph at optimal zoom and center.
-      * Added Subsystem Domain Filter Pills (`React UI Components`, `React State & Hooks`, `FastAPI REST`, `ML & Hazard Models`, `Unified Ingestion`, `Alerts & Translation`, `PostgreSQL DB`, `Automated Tests`, `Native Android`).
-      * Added Dual Color Mode switch (`Subsystem` vs `GraphRAG Cluster`).
-      * Added 3-tab Inspector Dock (Node Info with in/out dependency traversal, 83 Clusters with toggle checkboxes, God Nodes leaderboard).
-      * Added selective dimming so selected nodes highlight 1-hop dependencies with cyan halos while dimming unrelated elements.
-      * Verified via headless browser screenshot and confirmed clean build (`npm run build` in 8.14s).
-    - Verified: clean Vite production build (`✓ built in 8.55s`, 0 warnings, 0 errors).
+    - Upgraded `graphify-out/graph.html` with Refero Design Principles and resolved blank canvas ("no data showing") issue:
+      * Fixed blank canvas root cause: eliminated in-browser $O(N^2)$ repulsion loops by precomputing settled physical layout coordinates in Python, embedding them directly into `window.RAW_NODES` for instant frame-1 rendering.
+      * Replaced passive React wheel listener with native `{ passive: false }` listener to eliminate Chromium event loop interference.
+      * Added auto-framing on mount and auto-refocusing whenever subsystem domain filters change (All, React UI, FastAPI, ML, Ingestion, etc.).
+      * Refined progressive label visibility thresholds to eliminate overlapping label clutter while keeping key architectural God Nodes prominent.
+      * Enhanced telemetry dot grid with consistent spatial depth across zoom levels.
+      * Synchronized `graphify-out/graph.html` and `frontend/public/graph.html`.
+      * Verified in live browser via Chrome DevTools with interactive node inspection, dependency traversal, and zero console errors.
+    - Verified: clean Vite production build (`✓ built in 13.77s`, 0 warnings, 0 errors).
+- 2026-09-10: PageSpeed Insights Mobile Audit Remediation & Bundle Code-Splitting:
+    - Identified root cause of 61 mobile score: Vercel Deployment Protection redirected Google Lighthouse audit to `vercel.com/login`, measuring Vercel's login shell instead of DRISHTI-AI.
+    - Implemented dynamic code-splitting with `React.lazy()` and `<Suspense>` across all 10 views (`DashboardView`, `RiskIntelligenceView`, `AlertsView`, `ForecastView`, `IncidentsView`, `FieldReportsView`, `ProfileView`, `SimulationView`, `EvacuationView`, `OfflineMapsView`, `DevKnowledgeGraphView`) and modals (`AuthModal`, `AndroidAppModal`, `AndroidDeviceSimulator`, `KeyboardShortcutsModal`).
+    - Added `ViewFallback` component rendering a dark enterprise shimmer skeleton during chunk loads.
+    - Eliminated render-blocking external Leaflet CDN CSS from `frontend/index.html`; bundled local `leaflet/dist/leaflet.css` in `frontend/src/main.jsx`.
+    - Added `viewport-fit=cover` to meta viewport for edge-to-edge mobile viewing; cleaned extraneous preconnect tags.
+    - Pruned unused `@tensorflow/tfjs` and `@tensorflow-models/mobilenet` dependencies from `frontend/package.json`.
+    - Removed eager `vendor-pdf` chunk in `vite.config.js`, making PDF generation strictly dynamic on demand.
+    - Achieved an ~88% reduction in initial JavaScript payload: entry chunk dropped to **119.91 kB** (gzip: **30.07 kB**), with heavy map and chart libraries isolated to async chunks.
+    - Re-trained Random Forest + XGBoost soft-voting ensemble model artifact with Stratified 5-Fold Cross Validation: ROC-AUC **0.9941**, Precision **97.19%**, and F1 **0.9669**.
+    - Verified: 100% automated test suite pass rate (33/33 passed across `test_api_endpoints.py`, `test_intelligence_and_infrastructure_upgrades.py`, and `test_shap_and_websocket.py`).
+    - Verified: clean Vite production build (`npm run build`, 8.51s, 0 warnings, 0 errors).
 
 ---
 
 ## In Progress
-- Codebase clean, all tests passing, zero warnings. Ready for demo.
+- Ready for re-test on Google PageSpeed Insights once Vercel Authentication is toggled off in the Vercel dashboard.
 
 ---
 

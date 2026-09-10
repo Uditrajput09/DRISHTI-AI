@@ -1,28 +1,44 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import AppShell from './components/ui/AppShell';
-import DashboardView from './views/DashboardView';
-import RiskIntelligenceView from './views/RiskIntelligenceView';
-import ForecastView from './views/ForecastView';
-import IncidentsView from './views/IncidentsView';
-import AlertsView from './views/AlertsView';
-import FieldReportsView from './views/FieldReportsView';
-import ProfileView from './views/ProfileView';
 import LoginView from './views/LoginView';
-import SimulationView from './views/SimulationView';
-import EvacuationView from './views/EvacuationView';
-import OfflineMapsView from './views/OfflineMapsView';
-import DevKnowledgeGraphView from './views/DevKnowledgeGraphView';
-import AuthModal from './components/AuthModal';
-import AndroidAppModal from './components/AndroidAppModal';
-import AndroidDeviceSimulator from './components/AndroidDeviceSimulator';
 import CookieBanner from './components/CookieBanner';
 import BackToTop from './components/BackToTop';
-import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import SkeletonLoader from './components/SkeletonLoader';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { authService } from './services/authService';
 import { useRiskWebSocket } from './hooks/useRiskWebSocket';
 import { api } from './api';
+
+// Route-level dynamic code splitting for high mobile performance
+const DashboardView = lazy(() => import('./views/DashboardView'));
+const RiskIntelligenceView = lazy(() => import('./views/RiskIntelligenceView'));
+const ForecastView = lazy(() => import('./views/ForecastView'));
+const IncidentsView = lazy(() => import('./views/IncidentsView'));
+const AlertsView = lazy(() => import('./views/AlertsView'));
+const FieldReportsView = lazy(() => import('./views/FieldReportsView'));
+const ProfileView = lazy(() => import('./views/ProfileView'));
+const SimulationView = lazy(() => import('./views/SimulationView'));
+const EvacuationView = lazy(() => import('./views/EvacuationView'));
+const OfflineMapsView = lazy(() => import('./views/OfflineMapsView'));
+const DevKnowledgeGraphView = lazy(() => import('./views/DevKnowledgeGraphView'));
+
+// Modals / Simulators (deferred until user interaction)
+const AuthModal = lazy(() => import('./components/AuthModal'));
+const AndroidAppModal = lazy(() => import('./components/AndroidAppModal'));
+const AndroidDeviceSimulator = lazy(() => import('./components/AndroidDeviceSimulator'));
+const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcutsModal'));
+
+function ViewFallback() {
+  return (
+    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <SkeletonLoader type="chart" height={280} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 8 }}>
+        <SkeletonLoader height={140} />
+        <SkeletonLoader height={140} />
+      </div>
+    </div>
+  );
+}
 
 function AppContent() {
   const { showToast } = useToast();
@@ -294,14 +310,16 @@ function AppContent() {
     return (
       <div style={{ position: 'relative' }}>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
-        <LoginView
-          currentUser={currentUser}
-          onLoginSuccess={(user) => {
-            setCurrentUser(user);
-            handleSelectSection('gis');
-          }}
-          onNavigate={(p) => handleSelectSection(p)}
-        />
+        <Suspense fallback={<ViewFallback />}>
+          <LoginView
+            currentUser={currentUser}
+            onLoginSuccess={(user) => {
+              setCurrentUser(user);
+              handleSelectSection('gis');
+            }}
+            onNavigate={(p) => handleSelectSection(p)}
+          />
+        </Suspense>
         <CookieBanner />
       </div>
     );
@@ -334,7 +352,7 @@ function AppContent() {
           </div>
         </div>
       ) : (
-        <>
+        <Suspense fallback={<ViewFallback />}>
           {/* Screen 1: GIS Command Center */}
           {activeSection === 'gis' && (
             <DashboardView
@@ -443,7 +461,7 @@ function AppContent() {
               onNavigateSection={handleSelectSection}
             />
           )}
-        </>
+        </Suspense>
       )}
 
       {/* Floating Back to Top Button (Desktop only) */}
@@ -453,44 +471,54 @@ function AppContent() {
       {!isSimulatorEmbed && <CookieBanner />}
 
       {/* Keyboard Shortcuts Modal (Desktop only) */}
-      {!isSimulatorEmbed && (
-        <KeyboardShortcutsModal
-          isOpen={isShortcutsOpen}
-          onClose={() => setIsShortcutsOpen(false)}
-          onNavigate={handleSelectSection}
-          onToggleTheme={toggleTheme}
-          currentTheme={theme}
-          onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
-          onOpenSimulator={() => setIsSimulatorOpen(true)}
-        />
+      {!isSimulatorEmbed && isShortcutsOpen && (
+        <Suspense fallback={null}>
+          <KeyboardShortcutsModal
+            isOpen={isShortcutsOpen}
+            onClose={() => setIsShortcutsOpen(false)}
+            onNavigate={handleSelectSection}
+            onToggleTheme={toggleTheme}
+            currentTheme={theme}
+            onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
+            onOpenSimulator={() => setIsSimulatorOpen(true)}
+          />
+        </Suspense>
       )}
 
       {/* Modals */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        currentUser={currentUser}
-        onLogin={(user) => setCurrentUser(user)}
-      />
+      {isAuthModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+            currentUser={currentUser}
+            onLogin={(user) => setCurrentUser(user)}
+          />
+        </Suspense>
+      )}
 
-      {!isSimulatorEmbed && (
-        <AndroidAppModal
-          isOpen={isAndroidModalOpen}
-          onClose={() => setIsAndroidModalOpen(false)}
-          onLaunchSimulator={() => {
-            setIsAndroidModalOpen(false);
-            setIsSimulatorOpen(true);
-          }}
-          onLaunchMobilePreview={() => handleSelectSection('reports')}
-        />
+      {!isSimulatorEmbed && isAndroidModalOpen && (
+        <Suspense fallback={null}>
+          <AndroidAppModal
+            isOpen={isAndroidModalOpen}
+            onClose={() => setIsAndroidModalOpen(false)}
+            onLaunchSimulator={() => {
+              setIsAndroidModalOpen(false);
+              setIsSimulatorOpen(true);
+            }}
+            onLaunchMobilePreview={() => handleSelectSection('reports')}
+          />
+        </Suspense>
       )}
 
       {/* Android Hardware Device Simulator Overlay (Top window only) */}
-      {!isSimulatorEmbed && (
-        <AndroidDeviceSimulator
-          isOpen={isSimulatorOpen}
-          onClose={() => setIsSimulatorOpen(false)}
-        />
+      {!isSimulatorEmbed && isSimulatorOpen && (
+        <Suspense fallback={null}>
+          <AndroidDeviceSimulator
+            isOpen={isSimulatorOpen}
+            onClose={() => setIsSimulatorOpen(false)}
+          />
+        </Suspense>
       )}
     </AppShell>
   );

@@ -12,8 +12,6 @@
     "@capacitor/android": "^8.5.1",
     "@capacitor/cli": "^8.5.1",
     "@capacitor/core": "^8.5.1",
-    "@tensorflow-models/mobilenet": "^2.1.1",
-    "@tensorflow/tfjs": "^4.22.0",
     "chart.js": "^4.4.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
