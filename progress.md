@@ -383,6 +383,14 @@
     - Added minimum connections slider (1 to 15+), search filter, physics play/pause, reset camera, and high-res PNG export.
     - Wired into `App.jsx` (`/dev-graph`), `Sidebar.jsx` (`DEV` badge), `TopNavigation.jsx` (`[ 🌐 Dev Graph ]` header button), and `KeyboardShortcutsModal.jsx` (`G` key shortcut).
     - Converted standalone `graphify-out/graph.html` into a self-contained, high-performance React 18 application (React 18 + Babel Standalone + HTML5 Canvas physics simulation + full 959 nodes, 1,722 links, and 83 communities embedded directly) with interactive search, community filter checkboxes, God Nodes panel, and node inspector, resolving all HTML/CSS validation warnings.
+    - Upgraded `graphify-out/graph.html` with Refero Design Principles:
+      * Fixed canvas container sizing with `ResizeObserver` preventing canvas from overflowing and pushing the right inspector dock offscreen.
+      * Fixed node clustering and initial camera fit, eliminating the collapsed center speck and auto-framing the full graph at optimal zoom and center.
+      * Added Subsystem Domain Filter Pills (`React UI Components`, `React State & Hooks`, `FastAPI REST`, `ML & Hazard Models`, `Unified Ingestion`, `Alerts & Translation`, `PostgreSQL DB`, `Automated Tests`, `Native Android`).
+      * Added Dual Color Mode switch (`Subsystem` vs `GraphRAG Cluster`).
+      * Added 3-tab Inspector Dock (Node Info with in/out dependency traversal, 83 Clusters with toggle checkboxes, God Nodes leaderboard).
+      * Added selective dimming so selected nodes highlight 1-hop dependencies with cyan halos while dimming unrelated elements.
+      * Verified via headless browser screenshot and confirmed clean build (`npm run build` in 8.14s).
     - Verified: clean Vite production build (`✓ built in 8.55s`, 0 warnings, 0 errors).
 
 ---

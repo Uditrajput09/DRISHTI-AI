@@ -55,3 +55,4 @@ backend/ml/model.joblib
 
 # Graphify analysis outputs
 graphify-out/
+frontend/public/graph.html
