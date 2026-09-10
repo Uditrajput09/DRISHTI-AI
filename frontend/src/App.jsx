@@ -11,6 +11,7 @@ import LoginView from './views/LoginView';
 import SimulationView from './views/SimulationView';
 import EvacuationView from './views/EvacuationView';
 import OfflineMapsView from './views/OfflineMapsView';
+import DevKnowledgeGraphView from './views/DevKnowledgeGraphView';
 import AuthModal from './components/AuthModal';
 import AndroidAppModal from './components/AndroidAppModal';
 import AndroidDeviceSimulator from './components/AndroidDeviceSimulator';
@@ -56,6 +57,7 @@ function AppContent() {
     if (path === '/profile') return 'profile';
     if (path === '/evacuation' || path === '/shelters') return 'evacuation';
     if (path === '/offline-maps') return 'offline-maps';
+    if (path === '/dev-graph' || path === '/graph') return 'devgraph';
     if (path === '/app' || path === '/gis') return 'gis';
     return 'login';
   });
@@ -432,6 +434,13 @@ function AppContent() {
             <OfflineMapsView
               onNavigateToGIS={() => handleSelectSection('gis')}
               onNavigateToEvac={() => handleSelectSection('evacuation')}
+            />
+          )}
+
+          {/* Screen 10: Developer Knowledge Graph */}
+          {activeSection === 'devgraph' && (
+            <DevKnowledgeGraphView
+              onNavigateSection={handleSelectSection}
             />
           )}
         </>

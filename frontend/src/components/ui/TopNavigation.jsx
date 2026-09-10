@@ -11,7 +11,8 @@ import {
   Command,
   Smartphone,
   ChevronRight,
-  Compass
+  Compass,
+  Network
 } from 'lucide-react';
 import { IconButton } from './Button';
 import { Avatar } from './Avatar';
@@ -40,6 +41,7 @@ export function TopNavigation({
   onOpenShortcuts,
   onOpenAndroidModal,
   onOpenEvacuation,
+  onOpenDevGraph,
   onToggleSidebarMobile,
   isSidebarOpen = false,
   onSearch,
@@ -60,6 +62,7 @@ export function TopNavigation({
       case 'simulation': return 'Cloudburst Simulation';
       case 'evacuation': return 'Tourist & Evacuation Guide';
       case 'profile': return 'Profile & Settings';
+      case 'devgraph': return 'Architecture Knowledge Graph';
       default: return 'Command Center';
     }
   };
@@ -202,6 +205,7 @@ export function TopNavigation({
         {/* Tourist Emergency & Evacuation Guide Quick Action (Hidden on mobile where Evac is in Bottom Nav) */}
         {onOpenEvacuation && (
           <button
+            type="button"
             onClick={onOpenEvacuation}
             className="hidden-mobile"
             style={{
@@ -224,6 +228,35 @@ export function TopNavigation({
           >
             <Compass size={14} style={{ animation: activeSection === 'evacuation' ? 'spin 6s linear infinite' : 'none' }} />
             <span>Evac Guide</span>
+          </button>
+        )}
+
+        {/* Developer Knowledge Graph Quick Action */}
+        {onOpenDevGraph && (
+          <button
+            type="button"
+            onClick={onOpenDevGraph}
+            className="hidden-mobile"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              height: 32,
+              padding: '0 10px',
+              borderRadius: 'var(--radius-btn)',
+              backgroundColor: activeSection === 'devgraph' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(56, 189, 248, 0.12)',
+              border: `1px solid ${activeSection === 'devgraph' ? '#38BDF8' : 'rgba(56, 189, 248, 0.35)'}`,
+              color: '#38BDF8',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all var(--transition-fast)'
+            }}
+            title="Explore Architecture Knowledge Graph"
+            aria-label="Dev Knowledge Graph"
+          >
+            <Network size={14} />
+            <span>Dev Graph</span>
           </button>
         )}
 

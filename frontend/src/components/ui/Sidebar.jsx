@@ -17,7 +17,8 @@ import {
   X,
   Radio,
   Compass,
-  Download
+  Download,
+  Network
 } from 'lucide-react';
 import { Avatar } from './Avatar';
 
@@ -68,6 +69,7 @@ export function Sidebar({
     {
       title: 'SYSTEM',
       items: [
+        { id: 'devgraph', label: 'Dev Knowledge Graph', icon: Network, badge: 'DEV', badgeVariant: 'warning' },
         { id: 'profile', label: 'Profile & Emergency', icon: User, badge: null },
         { id: 'login', label: 'Operator Portal / Exit', icon: Shield, badge: null },
         { id: 'help', label: 'Help & Shortcuts', icon: HelpCircle, badge: null }
