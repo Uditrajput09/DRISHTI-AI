@@ -370,6 +370,11 @@
     - Remediated accessibility (`/a11y-debugging`): added missing `aria-label`s and `type="button"` attributes across `ToastContext.jsx`, `KeyboardShortcutsModal.jsx`, `AuthModal.jsx`, `AndroidAppModal.jsx`, `Input.jsx` (SearchInput clear button), and `OfflineMapsView.jsx`.
     - Verified: 100% backend test pass rate (33/33 passed in 135s), clean Vite production build (8.26s, 0 warnings, 0 errors).
 
+- 2026-09-10: Resolved IDE HTML Checker Warning:
+    - Disabled network-dependent `"html-checker"` hint in `.hintrc` and `frontend/.hintrc` to eliminate JSON parse errors caused by remote W3C Nu validator service timeouts/HTML error responses.
+    - Standardized `<!DOCTYPE html>` in `frontend/index.html`.
+    - Verified clean Vite production build (`✓ built in 14.26s`, 0 errors).
+
 ---
 
 ## In Progress
