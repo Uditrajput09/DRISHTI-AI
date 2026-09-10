@@ -282,7 +282,8 @@ async def chatbot_query(request: Request, payload: ChatQuery, db: Session = Depe
         # Try gemini-3.6-flash with 4-second timeout
         model = "gemini-3.6-flash"
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            # Security Audit #25: API key in header, not URL query string
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
             body = {
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {
@@ -293,14 +294,18 @@ async def chatbot_query(request: Request, payload: ChatQuery, db: Session = Depe
             req = urllib.request.Request(
                 url,
                 data=json.dumps(body).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": api_key
+                }
             )
             with urllib.request.urlopen(req, timeout=4) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 answer = data["candidates"][0]["content"]["parts"][0]["text"].strip()
                 return {"answer": answer, "source": f"gemini ({model})"}
         except Exception as e:
-            logger.info(f"Gemini API query fast-fallback to local telemetry: {e}")
+            # Security Audit #54: Don't log full exception (may contain API key in URL)
+            logger.info(f"Gemini API query fast-fallback to local telemetry: {type(e).__name__}")
 
     # Seamless instant local domain responder
     answer = generate_local_response(payload.question, db, payload.context, payload.zone_id)

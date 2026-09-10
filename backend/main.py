@@ -165,6 +165,9 @@ async def add_security_headers(request, call_next):
         "frame-ancestors 'self'"
     )
     response.headers["Permissions-Policy"] = "geolocation=(self), camera=(self), microphone=()"
+    # Security Audit #34: HSTS for production HTTPS deployments
+    if settings.ENVIRONMENT != "development":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 # Enable secure CORS for frontend dashboard, preview deployments, and local dev

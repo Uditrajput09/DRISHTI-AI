@@ -43,6 +43,7 @@ scratch/
 .playwright-mcp/
 *.timestamp-*.mjs
 .claude/
+/*.png
 
 # Reticle agent instrumentation
 .reticle/

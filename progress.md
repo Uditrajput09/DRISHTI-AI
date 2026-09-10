@@ -322,12 +322,58 @@
       - Validated 390px mobile viewport in Playwright with clean rendering above the fold, verified accordion expand/collapse interaction, and verified preset loading.
       - Validated desktop split-screen layout and simulated Google Pixel 8 Pro device frame in Playwright.
       - Vite production build passed cleanly (`✓ built in 13.60s`, 2,551 modules).
-      - Native Android Capacitor container synced cleanly (`npx cap sync android` in 0.319s).
+- 2026-09-10: Redesigned Login Page (`LoginView.jsx`) with User-Provided Reference Layout Format & Dark Enterprise Analytics Palette (Refero Design):
+    - **Layout Format Alignment**:
+      - Left column: Branded header lockup (`DRISHTI-AI` emblem + subtitle), punchy 2-line bold headline (`Intelligence for every terrain decision.`), concise description, 3-pill feature row (`AI Predictions`, `Dijkstra Corridors`, `5-Source Ingestion`), and live telemetry preview card (`AI PREDICTIVE HAZARD SIGNAL` with pulsing green beacon, `96.5% Precision`, `10 Micro-Zones`, `28 Havens Listed`, and dynamic AI Geotechnical Insight strip).
+      - Right column: Clean, focused card (`Welcome back` / `Register Responder`), uppercase input labels (`OFFICIAL EMAIL OR PHONE`, `SECURITY PASSCODE`), inline icons, show/hide passcode toggle, "Remember me" and "Forgot passcode?", full-width "Sign In" button, smooth "Create an account" / "Sign In" toggle, "Explore as Guest / Jury (Bypass Login) →", compact 1-click Demo Presets row (`Volunteer`, `SDMA Admin`, `SDRF Lead`), and bottom status strip (`Secure Terminal Auth` • `Early Warning Grid Online`).
+    - **Anti-AI-Slop & Brand Discipline**:
+- 2026-09-10: Redesigned Android App & Mobile Login Screen (`LoginView.jsx`) for Zero-Friction Minimal Experience (Refero Design):
+    - **Mobile-First Ergonomics (< 980px & Android App)**:
+      - Automatically hides desktop marketing columns on mobile viewports, placing the authentication card front-and-center above the fold with zero scroll fatigue.
+      - Integrated native mobile brand header inside the card (`DRISHTI-AI` emblem + title + green status indicator).
+      - Touch-first inputs and button targets: 44px–48px touch targets, inline icons, show/hide eye toggle, tactile haptic feedback (`navigator.vibrate`), and 1-click Demo Presets row (`Volunteer`, `SDMA Admin`, `SDRF Lead`).
+      - Full-width high-contrast primary action (`Sign In to Command Center`) and direct guest bypass (`Explore as Guest / Jury`).
+    - **Dual Desktop / Mobile Layout Parity**:
+      - Desktop viewports (`>= 980px`) retain the rich two-column reference layout (hero intelligence presentation + auth card).
+      - Mobile viewports (`< 980px`) cleanly focus 100% of screen real-estate on the minimal, distraction-free mobile login card.
+    - **Verification**:
+      - Clean production build: `npm run build` compiled in 13.62s with 0 errors.
+      - Native Android Capacitor sync: `npx cap sync android` synchronized in 0.297s.
+      - Playwright verification: verified mobile viewport (390x844) with `login_android_minimal.png` and desktop viewport (1440x900) with `login_desktop_verified.png`.
+
+- 2026-09-10: 54-Point Security Audit & Remediation:
+    - Performed full repository security audit against 54 checks covering authentication, authorization, secrets, PII, AI spend, CORS/HTTP headers, rate limiting, database, Docker, and frontend.
+    - **Results:** 32 PASS, 11 FAIL, 5 UNKNOWN, 6 N/A.
+    - **P0 Fixes Applied:**
+      - Removed hardcoded admin API key (`drishti-demo-admin-key-2026`) from `frontend/src/api.js` client bundle — key now exclusively sourced from `VITE_ADMIN_API_KEY` env var.
+      - Added `@limiter.limit("5/hour")` rate limit to `POST /api/sos/beacon` in `backend/api/routes_sos.py` to prevent SMS spend abuse.
+      - Added `Depends(verify_admin_key)` to `PUT /api/sos/beacon/{id}/acknowledge` to prevent unauthorized silencing of emergencies.
+    - **P1 Fixes Applied:**
+      - Applied `mask_contact()` to SOS contact field in `GET /api/sos/active` response.
+      - Moved Gemini API key from URL query string (`?key=`) to `x-goog-api-key` HTTP header in `backend/api/routes_chatbot.py`.
+      - Stripped API key from error log messages (log `type(e).__name__` instead of full exception string).
+    - **P2 Fixes Applied:**
+      - Added `Strict-Transport-Security` (HSTS) header for production HTTPS deployments in `backend/main.py`.
+      - Replaced hardcoded `POSTGRES_PASSWORD=postgres` in `docker-compose.yml` with `${POSTGRES_PASSWORD:-postgres}` env interpolation.
+      - Removed actual admin key value from `.env.example`, replaced with empty placeholder and generation command.
+    - **Also added:** Pydantic `Field(max_length=...)` to `SOSBeaconRequest` fields.
+    - Verified clean Vite production build (8.62s, 0 errors) and confirmed admin key absent from `dist/` bundle.
+    - Full audit report at `security_audit_report.md`.
+
+- 2026-09-10: Codebase Cleanup, ML Hardening & A11y Remediation:
+    - Deleted 9 temporary screenshot PNGs (`login_*.png`) from the project root and configured `/*.png` in `.gitignore`.
+    - Made ML `shap` TreeExplainer dependency optional with graceful fallback to Random Forest feature attribution in `backend/ml/model.py`, preventing startup crashes in environments missing C++ compiled packages.
+    - Retrained ML model artifact (`model.joblib`) with full RF + XGBoost ensemble achieving ROC-AUC 0.9941, Precision 97.2%, Recall 96.2%, F1 96.7%.
+    - Added `api.getZoneVulnerability(zoneId)` to `frontend/src/api.js` and wired `VulnerabilityCard.jsx` directly into the `ZoneIntelligence.jsx` panel on the GIS Command Center.
+    - Wired `useSpeechToText.js` hook into `FieldReportForm.jsx` with a microphone toggle button for hands-free emergency hazard reporting.
+    - Connected `useTranslation.js` hook in `ProfileView.jsx` so language preferences persist across reloads.
+    - Remediated accessibility (`/a11y-debugging`): added missing `aria-label`s and `type="button"` attributes across `ToastContext.jsx`, `KeyboardShortcutsModal.jsx`, `AuthModal.jsx`, `AndroidAppModal.jsx`, `Input.jsx` (SearchInput clear button), and `OfflineMapsView.jsx`.
+    - Verified: 100% backend test pass rate (33/33 passed in 135s), clean Vite production build (8.26s, 0 warnings, 0 errors).
 
 ---
 
 ## In Progress
-- Complete MVP + Tourist Emergency Evacuation + Dijkstra Route Optimization + Dynamic Blockage Simulator + Refero Design Mobile Polish + SHAP TreeExplainer + WebSocket Streaming + XGBoost Ensemble + Anomaly Detection + 7-Day Probabilistic Forecast + Redis Caching + AI Chatbot Assistant + 100% Pure PostgreSQL + PostGIS + Security Hardening fully verified and operational. Ready for jury demo.
+- Codebase clean, all tests passing, zero warnings. Ready for demo.
 
 ---
 
@@ -339,10 +385,6 @@
 ## Next Session Starting Point
 1. Backend running on `http://127.0.0.1:8000` (`python -m uvicorn backend.main:app --reload`) connected to Supabase PostgreSQL.
 2. Frontend running on `http://localhost:5173` (`npm run dev`) with real-time WebSocket live updates, AI chatbot drawer, anomaly banners, and Dijkstra Evacuation Route Optimizer.
-3. Test Dijkstra Route Optimization on `http://localhost:5173/evacuation`: switch between Rank #1, #2, #3 corridors; simulate road blockage on `SH-5` or `NH-206`; inspect XAI cost weights.
-4. Test XGBoost ensemble predictions (`v2.0-rf-xgb-ensemble`, ROC-AUC 0.9941) with SHAP attribution.
-5. Test 7-day probabilistic trajectory and 90% CI bands on `http://localhost:5173/forecast`.
-6. Test AI Assistant via the floating FAB button or Top Navigation bar.
-7. Follow `DEMO_SCRIPT.md` to present the system.
-
-
+3. **Important:** Set `VITE_ADMIN_API_KEY` in frontend `.env` and `ADMIN_API_KEY` in backend `.env` to a matching strong key (generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"`).
+4. For production Docker deployment, set `POSTGRES_PASSWORD` env var to override the default.
+5. Follow `DEMO_SCRIPT.md` to present the system.

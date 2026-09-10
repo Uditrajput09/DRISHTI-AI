@@ -29,6 +29,7 @@ import {
 } from '../components/ui';
 import { authService } from '../services/authService';
 import FaqAccordion from '../components/FaqAccordion';
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function ProfileView({ 
   currentUser, 
@@ -44,8 +45,8 @@ export default function ProfileView({
   const [pushAlerts, setPushAlerts] = useState(true);
   const [soundAlerts, setSoundAlerts] = useState(true);
 
-  // Preferences
-  const [language, setLanguage] = useState('en');
+  // Preferences & i18n
+  const { lang, setLang } = useTranslation();
   const [units, setUnits] = useState('metric');
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -295,8 +296,16 @@ export default function ProfileView({
               <div style={{ maxWidth: 320, marginTop: 4 }}>
                 <Select
                   label="Display Language"
-                  value={language}
-                  onChange={setLanguage}
+                  value={lang}
+                  onChange={(val) => {
+                    const newLang = typeof val === 'object' && val?.target ? val.target.value : val;
+                    setLang(newLang);
+                    if (currentUser) {
+                      const updated = { ...currentUser, language: newLang };
+                      setCurrentUser && setCurrentUser(updated);
+                      localStorage.setItem('drishti_current_user', JSON.stringify(updated));
+                    }
+                  }}
                   options={[
                     { value: 'en', label: 'English' },
                     { value: 'kha', label: 'Khasi (Meghalaya)' },

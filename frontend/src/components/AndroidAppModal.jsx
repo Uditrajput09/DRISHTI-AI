@@ -162,7 +162,9 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchSimulator }) 
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close Android release modal"
             style={{
               background: 'transparent',
               border: 'none',
@@ -184,7 +186,6 @@ export default function AndroidAppModal({ isOpen, onClose, onLaunchSimulator }) 
               e.currentTarget.style.backgroundColor = 'transparent';
               e.currentTarget.style.color = 'var(--text-secondary)';
             }}
-            aria-label="Close"
           >
             <X size={16} />
           </button>

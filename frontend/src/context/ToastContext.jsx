@@ -39,7 +39,9 @@ export function ToastProvider({ children }) {
               <Icon size={18} style={{ color: toast.type === 'critical' ? 'var(--risk-critical)' : toast.type === 'success' ? 'var(--risk-safe)' : 'var(--color-copper)' }} />
               <div style={{ flex: 1, fontSize: '0.82rem', lineHeight: '1.4' }}>{toast.message}</div>
               <button
+                type="button"
                 onClick={() => removeToast(toast.id)}
+                aria-label="Dismiss notification"
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
                 <X size={14} />

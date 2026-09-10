@@ -409,7 +409,9 @@ export default function OfflineMapsView({ onNavigateToGIS, onNavigateToEvac }) {
         >
           <span>{feedbackMsg}</span>
           <button
+            type="button"
             onClick={() => setFeedbackMsg('')}
+            aria-label="Dismiss status notification"
             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem' }}
           >
             Dismiss

@@ -16,6 +16,7 @@ import { Button } from './ui/Button';
 import { Badge, RiskBadge } from './ui/Badge';
 import { ProgressBar } from './ui/ProgressBar';
 import { exportZoneRiskPDF } from '../utils/pdfExport';
+import VulnerabilityCard from './VulnerabilityCard';
 
 export default function ZoneIntelligence({
   zone,
@@ -290,6 +291,9 @@ export default function ZoneIntelligence({
           </Badge>
         </div>
       </div>
+
+      {/* Village Vulnerability Index Card */}
+      <VulnerabilityCard zoneId={zone.id} />
 
       {/* Operational Advisory */}
       <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-md, 8px)', padding: '10px 12px' }}>

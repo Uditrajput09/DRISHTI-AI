@@ -82,6 +82,7 @@ export default function KeyboardShortcutsModal({
           <Search size={18} style={{ color: 'var(--color-copper)' }} />
           <input
             type="text"
+            aria-label="Search keyboard shortcuts or commands"
             placeholder="Type a command or jump to section..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

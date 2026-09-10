@@ -7,9 +7,10 @@ const RAW_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AP
   ? import.meta.env.VITE_API_BASE.replace(/\/$/, '') 
   : '';
 const API_BASE = RAW_BASE.endsWith('/api') ? RAW_BASE : (RAW_BASE ? `${RAW_BASE}/api` : '/api');
+// Admin key MUST come from environment — never hardcode in client bundle (Security Audit #13)
 const ADMIN_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_API_KEY)
   ? import.meta.env.VITE_ADMIN_API_KEY
-  : 'drishti-demo-admin-key-2026';
+  : '';
 
 export const api = {
   // ─── Risk Endpoints ──────────────────────────────────────────
@@ -53,6 +54,17 @@ export const api = {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
+  },
+
+  async getZoneVulnerability(zoneId) {
+    try {
+      const res = await fetch(`${API_BASE}/vulnerability/zone/${zoneId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('API getZoneVulnerability error:', err);
+      return null;
+    }
   },
 
   // ─── Weather Endpoints ───────────────────────────────────────

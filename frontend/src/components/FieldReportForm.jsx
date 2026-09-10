@@ -12,11 +12,14 @@ import {
   Crosshair,
   ChevronDown,
   ChevronUp,
-  AlertTriangle
+  AlertTriangle,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { api } from '../api';
+import { useSpeechToText } from '../hooks/useSpeechToText';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
@@ -145,6 +148,15 @@ export default function FieldReportForm({ onReportSubmitted }) {
   const [description, setDescription] = useState('Landslide blocking half of the road. Traffic moving slowly.');
   const [impactLevel, setImpactLevel] = useState('Critical'); // 'Low', 'Medium', 'High', 'Critical'
   const [visibility, setVisibility] = useState('Good');
+
+  // Voice-to-text dictation hook for hands-free field reporting
+  const { transcript, isListening, isSupported, startListening, stopListening } = useSpeechToText('en');
+
+  useEffect(() => {
+    if (transcript) {
+      setDescription(transcript);
+    }
+  }, [transcript]);
 
   // Photo
   const [photoPreview, setPhotoPreview] = useState('/images/incidents/incident-landslide.jpg');
@@ -586,13 +598,40 @@ export default function FieldReportForm({ onReportSubmitted }) {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginBottom: 6 }}>
-                Description / Hazard Situation
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                  Description / Hazard Situation
+                </label>
+                {isSupported && (
+                  <button
+                    type="button"
+                    onClick={isListening ? stopListening : startListening}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(79, 111, 255, 0.12)',
+                      color: isListening ? '#EF4444' : 'var(--brand-primary, #4F6FFF)',
+                      border: `1px solid ${isListening ? '#EF4444' : 'rgba(79, 111, 255, 0.35)'}`,
+                      borderRadius: 'var(--radius-pill, 9999px)',
+                      padding: '2px 8px',
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                    aria-label={isListening ? 'Stop voice dictation' : 'Start voice dictation'}
+                    title={isListening ? 'Listening... click to stop' : 'Dictate description with microphone'}
+                  >
+                    {isListening ? <MicOff size={12} style={{ animation: 'pulse 1s infinite' }} /> : <Mic size={12} />}
+                    <span>{isListening ? 'Listening...' : 'Voice Dictate'}</span>
+                  </button>
+                )}
+              </div>
               <textarea
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                aria-label="Description or hazard situation"
                 style={{
                   fontSize: '0.85rem',
                   padding: '10px 12px',

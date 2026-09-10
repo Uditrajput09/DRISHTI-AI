@@ -9,7 +9,12 @@ from typing import Dict, Any, List, Optional
 import os
 import joblib
 import numpy as np
-import shap
+try:
+    import shap
+    HAS_SHAP = True
+except ImportError:
+    shap = None
+    HAS_SHAP = False
 from backend.ml.features import FEATURE_COLUMNS, extract_features_from_dict
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model.joblib")
@@ -54,6 +59,9 @@ class LandslideRiskModel:
 
     def _init_shap_explainer(self):
         """Initialize SHAP TreeExplainer for instantaneous exact Shapley value computation."""
+        if not HAS_SHAP or shap is None:
+            self.explainer = None
+            return
         if self.model is not None:
             try:
                 self.explainer = shap.TreeExplainer(self.model)

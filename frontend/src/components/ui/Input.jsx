@@ -163,6 +163,7 @@ export const SearchInput = forwardRef(function SearchInput({
           type="button"
           onClick={onClear || (() => onChange && onChange({ target: { value: '' } }))}
           title="Clear search"
+          aria-label="Clear search input"
           style={{
             position: 'absolute',
             right: 10,
