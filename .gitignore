@@ -52,3 +52,6 @@ skills-lock.json
 
 # ML model artifacts (regenerate via: python -m backend.ml.trainer)
 backend/ml/model.joblib
+
+# Graphify analysis outputs
+graphify-out/
