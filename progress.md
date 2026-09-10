@@ -382,7 +382,8 @@
     - Implemented Interactive Node Inspector with inbound/outbound dependency graph traversal, source file line references with 1-click clipboard copy, and Top Centrality God Nodes leaderboard.
     - Added minimum connections slider (1 to 15+), search filter, physics play/pause, reset camera, and high-res PNG export.
     - Wired into `App.jsx` (`/dev-graph`), `Sidebar.jsx` (`DEV` badge), `TopNavigation.jsx` (`[ 🌐 Dev Graph ]` header button), and `KeyboardShortcutsModal.jsx` (`G` key shortcut).
-    - Verified: clean Vite production build (`✓ built in 18.02s`, 0 warnings, 0 errors).
+    - Converted standalone `graphify-out/graph.html` into a self-contained, high-performance React 18 application (React 18 + Babel Standalone + HTML5 Canvas physics simulation + full 959 nodes, 1,722 links, and 83 communities embedded directly) with interactive search, community filter checkboxes, God Nodes panel, and node inspector, resolving all HTML/CSS validation warnings.
+    - Verified: clean Vite production build (`✓ built in 8.55s`, 0 warnings, 0 errors).
 
 ---
 
