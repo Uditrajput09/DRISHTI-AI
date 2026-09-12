@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Zap,
   Radio,
+  TrendingUp,
   Map as MapIcon
 } from 'lucide-react';
 import { 
@@ -46,6 +47,18 @@ export default function DashboardView({
   const [isSimulating, setIsSimulating] = useState(false);
   const [simFeedback, setSimFeedback] = useState('');
   const [activeAnomalyAlert, setActiveAnomalyAlert] = useState(null);
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? (window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile') : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile';
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const handleAnomaly = (e) => {
@@ -186,79 +199,171 @@ export default function DashboardView({
         </div>
       )}
 
-      {/* 2. Standardized 5 KPI Metric Cards Strip */}
+      {/* 2. Standardized KPI Metric Cards: Minimal 2x2 on Mobile, 5-Strip on Desktop */}
+      {isMobile ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div 
+            onClick={() => onNavigateToSection && onNavigateToSection('risk')}
+            style={{ 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-primary)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: '12px 14px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Critical Zones</span>
+              <ShieldAlert size={16} color="var(--risk-critical)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-critical)' }}>
+              {criticalCount}
+            </span>
+          </div>
+
+          <div 
+            onClick={() => onNavigateToSection && onNavigateToSection('risk')}
+            style={{ 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-primary)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: '12px 14px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>High Risk</span>
+              <AlertTriangle size={16} color="var(--risk-high)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-high)' }}>
+              {highCount}
+            </span>
+          </div>
+
+          <div 
+            onClick={() => onNavigateToSection && onNavigateToSection('risk')}
+            style={{ 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-primary)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: '12px 14px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Field Reports</span>
+              <MapPin size={16} color="var(--brand-primary)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              {reportsCount}
+            </span>
+          </div>
+
+          <div 
+            onClick={() => onNavigateToSection && onNavigateToSection('evacuation')}
+            style={{ 
+              background: 'var(--bg-surface)', 
+              border: '1px solid var(--border-primary)', 
+              borderRadius: 'var(--radius-card)', 
+              padding: '12px 14px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Shelters</span>
+              <Home size={16} color="var(--risk-safe)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)' }}>
+              {shelterCount}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gap: 14
+          }}
+        >
+          <MetricCard
+            label="Critical Zones"
+            value={String(criticalCount)}
+            variant="critical"
+            icon={ShieldAlert}
+            trend="80 - 100"
+            trendDirection="critical"
+            trendLabel="score"
+            description="Requires immediate evacuation notice"
+            onClick={() => onNavigateToSection && onNavigateToSection('risk')}
+          />
+
+          <MetricCard
+            label="High Risk Zones"
+            value={String(highCount)}
+            variant="high"
+            icon={AlertTriangle}
+            trend="60 - 79"
+            trendDirection="down"
+            trendLabel="score"
+            description="Antecedent soil saturation >80%"
+            onClick={() => onNavigateToSection && onNavigateToSection('risk')}
+          />
+
+          <MetricCard
+            label="Field Reports"
+            value={String(reportsCount)}
+            icon={MapPin}
+            trend="Live"
+            trendDirection="neutral"
+            trendLabel="today"
+            description="Crowdsourced & responder telemetry"
+            onClick={() => onNavigateToSection && onNavigateToSection('incidents')}
+          />
+
+          <MetricCard
+            label="Operational Shelters"
+            value={String(shelterCount)}
+            variant="safe"
+            icon={Home}
+            trend="Active"
+            trendDirection="up"
+            trendLabel="ready"
+            description="Designated safe havens in corridor"
+            onClick={() => onNavigateToSection && onNavigateToSection('gis')}
+          />
+
+          <MetricCard
+            label="Active Alerts"
+            value={String(alertsCount)}
+            variant="critical"
+            icon={BellRing}
+            trend="CAP v1.2"
+            trendDirection="critical"
+            trendLabel="dispatched"
+            description="Multi-lingual emergency broadcasts"
+            onClick={() => onNavigateToSection && onNavigateToSection('alerts')}
+          />
+        </div>
+      )}
+
+      {/* 3. GIS Command Hero Grid: Map + Zone Intelligence */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: 14
-        }}
-      >
-        <MetricCard
-          label="Critical Zones"
-          value={String(criticalCount)}
-          variant="critical"
-          icon={ShieldAlert}
-          trend="80 - 100"
-          trendDirection="critical"
-          trendLabel="score"
-          description="Requires immediate evacuation notice"
-          onClick={() => onNavigateToSection && onNavigateToSection('risk')}
-        />
-
-        <MetricCard
-          label="High Risk Zones"
-          value={String(highCount)}
-          variant="high"
-          icon={AlertTriangle}
-          trend="60 - 79"
-          trendDirection="down"
-          trendLabel="score"
-          description="Antecedent soil saturation >80%"
-          onClick={() => onNavigateToSection && onNavigateToSection('risk')}
-        />
-
-        <MetricCard
-          label="Field Reports"
-          value={String(reportsCount)}
-          icon={MapPin}
-          trend="Live"
-          trendDirection="neutral"
-          trendLabel="today"
-          description="Crowdsourced & responder telemetry"
-          onClick={() => onNavigateToSection && onNavigateToSection('incidents')}
-        />
-
-        <MetricCard
-          label="Operational Shelters"
-          value={String(shelterCount)}
-          variant="safe"
-          icon={Home}
-          trend="Active"
-          trendDirection="up"
-          trendLabel="ready"
-          description="Designated safe havens in corridor"
-          onClick={() => onNavigateToSection && onNavigateToSection('gis')}
-        />
-
-        <MetricCard
-          label="Active Alerts"
-          value={String(alertsCount)}
-          variant="critical"
-          icon={BellRing}
-          trend="CAP v1.2"
-          trendDirection="critical"
-          trendLabel="dispatched"
-          description="Multi-lingual emergency broadcasts"
-          onClick={() => onNavigateToSection && onNavigateToSection('alerts')}
-        />
-      </div>
-
-      {/* 3. GIS Command Hero Grid: 70–75% Left Interactive Map | 25–30% Right Zone Intelligence */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 2.3fr) minmax(360px, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 2.3fr) minmax(360px, 1fr)',
           gap: 16,
           alignItems: 'stretch'
         }}
@@ -268,8 +373,8 @@ export default function DashboardView({
         <Card
           padding={0}
           style={{
-            minHeight: 620,
-            height: '100%',
+            minHeight: isMobile ? 380 : 620,
+            height: isMobile ? 380 : '100%',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column'
@@ -308,180 +413,230 @@ export default function DashboardView({
         </Card>
       </div>
 
-      {/* 4. Below-Map Analytics Row: 48-Hour Forecast | Cloudburst Stress Simulator */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 2fr) minmax(340px, 1fr)',
-          gap: 16,
-          alignItems: 'stretch'
-        }}
-        className="simulation-xai-grid"
-      >
-        {/* Left: 48-Hour Forecast Inline Card */}
-        <Card padding={18}>
-          <ForecastChart
-            zoneId={activeZone?.id || 1}
-            zoneName={activeZone?.name || 'Sohra Escarpment'}
-          />
-        </Card>
-
-        {/* Right: Cloudburst Stress Simulator Box in Strict Enterprise Styling */}
-        <Card
-          padding={20}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: 16
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Zap size={16} style={{ color: 'var(--brand-primary)' }} />
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                  Cloudburst Simulator
-                </h3>
-              </div>
-              <Badge variant="info" size="sm">Stress Test</Badge>
-            </div>
-
-            {/* Parameter Rows */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '9px 12px',
-                  borderRadius: 'var(--radius-input)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Rainfall Intensity</span>
-                <span className="font-mono" style={{ fontSize: 13, color: 'var(--brand-primary)', fontWeight: 600 }}>
-                  120 mm/h
-                </span>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '9px 12px',
-                  borderRadius: 'var(--radius-input)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Duration</span>
-                <span className="font-mono" style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>
-                  3 Hours
-                </span>
-              </div>
-
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '9px 12px',
-                  borderRadius: 'var(--radius-input)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Target Corridor</span>
-                <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>
-                  Sohra Escarpment
-                </span>
-              </div>
-            </div>
-
-            {/* Impact Projection Breakdown */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-input)'
-                }}
-              >
-                <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Projected Risk</span>
-                <strong className="font-mono" style={{ color: 'var(--risk-critical)', fontSize: 12 }}>
-                  96% (+28%)
-                </strong>
-              </div>
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-input)'
-                }}
-              >
-                <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Affected Zones</span>
-                <strong style={{ color: 'var(--brand-light)', fontSize: 12 }}>7 Micro-Zones</strong>
-              </div>
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-input)'
-                }}
-              >
-                <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Road Impact</span>
-                <strong style={{ color: 'var(--risk-high)', fontSize: 12 }}>NH-6 Critical</strong>
-              </div>
-              <div
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-primary)',
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-input)'
-                }}
-              >
-                <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Vulnerable Pop.</span>
-                <strong className="font-mono" style={{ color: 'var(--text-primary)', fontSize: 12 }}>12,842</strong>
-              </div>
-            </div>
-
-            {/* Status Feedback */}
-            {simFeedback && (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: 'var(--risk-safe)',
-                  fontWeight: 500,
-                  textAlign: 'center',
-                  marginTop: 6,
-                  padding: '4px 8px',
-                  backgroundColor: 'var(--risk-safe-bg)',
-                  borderRadius: 'var(--radius-sm)'
-                }}
-              >
-                {simFeedback}
-              </div>
-            )}
-          </div>
-
-          {/* Run Simulation Button */}
-          <Button
-            variant="primary"
-            fullWidth
-            icon={Play}
-            loading={isSimulating}
-            onClick={handleRunQuickSim}
+      {/* 4. Below-Map Analytics Row: Desktop shows inline chart/sim; Mobile shows clean dedicated launchers */}
+      {isMobile ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <button
+            onClick={() => onNavigateToSection && onNavigateToSection('forecast')}
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-card)',
+              padding: '16px 12px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              minHeight: 76,
+              color: 'var(--text-primary)'
+            }}
           >
-            {isSimulating ? 'Computing Stress Physics...' : 'Execute Stress Simulation'}
-          </Button>
-        </Card>
-      </div>
+            <TrendingUp size={22} color="var(--brand-primary)" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+              48H Forecast Chart
+            </span>
+          </button>
+
+          <button
+            onClick={() => onNavigateToSection && onNavigateToSection('simulation')}
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: 'var(--radius-card)',
+              padding: '16px 12px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              minHeight: 76,
+              color: 'var(--text-primary)'
+            }}
+          >
+            <Zap size={22} color="var(--risk-high)" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+              Cloudburst Sandbox
+            </span>
+          </button>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 2fr) minmax(340px, 1fr)',
+            gap: 16,
+            alignItems: 'stretch'
+          }}
+          className="simulation-xai-grid"
+        >
+          {/* Left: 48-Hour Forecast Inline Card */}
+          <Card padding={18}>
+            <ForecastChart
+              zoneId={activeZone?.id || 1}
+              zoneName={activeZone?.name || 'Sohra Escarpment'}
+            />
+          </Card>
+
+          {/* Right: Cloudburst Stress Simulator Box */}
+          <Card
+            padding={20}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: 16
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Zap size={16} style={{ color: 'var(--brand-primary)' }} />
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    Cloudburst Simulator
+                  </h3>
+                </div>
+                <Badge variant="info" size="sm">Stress Test</Badge>
+              </div>
+
+              {/* Parameter Rows */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '9px 12px',
+                    borderRadius: 'var(--radius-input)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Rainfall Intensity</span>
+                  <span className="font-mono" style={{ fontSize: 13, color: 'var(--brand-primary)', fontWeight: 600 }}>
+                    120 mm/h
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '9px 12px',
+                    borderRadius: 'var(--radius-input)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Duration</span>
+                  <span className="font-mono" style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600 }}>
+                    3 Hours
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '9px 12px',
+                    borderRadius: 'var(--radius-input)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Target Corridor</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>
+                    Sohra Escarpment
+                  </span>
+                </div>
+              </div>
+
+              {/* Impact Projection Breakdown */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '8px 10px',
+                    borderRadius: 'var(--radius-input)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Projected Risk</span>
+                  <strong className="font-mono" style={{ color: 'var(--risk-critical)', fontSize: 12 }}>
+                    96% (+28%)
+                  </strong>
+                </div>
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '8px 10px',
+                    borderRadius: 'var(--radius-input)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Affected Zones</span>
+                  <strong style={{ color: 'var(--brand-light)', fontSize: 12 }}>7 Micro-Zones</strong>
+                </div>
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '8px 10px',
+                    borderRadius: 'var(--radius-input)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Road Impact</span>
+                  <strong style={{ color: 'var(--risk-high)', fontSize: 12 }}>NH-6 Critical</strong>
+                </div>
+                <div
+                  style={{
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-primary)',
+                    padding: '8px 10px',
+                    borderRadius: 'var(--radius-input)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)', fontSize: 11, display: 'block' }}>Vulnerable Pop.</span>
+                  <strong className="font-mono" style={{ color: 'var(--text-primary)', fontSize: 12 }}>12,842</strong>
+                </div>
+              </div>
+
+              {/* Status Feedback */}
+              {simFeedback && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: 'var(--risk-safe)',
+                    fontWeight: 500,
+                    textAlign: 'center',
+                    marginTop: 6,
+                    padding: '4px 8px',
+                    backgroundColor: 'var(--risk-safe-bg)',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
+                >
+                  {simFeedback}
+                </div>
+              )}
+            </div>
+
+            {/* Run Simulation Button */}
+            <Button
+              variant="primary"
+              fullWidth
+              icon={Play}
+              loading={isSimulating}
+              onClick={handleRunQuickSim}
+            >
+              {isSimulating ? 'Computing Stress Physics...' : 'Execute Stress Simulation'}
+            </Button>
+          </Card>
+        </div>
+      )}
 
       {/* 5. Standardized XAI Modal Dialog */}
       <Modal

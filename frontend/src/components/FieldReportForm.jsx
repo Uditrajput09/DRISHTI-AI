@@ -177,6 +177,20 @@ export default function FieldReportForm({ onReportSubmitted }) {
   const [mapTileLayer, setMapTileLayer] = useState('satellite'); // 'satellite' | 'street'
   const [showManualCoords, setShowManualCoords] = useState(false);
 
+  const [wizardStep, setWizardStep] = useState(1);
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? (window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile') : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile';
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
@@ -448,17 +462,409 @@ export default function FieldReportForm({ onReportSubmitted }) {
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* 3-COLUMN RESPONSIVE LAYOUT */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 24,
-            alignItems: 'start'
-          }}
-        >
-          {/* COLUMN 1: REPORT DETAILS & GPS QUICK CONTROLS */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {isMobile ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Step Progress Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand-primary)', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700 }}>
+                  {wizardStep}
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Step {wizardStep} of 3
+                  </span>
+                  <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                    {wizardStep === 1 ? 'Hazard & Severity' : wizardStep === 2 ? 'Location & Evidence' : 'Review & Submit'}
+                  </strong>
+                </div>
+              </div>
+              <Badge variant={isOnline ? 'safe' : 'warning'} size="sm">
+                {isOnline ? 'Online Sync' : 'Offline Queue'}
+              </Badge>
+            </div>
+
+            {/* STEP 1: Hazard & Severity */}
+            {wizardStep === 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Select
+                  label="Hazard Type"
+                  value={hazardType}
+                  onChange={(e) => setHazardType(e.target.value)}
+                  options={[
+                    { value: 'Landslide', label: 'Landslide' },
+                    { value: 'Rockfall', label: 'Rockfall' },
+                    { value: 'Flooding', label: 'Flooding' },
+                    { value: 'Road Blockage', label: 'Road Blockage' },
+                    { value: 'Slope Failure', label: 'Slope Failure' }
+                  ]}
+                />
+
+                {/* Impact Level Buttons */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginBottom: 8 }}>
+                    Impact Level
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                    {[
+                      { id: 'Low', color: 'var(--risk-low, #22C55E)' },
+                      { id: 'Medium', color: 'var(--risk-medium, #EAB308)' },
+                      { id: 'High', color: 'var(--risk-high, #F97316)' },
+                      { id: 'Critical', color: 'var(--risk-critical, #EF4444)' }
+                    ].map(item => {
+                      const isActive = impactLevel === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setImpactLevel(item.id)}
+                          style={{
+                            background: isActive ? item.color : 'var(--bg-surface, #101010)',
+                            color: isActive ? '#0A0A0A' : 'var(--text-secondary)',
+                            border: `1px solid ${isActive ? item.color : 'var(--border-primary)'}`,
+                            borderRadius: 'var(--radius-full, 9999px)',
+                            padding: '10px 0',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            minHeight: 44,
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {item.id}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Visibility Dropdown */}
+                <Select
+                  label="Visibility & Weather Conditions"
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  options={[
+                    { value: 'Good', label: 'Good (Clear Sight)' },
+                    { value: 'Foggy', label: 'Foggy (Dense Mountain Mist)' },
+                    { value: 'Heavy Rain', label: 'Heavy Rain / Cloudburst' }
+                  ]}
+                />
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  fullWidth
+                  onClick={() => setWizardStep(2)}
+                  style={{ height: 48, fontSize: '0.90rem', fontWeight: 600, marginTop: 8 }}
+                >
+                  Continue to Location & Photo →
+                </Button>
+              </div>
+            )}
+
+            {/* STEP 2: Location & Evidence */}
+            {wizardStep === 2 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Location Input with Live GPS Lock Trigger */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                      Location / Hazard Site
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAcquireLiveGps}
+                      disabled={isGpsLocating}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        background: isGpsLocating ? 'rgba(79, 111, 255, 0.25)' : 'rgba(79, 111, 255, 0.12)',
+                        color: 'var(--brand-primary, #4F6FFF)',
+                        border: '1px solid rgba(79, 111, 255, 0.35)',
+                        borderRadius: 'var(--radius-pill, 9999px)',
+                        padding: '5px 12px',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        cursor: isGpsLocating ? 'wait' : 'pointer'
+                      }}
+                    >
+                      <LocateFixed size={13} style={{ animation: isGpsLocating ? 'spin 1s linear infinite' : 'none' }} />
+                      <span>{isGpsLocating ? 'Locking GPS...' : 'Use My Live GPS'}</span>
+                    </button>
+                  </div>
+
+                  <Input
+                    value={locationName}
+                    onChange={(e) => setLocationName(e.target.value)}
+                    placeholder="e.g. Sohra (Cherrapunji) Escarpment, NH-6"
+                    required
+                    fullWidth
+                  />
+
+                  {/* Pinpoint status */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 6,
+                      padding: '6px 10px',
+                      background: 'var(--bg-surface, #101010)',
+                      border: '1px solid var(--border-primary, #252525)',
+                      borderRadius: 'var(--radius-md, 6px)',
+                      fontSize: '0.72rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <MapPin size={13} style={{ color: '#EF4444' }} />
+                      <span style={{ color: 'var(--text-secondary)' }}>GPS:</span>
+                      <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                        {coords.lat}, {coords.lon}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Quick Landmark Hotspots Horizontal Presets */}
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 5 }}>
+                      Quick Corridor Presets
+                    </div>
+                    <div 
+                      style={{ 
+                        display: 'flex', 
+                        gap: 6, 
+                        overflowX: 'auto', 
+                        paddingBottom: 4,
+                        WebkitOverflowScrolling: 'touch',
+                        scrollbarWidth: 'none'
+                      }}
+                    >
+                      {LANDMARK_PRESETS.slice(0, 4).map((preset) => {
+                        const isSelected = Math.abs(numericCoords.lat - preset.lat) < 0.001 && Math.abs(numericCoords.lon - preset.lon) < 0.001;
+                        return (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => handleSelectLandmark(preset)}
+                            style={{
+                              flexShrink: 0,
+                              background: isSelected ? 'rgba(79, 111, 255, 0.2)' : 'var(--bg-surface-elevated, #151515)',
+                              border: `1px solid ${isSelected ? 'var(--brand-primary)' : 'var(--border-primary)'}`,
+                              color: isSelected ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                              padding: '5px 10px',
+                              borderRadius: 'var(--radius-pill)',
+                              fontSize: '0.72rem',
+                              fontWeight: isSelected ? 600 : 500,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {preset.name.split(' ')[0]} ({preset.corridor})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mini Pinpoint Map */}
+                <div style={{ height: 200, borderRadius: 'var(--radius-md, 8px)', overflow: 'hidden', border: '1px solid var(--border-primary)' }}>
+                  <MapContainer
+                    center={[numericCoords.lat, numericCoords.lon]}
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={false}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution="&copy; OpenStreetMap"
+                      maxZoom={19}
+                    />
+                    <MapController center={[numericCoords.lat, numericCoords.lon]} />
+                    <PinpointMarker 
+                      position={[numericCoords.lat, numericCoords.lon]} 
+                      onPinpointChange={handlePinpointChange} 
+                    />
+                  </MapContainer>
+                </div>
+
+                {/* Photo Upload & Preview Card */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginBottom: 6 }}>
+                    Photo Evidence
+                  </label>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <label
+                      style={{
+                        flex: 1,
+                        height: 90,
+                        border: '1.5px dashed var(--border-primary)',
+                        borderRadius: 'var(--radius-md, 8px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        cursor: 'pointer',
+                        background: 'var(--bg-surface, #101010)',
+                        padding: 8
+                      }}
+                    >
+                      <Camera size={22} color="var(--brand-primary)" />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                        Take / Upload Photo
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handlePhotoUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+
+                    {photoPreview && (
+                      <div style={{ width: 90, height: 90, borderRadius: 'var(--radius-md, 8px)', overflow: 'hidden', border: '1px solid var(--border-primary)', flexShrink: 0 }}>
+                        <img src={photoPreview} alt="Hazard preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, marginTop: 10 }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setWizardStep(1)}
+                    style={{ height: 48 }}
+                  >
+                    ← Back
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => setWizardStep(3)}
+                    style={{ height: 48, fontSize: '0.90rem', fontWeight: 600 }}
+                  >
+                    Review & Submit →
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: Review & Submit */}
+            {wizardStep === 3 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Description & Speech to Text */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                      Situation Description
+                    </label>
+                    {isSupported && (
+                      <button
+                        type="button"
+                        onClick={isListening ? stopListening : startListening}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(79, 111, 255, 0.12)',
+                          color: isListening ? '#EF4444' : 'var(--brand-primary)',
+                          border: `1px solid ${isListening ? '#EF4444' : 'rgba(79, 111, 255, 0.35)'}`,
+                          borderRadius: 'var(--radius-pill)',
+                          padding: '3px 8px',
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isListening ? <MicOff size={12} style={{ animation: 'pulse 1s infinite' }} /> : <Mic size={12} />}
+                        <span>{isListening ? 'Listening...' : 'Voice Dictate'}</span>
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    style={{
+                      fontSize: '0.85rem',
+                      padding: '10px 12px',
+                      resize: 'none',
+                      width: '100%',
+                      borderRadius: 'var(--radius-md, 8px)',
+                      background: 'var(--bg-surface, #101010)',
+                      border: '1px solid var(--border-primary, #252525)',
+                      color: 'var(--text-primary, #F5F5F5)',
+                      boxSizing: 'border-box'
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* Summary Review Box */}
+                <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)', padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ fontSize: '0.70rem', color: 'var(--brand-primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    REPORT SUMMARY
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.80rem' }}>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.70rem' }}>HAZARD TYPE</span>
+                      <strong style={{ color: 'var(--text-primary)' }}>{hazardType}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.70rem' }}>SEVERITY</span>
+                      <strong style={{ color: impactLevel === 'Critical' ? 'var(--risk-critical)' : 'var(--risk-high)' }}>{impactLevel}</strong>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.70rem' }}>LOCATION</span>
+                      <strong style={{ color: 'var(--text-primary)' }}>{locationName}</strong>
+                      <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.70rem', fontFamily: 'var(--font-mono)' }}>
+                        {coords.lat}, {coords.lon}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Action */}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isSubmitting}
+                  loading={isSubmitting}
+                  fullWidth
+                  style={{ height: 48, fontSize: '0.92rem', fontWeight: 700 }}
+                >
+                  <Send size={16} />
+                  <span>{isSubmitting ? 'SUBMITTING...' : (isOnline ? 'SUBMIT REPORT' : 'SAVE TO OFFLINE QUEUE')}</span>
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  fullWidth
+                  onClick={() => setWizardStep(2)}
+                  style={{ height: 44 }}
+                >
+                  ← Back to Location & Photo
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* 3-COLUMN RESPONSIVE DESKTOP LAYOUT */
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 24,
+              alignItems: 'start'
+            }}
+          >
+            {/* COLUMN 1: REPORT DETAILS & GPS QUICK CONTROLS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               REPORT DETAILS
             </div>
@@ -1096,6 +1502,7 @@ export default function FieldReportForm({ onReportSubmitted }) {
             </Button>
           </div>
         </div>
+        )}
       </form>
     </Card>
   );

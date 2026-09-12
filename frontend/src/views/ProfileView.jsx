@@ -40,6 +40,21 @@ export default function ProfileView({
 }) {
   const [activeNav, setActiveNav] = useState('notifications');
 
+  // Mobile viewport detection
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' && (window.innerWidth < 768 || window.location.search.includes('mode=mobile'));
+  });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768 || window.location.search.includes('mode=mobile'));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [mobileTab, setMobileTab] = useState('alerts'); // 'alerts' | 'offline' | 'faq'
+
   // Settings Toggles
   const [smsAlerts, setSmsAlerts] = useState(true);
   const [pushAlerts, setPushAlerts] = useState(true);
@@ -69,35 +84,49 @@ export default function ProfileView({
   const userDistrict = currentUser?.district || 'East Khasi Hills, Meghalaya';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* 1. Page Header */}
-      <PageHeader
-        breadcrumbs={['System', 'User Profile', 'Settings & Hub']}
-        title="Emergency Responder Profile"
-        subtitle="Operator identity, multi-channel dispatch preferences, and client synchronization"
-        actions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <SecondaryButton
-              size="sm"
-              icon={User}
-              onClick={() => onNavigate && onNavigate('login')}
-            >
-              Switch User
-            </SecondaryButton>
-            <DangerButton
-              size="sm"
-              icon={LogOut}
-              onClick={() => {
-                authService.logout();
-                if (setCurrentUser) setCurrentUser(null);
-                if (onNavigate) onNavigate('login');
-              }}
-            >
-              Log Out
-            </DangerButton>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 20, paddingBottom: isMobile ? 80 : 20 }}>
+      {/* 1. Page Header (simplified on mobile) */}
+      {!isMobile ? (
+        <PageHeader
+          breadcrumbs={['System', 'User Profile', 'Settings & Hub']}
+          title="Emergency Responder Profile"
+          subtitle="Operator identity, multi-channel dispatch preferences, and client synchronization"
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <SecondaryButton
+                size="sm"
+                icon={User}
+                onClick={() => onNavigate && onNavigate('login')}
+              >
+                Switch User
+              </SecondaryButton>
+              <DangerButton
+                size="sm"
+                icon={LogOut}
+                onClick={() => {
+                  authService.logout();
+                  if (setCurrentUser) setCurrentUser(null);
+                  if (onNavigate) onNavigate('login');
+                }}
+              >
+                Log Out
+              </DangerButton>
+            </div>
+          }
+        />
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Responder Settings
+            </h1>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              Profile, telemetry & sync preferences
+            </span>
           </div>
-        }
-      />
+          <Badge variant="live" size="sm">Online</Badge>
+        </div>
+      )}
 
       {/* 2. Top Profile Hero Card */}
       <Card padding={16}>
@@ -125,38 +154,40 @@ export default function ProfileView({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {onOpenAndroidModal && (
-              <SecondaryButton
-                size="sm"
-                icon={Smartphone}
-                onClick={onOpenAndroidModal}
-                style={{ flex: '1 1 130px' }}
-              >
-                Android APK
-              </SecondaryButton>
-            )}
-            {onOpenSimulator && (
-              <SecondaryButton
-                size="sm"
-                icon={Terminal}
-                onClick={onOpenSimulator}
-                style={{ flex: '1 1 130px' }}
-              >
-                Device Simulator
-              </SecondaryButton>
-            )}
-            {onNavigate && (
-              <SecondaryButton
-                size="sm"
-                icon={Download}
-                onClick={() => onNavigate('offline-maps')}
-                style={{ flex: '1 1 130px' }}
-              >
-                Offline Maps & GPS
-              </SecondaryButton>
-            )}
-          </div>
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {onOpenAndroidModal && (
+                <SecondaryButton
+                  size="sm"
+                  icon={Smartphone}
+                  onClick={onOpenAndroidModal}
+                  style={{ flex: '1 1 130px' }}
+                >
+                  Android APK
+                </SecondaryButton>
+              )}
+              {onOpenSimulator && (
+                <SecondaryButton
+                  size="sm"
+                  icon={Terminal}
+                  onClick={onOpenSimulator}
+                  style={{ flex: '1 1 130px' }}
+                >
+                  Device Simulator
+                </SecondaryButton>
+              )}
+              {onNavigate && (
+                <SecondaryButton
+                  size="sm"
+                  icon={Download}
+                  onClick={() => onNavigate('offline-maps')}
+                  style={{ flex: '1 1 130px' }}
+                >
+                  Offline Maps & GPS
+                </SecondaryButton>
+              )}
+            </div>
+          )}
         </div>
 
         {/* User Stats Row */}
@@ -199,225 +230,504 @@ export default function ProfileView({
         </div>
       </Card>
 
-      {/* 3. Settings Navigation Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '220px minmax(0, 1fr)',
-          gap: 16,
-          alignItems: 'start'
-        }}
-        className="simulation-xai-grid"
-      >
-        {/* Left Settings Rail */}
-        <Card padding={8} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {menuItems.map((item) => {
-            const isActive = activeNav === item.id;
-            const Icon = item.icon;
-
-            return (
+      {/* 3. Settings Navigation: Mobile 3-Tab Segmented Switcher vs Desktop 2-Column Rail */}
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Mobile Segmented Controller */}
+          <div
+            style={{
+              display: 'flex',
+              backgroundColor: 'var(--bg-surface)',
+              padding: 4,
+              borderRadius: 'var(--radius-pill)',
+              border: '1px solid var(--border-primary)',
+              gap: 4
+            }}
+          >
+            {[
+              { id: 'alerts', label: 'Preferences', icon: Bell },
+              { id: 'offline', label: 'Sync & App', icon: Database },
+              { id: 'faq', label: 'FAQ & Account', icon: Info }
+            ].map((tab) => (
               <button
-                key={item.id}
-                onClick={() => setActiveNav(item.id)}
+                key={tab.id}
+                type="button"
+                onClick={() => setMobileTab(tab.id)}
                 style={{
+                  flex: 1,
+                  minHeight: 46,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '9px 12px',
-                  borderRadius: 'var(--radius-input)',
-                  border: isActive ? '1px solid var(--brand-border)' : '1px solid transparent',
-                  backgroundColor: isActive ? 'var(--brand-tint)' : 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  fontSize: 13,
-                  fontWeight: isActive ? 500 : 400,
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: '8px 10px',
+                  borderRadius: 'var(--radius-pill)',
+                  border: 'none',
+                  backgroundColor: mobileTab === tab.id ? 'var(--brand-primary)' : 'transparent',
+                  color: mobileTab === tab.id ? '#FFFFFF' : 'var(--text-secondary)',
+                  fontSize: 12.5,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  textAlign: 'left',
                   transition: 'all var(--transition-fast)'
                 }}
               >
-                <Icon
-                  size={15}
-                  style={{ color: isActive ? 'var(--brand-primary)' : 'var(--text-muted)' }}
-                />
-                <span>{item.label}</span>
+                <tab.icon size={15} />
+                <span>{tab.label}</span>
               </button>
-            );
-          })}
-        </Card>
+            ))}
+          </div>
 
-        {/* Right Settings Detail Panel */}
-        <Card padding={20}>
-          {activeNav === 'notifications' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                Notification Preferences
-              </h3>
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Configure multi-channel alerts and audible siren triggers for immediate landslide danger.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+          {/* TAB 1: Preferences (Notifications + Regional Standards) */}
+          {mobileTab === 'alerts' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Notification Preferences */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>SMS Emergency Alerts</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Direct SMS push via Fast2SMS gateway for Critical thresholds</div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      Notification Preferences
+                    </h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                      Multi-channel alerts and audible sirens for landslide hazards.
+                    </p>
                   </div>
-                  <input type="checkbox" checked={smsAlerts} onChange={(e) => setSmsAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
-                </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', minHeight: 52, backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                      <div style={{ paddingRight: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>SMS Emergency Alerts</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Fast2SMS priority delivery for Critical thresholds</div>
+                      </div>
+                      <input type="checkbox" checked={smsAlerts} onChange={(e) => setSmsAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 20, height: 20, cursor: 'pointer' }} />
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', minHeight: 52, backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                      <div style={{ paddingRight: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Push Notifications (FCM)</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Real-time alerts on slope movement & rainfall</div>
+                      </div>
+                      <input type="checkbox" checked={pushAlerts} onChange={(e) => setPushAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 20, height: 20, cursor: 'pointer' }} />
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', minHeight: 52, backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                      <div style={{ paddingRight: 10 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Audible Warning Siren</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>High-intensity acoustic tone for Critical alerts</div>
+                      </div>
+                      <input type="checkbox" checked={soundAlerts} onChange={(e) => setSoundAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 20, height: 20, cursor: 'pointer' }} />
+                    </label>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Language & Regional Settings */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>Web Push Notifications (FCM)</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Real-time browser notifications on slope movement</div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      Language & Units
+                    </h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                      Advisory translation language and technical measurement scale.
+                    </p>
                   </div>
-                  <input type="checkbox" checked={pushAlerts} onChange={(e) => setPushAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
-                </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <Select
+                      label="Interface Language"
+                      value={lang}
+                      onChange={(val) => {
+                        const newLang = typeof val === 'object' && val?.target ? val.target.value : val;
+                        setLang(newLang);
+                        if (currentUser) {
+                          const updated = { ...currentUser, language: newLang };
+                          setCurrentUser && setCurrentUser(updated);
+                          localStorage.setItem('drishti_current_user', JSON.stringify(updated));
+                        }
+                      }}
+                      options={[
+                        { value: 'en', label: 'English' },
+                        { value: 'kha', label: 'Khasi (Meghalaya)' },
+                        { value: 'hi', label: 'Hindi' },
+                        { value: 'as', label: 'Assamese' }
+                      ]}
+                    />
+
+                    <Select
+                      label="Measurement Standard"
+                      value={units}
+                      onChange={setUnits}
+                      options={[
+                        { value: 'metric', label: 'Metric (mm rainfall, m elevation, ° slope)' },
+                        { value: 'imperial', label: 'Imperial (inches rainfall, ft elevation)' }
+                      ]}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* TAB 2: Sync & Android App */}
+          {mobileTab === 'offline' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Data Synchronization */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>Audible Warning Siren</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Plays loud acoustic tone when a Critical advisory is received</div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      Offline Synchronization
+                    </h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                      IndexedDB local storage cache and queued reports for zero-connectivity zones.
+                    </p>
                   </div>
-                  <input type="checkbox" checked={soundAlerts} onChange={(e) => setSoundAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
-                </label>
-              </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ padding: '10px 12px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', fontSize: 12, color: 'var(--text-secondary)' }}>
+                      Status: <span style={{ color: 'var(--risk-safe)', fontWeight: 600 }}>Active</span> • 0 pending sync events
+                    </div>
+
+                    <Button
+                      variant="primary"
+                      icon={RefreshCw}
+                      loading={isSyncing}
+                      onClick={handleSyncNow}
+                      style={{ minHeight: 48, justifyContent: 'center' }}
+                    >
+                      {isSyncing ? 'Synchronizing Telemetry...' : 'Force Sync Now'}
+                    </Button>
+
+                    {onNavigate && (
+                      <SecondaryButton
+                        icon={Download}
+                        onClick={() => onNavigate('offline-maps')}
+                        style={{ minHeight: 48, justifyContent: 'center' }}
+                      >
+                        Manage Offline Maps & GPS
+                      </SecondaryButton>
+                    )}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Android Companion App */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <img
+                      src="/logo.jpg"
+                      alt="DRISHTI-AI"
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        objectFit: 'cover',
+                        border: '1px solid rgba(79, 111, 255, 0.35)',
+                        flexShrink: 0
+                      }}
+                    />
+                    <div>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                        DRISHTI-AI Android APK
+                      </h3>
+                      <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                        Hardware accelerometer tilt sensing & offline GIS tiles.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {onOpenAndroidModal && (
+                      <Button
+                        variant="primary"
+                        icon={Download}
+                        onClick={onOpenAndroidModal}
+                        style={{ minHeight: 48, justifyContent: 'center' }}
+                      >
+                        Download Android APK
+                      </Button>
+                    )}
+                    {onOpenSimulator && (
+                      <SecondaryButton
+                        icon={Terminal}
+                        onClick={onOpenSimulator}
+                        style={{ minHeight: 48, justifyContent: 'center' }}
+                      >
+                        Launch Sensor Simulator
+                      </SecondaryButton>
+                    )}
+                  </div>
+                </div>
+              </Card>
             </div>
           )}
 
-          {activeNav === 'language' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                Language & Regional Settings
-              </h3>
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Select preferred interface and emergency advisory translation language.
-              </p>
-
-              <div style={{ maxWidth: 320, marginTop: 4 }}>
-                <Select
-                  label="Display Language"
-                  value={lang}
-                  onChange={(val) => {
-                    const newLang = typeof val === 'object' && val?.target ? val.target.value : val;
-                    setLang(newLang);
-                    if (currentUser) {
-                      const updated = { ...currentUser, language: newLang };
-                      setCurrentUser && setCurrentUser(updated);
-                      localStorage.setItem('drishti_current_user', JSON.stringify(updated));
-                    }
-                  }}
-                  options={[
-                    { value: 'en', label: 'English' },
-                    { value: 'kha', label: 'Khasi (Meghalaya)' },
-                    { value: 'hi', label: 'Hindi' },
-                    { value: 'as', label: 'Assamese' }
-                  ]}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeNav === 'display' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                Units & Measurements
-              </h3>
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Technical telemetry units for rainfall, slope angle, and coordinate displays.
-              </p>
-
-              <div style={{ maxWidth: 320, marginTop: 4 }}>
-                <Select
-                  label="Measurement Standard"
-                  value={units}
-                  onChange={setUnits}
-                  options={[
-                    { value: 'metric', label: 'Metric (mm rainfall, m elevation, ° slope)' },
-                    { value: 'imperial', label: 'Imperial (inches rainfall, ft elevation)' }
-                  ]}
-                />
-              </div>
-            </div>
-          )}
-
-          {activeNav === 'sync' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                Offline Data Synchronization
-              </h3>
-              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-                Manage local IndexedDB caching and background sync queue for remote areas without cell connectivity.
-              </p>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                <Button
-                  variant="primary"
-                  icon={RefreshCw}
-                  loading={isSyncing}
-                  onClick={handleSyncNow}
-                >
-                  {isSyncing ? 'Synchronizing Telemetry...' : 'Force Sync Now'}
-                </Button>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  Last synced: 2 minutes ago • 0 pending changes
-                </span>
-              </div>
-            </div>
-          )}
-
-          {activeNav === 'android' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img
-                  src="/logo.jpg"
-                  alt="DRISHTI-AI"
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    objectFit: 'cover',
-                    border: '1px solid rgba(79, 111, 255, 0.35)',
-                    flexShrink: 0
-                  }}
-                />
-                <div>
+          {/* TAB 3: FAQ & Account Actions */}
+          {mobileTab === 'faq' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* FAQ Accordion */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                    DRISHTI-AI Android Companion Application
+                    Frequently Asked Questions
                   </h3>
-                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-                    Native Android APK with hardware accelerometer tilt sensing, offline GIS caching, and background push alarms.
-                  </p>
+                  <FaqAccordion />
+                </div>
+              </Card>
+
+              {/* Account Management Actions */}
+              <Card padding={16}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    Responder Account
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <SecondaryButton
+                      icon={User}
+                      onClick={() => onNavigate && onNavigate('login')}
+                      style={{ minHeight: 48, justifyContent: 'center' }}
+                    >
+                      Switch Operator Account
+                    </SecondaryButton>
+                    <DangerButton
+                      icon={LogOut}
+                      onClick={() => {
+                        authService.logout();
+                        if (setCurrentUser) setCurrentUser(null);
+                        if (onNavigate) onNavigate('login');
+                      }}
+                      style={{ minHeight: 48, justifyContent: 'center' }}
+                    >
+                      Log Out
+                    </DangerButton>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* DESKTOP VIEW: 2-Column Sidebar Rail + Detail Panel */
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '220px minmax(0, 1fr)',
+            gap: 16,
+            alignItems: 'start'
+          }}
+          className="simulation-xai-grid"
+        >
+          {/* Left Settings Rail */}
+          <Card padding={8} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {menuItems.map((item) => {
+              const isActive = activeNav === item.id;
+              const Icon = item.icon;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveNav(item.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '9px 12px',
+                    borderRadius: 'var(--radius-input)',
+                    border: isActive ? '1px solid var(--brand-border)' : '1px solid transparent',
+                    backgroundColor: isActive ? 'var(--brand-tint)' : 'transparent',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    fontSize: 13,
+                    fontWeight: isActive ? 500 : 400,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all var(--transition-fast)'
+                  }}
+                >
+                  <Icon
+                    size={15}
+                    style={{ color: isActive ? 'var(--brand-primary)' : 'var(--text-muted)' }}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </Card>
+
+          {/* Right Settings Detail Panel */}
+          <Card padding={20}>
+            {activeNav === 'notifications' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                  Notification Preferences
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+                  Configure multi-channel alerts and audible siren triggers for immediate landslide danger.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>SMS Emergency Alerts</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Direct SMS push via Fast2SMS gateway for Critical thresholds</div>
+                    </div>
+                    <input type="checkbox" checked={smsAlerts} onChange={(e) => setSmsAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>Web Push Notifications (FCM)</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Real-time browser notifications on slope movement</div>
+                    </div>
+                    <input type="checkbox" checked={pushAlerts} onChange={(e) => setPushAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)', cursor: 'pointer' }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>Audible Warning Siren</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Plays loud acoustic tone when a Critical advisory is received</div>
+                    </div>
+                    <input type="checkbox" checked={soundAlerts} onChange={(e) => setSoundAlerts(e.target.checked)} style={{ accentColor: 'var(--brand-primary)', width: 16, height: 16 }} />
+                  </label>
                 </div>
               </div>
+            )}
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <Button
-                  variant="primary"
-                  icon={Download}
-                  onClick={onOpenAndroidModal}
-                >
-                  Download APK
-                </Button>
-                <SecondaryButton
-                  icon={Terminal}
-                  onClick={onOpenSimulator}
-                >
-                  Launch Simulator
-                </SecondaryButton>
+            {activeNav === 'language' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                  Language & Regional Settings
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+                  Select preferred interface and emergency advisory translation language.
+                </p>
+
+                <div style={{ maxWidth: 320, marginTop: 4 }}>
+                  <Select
+                    label="Display Language"
+                    value={lang}
+                    onChange={(val) => {
+                      const newLang = typeof val === 'object' && val?.target ? val.target.value : val;
+                      setLang(newLang);
+                      if (currentUser) {
+                        const updated = { ...currentUser, language: newLang };
+                        setCurrentUser && setCurrentUser(updated);
+                        localStorage.setItem('drishti_current_user', JSON.stringify(updated));
+                      }
+                    }}
+                    options={[
+                      { value: 'en', label: 'English' },
+                      { value: 'kha', label: 'Khasi (Meghalaya)' },
+                      { value: 'hi', label: 'Hindi' },
+                      { value: 'as', label: 'Assamese' }
+                    ]}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeNav === 'faq' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                Frequently Asked Questions
-              </h3>
-              <FaqAccordion />
-            </div>
-          )}
-        </Card>
-      </div>
+            {activeNav === 'display' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                  Units & Measurements
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+                  Technical telemetry units for rainfall, slope angle, and coordinate displays.
+                </p>
+
+                <div style={{ maxWidth: 320, marginTop: 4 }}>
+                  <Select
+                    label="Measurement Standard"
+                    value={units}
+                    onChange={setUnits}
+                    options={[
+                      { value: 'metric', label: 'Metric (mm rainfall, m elevation, ° slope)' },
+                      { value: 'imperial', label: 'Imperial (inches rainfall, ft elevation)' }
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeNav === 'sync' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                  Offline Data Synchronization
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+                  Manage local IndexedDB caching and background sync queue for remote areas without cell connectivity.
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
+                  <Button
+                    variant="primary"
+                    icon={RefreshCw}
+                    loading={isSyncing}
+                    onClick={handleSyncNow}
+                  >
+                    {isSyncing ? 'Synchronizing Telemetry...' : 'Force Sync Now'}
+                  </Button>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    Last synced: 2 minutes ago • 0 pending changes
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {activeNav === 'android' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <img
+                    src="/logo.jpg"
+                    alt="DRISHTI-AI"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      objectFit: 'cover',
+                      border: '1px solid rgba(79, 111, 255, 0.35)',
+                      flexShrink: 0
+                    }}
+                  />
+                  <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      DRISHTI-AI Android Companion Application
+                    </h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                      Native Android APK with hardware accelerometer tilt sensing, offline GIS caching, and background push alarms.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                  <Button
+                    variant="primary"
+                    icon={Download}
+                    onClick={onOpenAndroidModal}
+                  >
+                    Download APK
+                  </Button>
+                  <SecondaryButton
+                    icon={Terminal}
+                    onClick={onOpenSimulator}
+                  >
+                    Launch Simulator
+                  </SecondaryButton>
+                </div>
+              </div>
+            )}
+
+            {activeNav === 'faq' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                  Frequently Asked Questions
+                </h3>
+                <FaqAccordion />
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

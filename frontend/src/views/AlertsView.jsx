@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BellRing, 
   Send, 
   Smartphone, 
   Users, 
   AlertTriangle, 
-  CheckCheck,
-  PhoneCall,
-  Clock,
-  Radio,
-  MapPin,
-  MessageSquare
+  CheckCheck, 
+  PhoneCall, 
+  Clock, 
+  Radio, 
+  MapPin, 
+  MessageSquare 
 } from 'lucide-react';
 import { 
   Card, 
@@ -39,6 +39,19 @@ export default function AlertsView({
   const [language, setLanguage] = useState('en');
   const [isSending, setIsSending] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [mobileTab, setMobileTab] = useState('feed'); // 'feed' | 'dispatch'
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? (window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile') : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile';
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // 4 Active Alerts
   const exactAlerts = [
@@ -127,78 +140,161 @@ export default function AlertsView({
         }
       />
 
-      {/* 2. Top 5 KPI Metric Cards Strip */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 14
-        }}
-      >
-        <MetricCard
-          label="Active Alerts"
-          value="6"
-          variant="critical"
-          icon={AlertTriangle}
-          trend="Broadcast"
-          trendDirection="critical"
-          trendLabel="active"
-          description="Emergency bulletins in circulation"
-        />
+      {/* 2. Top KPI Metric Cards: Compact 2x2 on Mobile, 5-Strip on Desktop */}
+      {isMobile ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)', padding: '12px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Active Alerts</span>
+              <AlertTriangle size={15} color="var(--risk-critical)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-critical)', display: 'block', marginTop: 4 }}>
+              6
+            </span>
+          </div>
 
-        <MetricCard
-          label="SMS Dispatched"
-          value="1,248"
-          icon={Smartphone}
-          trend="Fast2SMS"
-          trendDirection="up"
-          trendLabel="gateway"
-          description="Delivered to registered citizens"
-        />
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)', padding: '12px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>SMS Sent</span>
+              <Smartphone size={15} color="var(--brand-primary)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginTop: 4 }}>
+              1,248
+            </span>
+          </div>
 
-        <MetricCard
-          label="Push Notifications"
-          value="1,876"
-          icon={BellRing}
-          trend="FCM"
-          trendDirection="up"
-          trendLabel="delivered"
-          description="PWA and Android client devices"
-        />
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)', padding: '12px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Push Delivered</span>
+              <BellRing size={15} color="var(--brand-light)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginTop: 4 }}>
+              1,876
+            </span>
+          </div>
 
-        <MetricCard
-          label="Failed Deliveries"
-          value="12"
-          icon={PhoneCall}
-          trend="0.38%"
-          trendDirection="down"
-          trendLabel="bounce"
-          description="Retry pipeline automated"
-        />
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-card)', padding: '12px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Population Reach</span>
+              <Users size={15} color="var(--risk-safe)" />
+            </div>
+            <span className="font-mono" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--risk-safe)', display: 'block', marginTop: 4 }}>
+              3,436
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 14
+          }}
+        >
+          <MetricCard
+            label="Active Alerts"
+            value="6"
+            variant="critical"
+            icon={AlertTriangle}
+            trend="Broadcast"
+            trendDirection="critical"
+            trendLabel="active"
+            description="Emergency bulletins in circulation"
+          />
 
-        <MetricCard
-          label="Total Population Reach"
-          value="3,436"
-          variant="safe"
-          icon={Users}
-          trend="99.6%"
-          trendDirection="up"
-          trendLabel="coverage"
-          description="East Khasi Hills corridor reach"
-        />
-      </div>
+          <MetricCard
+            label="SMS Dispatched"
+            value="1,248"
+            icon={Smartphone}
+            trend="Fast2SMS"
+            trendDirection="up"
+            trendLabel="gateway"
+            description="Delivered to registered citizens"
+          />
+
+          <MetricCard
+            label="Push Notifications"
+            value="1,876"
+            icon={BellRing}
+            trend="FCM"
+            trendDirection="up"
+            trendLabel="delivered"
+            description="PWA and Android client devices"
+          />
+
+          <MetricCard
+            label="Failed Deliveries"
+            value="12"
+            icon={PhoneCall}
+            trend="0.38%"
+            trendDirection="down"
+            trendLabel="bounce"
+            description="Retry pipeline automated"
+          />
+
+          <MetricCard
+            label="Total Population Reach"
+            value="3,436"
+            variant="safe"
+            icon={Users}
+            trend="99.6%"
+            trendDirection="up"
+            trendLabel="coverage"
+            description="East Khasi Hills corridor reach"
+          />
+        </div>
+      )}
+
+      {/* Mobile Segmented Controller */}
+      {isMobile && (
+        <div style={{ display: 'flex', gap: 6, padding: 4, background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)' }}>
+          <button 
+            onClick={() => setMobileTab('feed')}
+            style={{ 
+              flex: 1, 
+              padding: '10px 12px', 
+              borderRadius: 'var(--radius-sm)', 
+              border: 'none', 
+              background: mobileTab === 'feed' ? 'var(--brand-primary)' : 'transparent', 
+              color: mobileTab === 'feed' ? '#FFFFFF' : 'var(--text-secondary)', 
+              fontWeight: 600, 
+              fontSize: '0.82rem', 
+              cursor: 'pointer'
+            }}
+          >
+            Active Bulletins ({exactAlerts.length})
+          </button>
+          <button 
+            onClick={() => setMobileTab('dispatch')}
+            style={{ 
+              flex: 1, 
+              padding: '10px 12px', 
+              borderRadius: 'var(--radius-sm)', 
+              border: 'none', 
+              background: mobileTab === 'dispatch' ? 'var(--brand-primary)' : 'transparent', 
+              color: mobileTab === 'dispatch' ? '#FFFFFF' : 'var(--text-secondary)', 
+              fontWeight: 600, 
+              fontSize: '0.82rem', 
+              cursor: 'pointer'
+            }}
+          >
+            Dispatch Broadcast
+          </button>
+        </div>
+      )}
 
       {/* 3. Main 2-Column Grid: Left Active Alerts Feed | Right Dispatch Form */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.55fr) minmax(360px, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.55fr) minmax(360px, 1fr)',
           gap: 16,
           alignItems: 'start'
         }}
         className="simulation-xai-grid"
       >
         {/* Left: Active Alerts Feed */}
+        {(!isMobile || mobileTab === 'feed') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Active CAP Bulletins ({exactAlerts.length})
@@ -288,8 +384,10 @@ export default function AlertsView({
             ))
           )}
         </div>
+        )}
 
         {/* Right: Manual Alert Dispatch Form */}
+        {(!isMobile || mobileTab === 'dispatch') && (
         <Card padding={20}>
           <div style={{ marginBottom: 16 }}>
             <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
@@ -390,6 +488,7 @@ export default function AlertsView({
             </Button>
           </form>
         </Card>
+        )}
       </div>
     </div>
   );

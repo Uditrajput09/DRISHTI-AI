@@ -20,7 +20,6 @@ const ProfileView = lazy(() => import('./views/ProfileView'));
 const SimulationView = lazy(() => import('./views/SimulationView'));
 const EvacuationView = lazy(() => import('./views/EvacuationView'));
 const OfflineMapsView = lazy(() => import('./views/OfflineMapsView'));
-const DevKnowledgeGraphView = lazy(() => import('./views/DevKnowledgeGraphView'));
 
 // Modals / Simulators (deferred until user interaction)
 const AuthModal = lazy(() => import('./components/AuthModal'));
@@ -73,7 +72,6 @@ function AppContent() {
     if (path === '/profile') return 'profile';
     if (path === '/evacuation' || path === '/shelters') return 'evacuation';
     if (path === '/offline-maps') return 'offline-maps';
-    if (path === '/dev-graph' || path === '/graph') return 'devgraph';
     if (path === '/app' || path === '/gis') return 'gis';
     return 'login';
   });
@@ -452,13 +450,6 @@ function AppContent() {
             <OfflineMapsView
               onNavigateToGIS={() => handleSelectSection('gis')}
               onNavigateToEvac={() => handleSelectSection('evacuation')}
-            />
-          )}
-
-          {/* Screen 10: Developer Knowledge Graph */}
-          {activeSection === 'devgraph' && (
-            <DevKnowledgeGraphView
-              onNavigateSection={handleSelectSection}
             />
           )}
         </Suspense>

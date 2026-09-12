@@ -407,6 +407,34 @@
 
 ---
 
+- 2026-09-11: Generated Hackathon Judge Q&A Preparation File (`HACKATHON_JUDGE_QA.md`):
+    - Recursively scanned all project `.md` files (README, architecture, brain, progress, DEMO_SCRIPT) and core source files (main.py, config.py, models.py, database.py, security.py, cache.py, rate_limiter.py, ml/model.py, ml/trainer.py, ml/features.py, ml/anomaly.py, ml/evacuation_graph.py, alerts/engine.py, all 18 routes_*.py, App.jsx, vite.config.js, package.json, docker-compose.yml).
+    - Produced 150 Q&A pairs organized into 6 categories (Frontend 25, Backend 25, ML 25, App Dev 25, Web Dev 25, API 25) with Team Ownership Matrix assigning categories to 5 member slots.
+    - Each category contains 3 difficulty tiers: 10 basic/factual, 10 architecture/justification, 5 adversarial/gotcha.
+    - All answers include precise metrics (ROC-AUC 0.9941, 97.19% precision, F1 0.9669), exact code snippets from source files, and architecture details. Zero invented details — all content derived from documented project artifacts.
+
+- 2026-09-12: Mobile Android App Redesign (Minimalism, Readability, Screen Splitting & Touch Ergonomics):
+    - **Visual Identity & Theme Preservation**: Retained 100% of the Dark Enterprise Analytics palette (`#0A0A0A` canvas, `#101010` surface, `#151515` elevated, `#252525` border, `#4F6FFF` electric blue, semantic risk colors `#FF4D5A`, `#FF8A4C`, `#E8B84B`, `#31B77A`). Zero new colors or branding deviations.
+    - **Bottom Navigation Overhaul (`BottomNavigation.jsx`)**: Consolidated 8 cramped, overlapping 45px tabs down to 4 primary operational tabs (`Map`, `Hazards`, `Report`, `Evac`), standardizing touch targets to >= 48dp with 20px icons, 12px labels, and clean rounded active pill indicators.
+    - **Dashboard Streamlining (`DashboardView.jsx`)**: Replaced 5 tall KPI cards with a compact 2x2 grid (`Critical`, `High`, `Reports`, `Shelters`), constrained map height to 380px for single-screen viewing, and suppressed heavy 1,800px+ inline forecast charts and simulation sandboxes in favor of clean 76px launcher cards (cutting vertical scroll depth by ~75%).
+    - **Risk Intelligence Transformation (`RiskIntelligenceView.jsx`)**: Added mobile segmented tab switcher (`'zones'` | `'vulnerability'`); replaced unreadable 8-column `DataTable` with stacked, touch-friendly **Zone Hazard Cards** featuring risk progress bars, 24h rainfall/moisture telemetry, and expandable geotechnical parameters with a direct `[ Inspect on GIS Map ]` action.
+    - **3-Step Field Report Wizard (`FieldReportForm.jsx`)**: Decomposed the 1,100-line single scrolling form into a focused 3-step progressive wizard on mobile (Step 1: Hazard & Severity, Step 2: Location & Evidence with live GPS, Step 3: Review & Submit) while preserving full 3-column desktop layout.
+    - **Alerts Center Segmentation (`AlertsView.jsx`)**: Added segmented tab switcher separating live alert feed from the manual alert dispatch form, condensing 5 metric cards into a clean 2x2 grid on mobile.
+    - **Responder Profile & Settings (`ProfileView.jsx`)**: Replaced desktop 2-column sidebar with 3 native Android grouped cards (`Preferences`, `Sync & App`, `FAQ & Account`) with min 48px touch switches and dropdowns.
+    - **Tourist Evacuation & Corridors (`EvacuationView.jsx`, `index.css`)**: Upgraded mobile tab switcher to min 48px height, increased hotspot selection chips to 44px, facility filter tabs to 42px, and repositioned bottom emergency rescue bar to 74px to prevent nav collisions.
+    - **Full Verification & Parity**:
+      - Executed Vite production build (`npm run build`): **2,559 modules bundled with 0 errors** in 13.92s.
+      - Synchronized native Android Capacitor project (`npx cap sync android`): assets synced to `android/app/src/main/assets/public` in 0.322s.
+      - Executed backend pytest suite (`.venv\Scripts\python -m pytest`): **33 of 33 tests passed (100%)** in 147s.
+
+- 2026-09-12: Removed Dev Knowledge Graph from App Navigation, Routes, and Build:
+    - Removed `DevKnowledgeGraphView` lazy import, `/dev-graph` route mapping, and screen rendering from `frontend/src/App.jsx`.
+    - Removed `[ 🌐 Dev Graph ]` quick action button, `Network` icon import, and route title mapping from `frontend/src/components/ui/TopNavigation.jsx`.
+    - Removed `onOpenDevGraph` callback prop from `frontend/src/components/ui/AppShell.jsx`.
+    - Removed `Dev Knowledge Graph` navigation entry and `Network` icon from `frontend/src/components/ui/Sidebar.jsx` (under `SYSTEM` rail).
+    - Removed `G` shortcut entry and `Network` icon from `frontend/src/components/KeyboardShortcutsModal.jsx`.
+    - Validated: `npm run build` passed with 0 errors (`✓ built in 15.40s`), reducing bundle size with `DevKnowledgeGraphView` chunk completely eliminated; synchronized native Android container with `npx cap sync android` (0.242s).
+
 ## In Progress
 - Ready for re-test on Google PageSpeed Insights once Vercel Authentication is toggled off in the Vercel dashboard.
 

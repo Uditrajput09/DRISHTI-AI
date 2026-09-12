@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Command, Search, X, Map, ShieldAlert, CloudRain, Bell, FileText, User, Play, Sun, Moon, Download, Sliders, Network } from 'lucide-react';
+import { Command, Search, X, Map, ShieldAlert, CloudRain, Bell, FileText, User, Play, Sun, Moon, Download, Sliders } from 'lucide-react';
 
 export default function KeyboardShortcutsModal({ 
   isOpen, 
@@ -21,7 +21,6 @@ export default function KeyboardShortcutsModal({
     { key: '6', label: 'Field Report Form', route: 'reports', icon: FileText },
     { key: '7', label: 'User Profile & FAQs', route: 'profile', icon: User },
     { key: 'S', label: 'Cloudburst Simulation', route: 'simulation', icon: Play },
-    { key: 'G', label: 'Architecture Knowledge Graph', route: 'devgraph', icon: Network },
     { key: 'A', label: 'Android APK Download', onTrigger: onOpenAndroidModal, icon: Download },
     { key: 'M', label: 'Simulate Android Hardware', onTrigger: onOpenSimulator, icon: Sliders },
   ];

@@ -540,20 +540,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-pill);
   border: none;
-  font-size: 0.76rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
-  min-height: 38px;
+  min-height: 48px;
 }
 
 .evac-bottom-bar {
   position: fixed;
-  bottom: 64px;
+  bottom: 74px;
   left: 12px;
   right: 12px;
   z-index: 850;
@@ -565,7 +565,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   backdrop-filter: blur(20px);
   border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: var(--radius-card);
-  padding: 8px 12px;
+  padding: 10px 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 16px rgba(239, 68, 68, 0.2);
   animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

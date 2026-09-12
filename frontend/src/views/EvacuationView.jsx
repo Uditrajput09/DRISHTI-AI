@@ -630,12 +630,13 @@ export default function EvacuationView({
                   setFacilityFilter(tab.id);
                 }}
                 style={{
-                  padding: '3px 9px',
+                  padding: isMobile ? '8px 14px' : '3px 9px',
+                  minHeight: isMobile ? 42 : 'auto',
                   borderRadius: 'var(--radius-pill)',
                   border: 'none',
                   backgroundColor: facilityFilter === tab.id ? 'var(--bg-surface-elevated)' : 'transparent',
                   color: facilityFilter === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontSize: 11,
+                  fontSize: isMobile ? 12 : 11,
                   fontWeight: 600,
                   cursor: 'pointer'
                 }}
@@ -1215,20 +1216,21 @@ export default function EvacuationView({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 5,
-                padding: '6px 12px',
+                gap: 6,
+                padding: isMobile ? '8px 14px' : '6px 12px',
+                minHeight: isMobile ? 44 : 32,
                 borderRadius: 'var(--radius-pill)',
                 backgroundColor: selectedHotspot?.id === 'live_gps' ? 'var(--brand-primary)' : 'rgba(79, 111, 255, 0.12)',
                 color: selectedHotspot?.id === 'live_gps' ? '#FFFFFF' : 'var(--brand-light)',
                 border: `1px solid ${selectedHotspot?.id === 'live_gps' ? 'var(--brand-primary)' : 'rgba(79, 111, 255, 0.35)'}`,
-                fontSize: 11,
+                fontSize: isMobile ? 12.5 : 11,
                 fontWeight: 600,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 flexShrink: 0
               }}
             >
-              <MapPin size={12} />
+              <MapPin size={isMobile ? 14 : 12} />
               <span>📍 My Live GPS</span>
             </button>
 
@@ -1243,12 +1245,13 @@ export default function EvacuationView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '6px 12px',
+                    padding: isMobile ? '8px 14px' : '6px 12px',
+                    minHeight: isMobile ? 44 : 32,
                     borderRadius: 'var(--radius-pill)',
                     backgroundColor: isSelected ? 'var(--brand-primary)' : 'var(--bg-surface-elevated)',
                     color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
                     border: `1px solid ${isSelected ? 'var(--brand-primary)' : 'var(--border-secondary)'}`,
-                    fontSize: 11,
+                    fontSize: isMobile ? 12.5 : 11,
                     fontWeight: isSelected ? 600 : 500,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -1260,9 +1263,9 @@ export default function EvacuationView({
                   {spot.risk === 'Critical' && (
                     <span
                       style={{
-                        fontSize: 9,
+                        fontSize: isMobile ? 10 : 9,
                         fontWeight: 700,
-                        padding: '2px 5px',
+                        padding: '2px 6px',
                         borderRadius: 8,
                         backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.3)' : 'rgba(239, 68, 68, 0.25)',
                         color: isSelected ? '#FFFFFF' : '#EF4444',

@@ -125,7 +125,6 @@ export function AppShell({
           onOpenShortcuts={onOpenShortcuts}
           onOpenAndroidModal={onOpenAndroidModal}
           onOpenEvacuation={() => onSelectSection && onSelectSection('evacuation')}
-          onOpenDevGraph={() => onSelectSection && onSelectSection('devgraph')}
           onToggleSidebarMobile={isMobile ? () => setIsMobileSidebarOpen(prev => !prev) : undefined}
           isSidebarOpen={isMobileSidebarOpen}
           onOpenAI={() => setIsAIDrawerOpen(true)}

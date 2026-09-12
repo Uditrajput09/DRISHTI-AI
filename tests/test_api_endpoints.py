@@ -354,8 +354,11 @@ def test_tourist_hotspots_and_evacuation_planner():
     assert "sdrf_meghalaya" in contacts
 
 
-def test_chatbot_queries():
+def test_chatbot_queries(monkeypatch):
     """Verify disaster AI chatbot query endpoint, live telemetry grounding, and fallback."""
+    from backend.config import settings
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "")
+    monkeypatch.setenv("GEMINI_API_KEY", "")
     # 1. Greetings query
     resp = client.post("/api/chatbot/query", json={"question": "Hello"})
     assert resp.status_code == 200

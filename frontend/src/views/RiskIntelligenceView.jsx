@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, 
   Search, 
-  Users,
-  Building2,
-  Home,
-  FileText,
-  MapPin,
-  Compass,
-  Layers,
-  ArrowUpRight
+  Users, 
+  Building2, 
+  Home, 
+  FileText, 
+  MapPin, 
+  Compass, 
+  Layers, 
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { 
   Card, 
@@ -30,6 +32,20 @@ export default function RiskIntelligenceView({
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedZone, setSelectedZone] = useState(null);
+  const [expandedZoneId, setExpandedZoneId] = useState(null);
+  const [mobileTab, setMobileTab] = useState('zones'); // 'zones' | 'vulnerability'
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' ? (window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile') : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768 || new URLSearchParams(window.location.search).get('mode') === 'mobile';
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Exact 10 monitored micro-zones
   const exactRiskZones = [
@@ -133,61 +149,224 @@ export default function RiskIntelligenceView({
         }
       />
 
-      {/* 2. Top Risk Zones Table matching Reference Image Table Spec */}
-      <Card padding={0} style={{ overflow: 'hidden' }}>
-        <div
-          style={{
-            padding: '14px 20px',
-            borderBottom: '1px solid var(--border-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 12,
-            backgroundColor: 'var(--bg-surface-elevated)'
-          }}
-        >
-          <div>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-              Top Landslide Hazard Zones
-            </h3>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-              Micro-zone severity hierarchy ranked by geotechnical slope failure probability
-            </p>
-          </div>
-
-          <div style={{ width: 220 }}>
-            <SearchInput
-              size="sm"
-              placeholder="Filter zone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onClear={() => setSearchTerm('')}
-            />
-          </div>
+      {/* Mobile Segmented Controller */}
+      {isMobile && (
+        <div style={{ display: 'flex', gap: 6, padding: 4, background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--border-primary)' }}>
+          <button 
+            onClick={() => setMobileTab('zones')}
+            style={{ 
+              flex: 1, 
+              padding: '10px 12px', 
+              borderRadius: 'var(--radius-sm)', 
+              border: 'none', 
+              background: mobileTab === 'zones' ? 'var(--brand-primary)' : 'transparent', 
+              color: mobileTab === 'zones' ? '#FFFFFF' : 'var(--text-secondary)', 
+              fontWeight: 600, 
+              fontSize: '0.82rem', 
+              cursor: 'pointer',
+              transition: 'background var(--transition-fast)'
+            }}
+          >
+            Hazard Zones ({filteredZones.length})
+          </button>
+          <button 
+            onClick={() => setMobileTab('vulnerability')}
+            style={{ 
+              flex: 1, 
+              padding: '10px 12px', 
+              borderRadius: 'var(--radius-sm)', 
+              border: 'none', 
+              background: mobileTab === 'vulnerability' ? 'var(--brand-primary)' : 'transparent', 
+              color: mobileTab === 'vulnerability' ? '#FFFFFF' : 'var(--text-secondary)', 
+              fontWeight: 600, 
+              fontSize: '0.82rem', 
+              cursor: 'pointer',
+              transition: 'background var(--transition-fast)'
+            }}
+          >
+            Vulnerability & Radar
+          </button>
         </div>
+      )}
 
-        <DataTable
-          columns={columns}
-          data={filteredZones}
-          keyField="id"
-          onSelectKey={(id) => {
-            const found = exactRiskZones.find(z => z.id === id);
-            if (found) setSelectedZone(found);
-          }}
-        />
-      </Card>
+      {/* 2. Top Risk Zones Section */}
+      {isMobile ? (
+        mobileTab === 'zones' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ width: '100%' }}>
+              <SearchInput
+                size="sm"
+                placeholder="Filter zone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClear={() => setSearchTerm('')}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {filteredZones.map(zone => {
+                const isExpanded = expandedZoneId === zone.id;
+                const scoreColor = zone.risk_score >= 80 ? 'var(--risk-critical)' : zone.risk_score >= 60 ? 'var(--risk-high)' : zone.risk_score >= 30 ? 'var(--risk-medium)' : 'var(--risk-safe)';
+                
+                return (
+                  <div
+                    key={zone.id}
+                    style={{
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-primary)',
+                      borderRadius: 'var(--radius-card)',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 10
+                    }}
+                  >
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {zone.name}
+                        </h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                          <RiskBadge level={zone.level} size="xs" />
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{zone.geology}</span>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span className="font-mono" style={{ fontSize: '1.2rem', fontWeight: 700, color: scoreColor }}>
+                          {zone.risk_score}%
+                        </span>
+                        <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)' }}>RISK INDEX</span>
+                      </div>
+                    </div>
+
+                    {/* Visual Progress Bar */}
+                    <div style={{ width: '100%', height: 4, background: 'var(--bg-surface-elevated)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${zone.risk_score}%`, height: '100%', background: scoreColor, borderRadius: 2 }} />
+                    </div>
+
+                    {/* Key Metrics Row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+                      <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: 'var(--radius-sm)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block' }}>24H RAIN</span>
+                        <span className="font-mono" style={{ fontSize: '0.80rem', fontWeight: 600, color: 'var(--brand-primary)' }}>{zone.rain}</span>
+                      </div>
+                      <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: 'var(--radius-sm)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block' }}>MOISTURE</span>
+                        <span className="font-mono" style={{ fontSize: '0.80rem', fontWeight: 600, color: 'var(--text-primary)' }}>{zone.moisture}</span>
+                      </div>
+                      <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: 'var(--radius-sm)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block' }}>SLOPE</span>
+                        <span className="font-mono" style={{ fontSize: '0.80rem', fontWeight: 600, color: 'var(--text-primary)' }}>{zone.slope}</span>
+                      </div>
+                    </div>
+
+                    {/* Expand/Collapse Button */}
+                    <button
+                      onClick={() => setExpandedZoneId(isExpanded ? null : zone.id)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '6px 0 0 0',
+                        color: 'var(--brand-primary)',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 4,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isExpanded ? <>Hide Details <ChevronUp size={14} /></> : <>Geotechnical Details <ChevronDown size={14} /></>}
+                    </button>
+
+                    {isExpanded && (
+                      <div style={{ paddingTop: 8, borderTop: '1px solid var(--border-primary)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.75rem' }}>
+                          <div><span style={{ color: 'var(--text-muted)' }}>Elevation:</span> <strong style={{ color: 'var(--text-primary)' }}>{zone.elevation}</strong></div>
+                          <div><span style={{ color: 'var(--text-muted)' }}>Drainage:</span> <strong style={{ color: 'var(--text-primary)' }}>{zone.drainage}</strong></div>
+                          <div><span style={{ color: 'var(--text-muted)' }}>Surface Area:</span> <strong style={{ color: 'var(--text-primary)' }}>{zone.area}</strong></div>
+                          <div><span style={{ color: 'var(--text-muted)' }}>AI Probability:</span> <strong style={{ color: 'var(--text-primary)' }}>{zone.prob}</strong></div>
+                        </div>
+                        {onNavigateToGIS && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={Compass}
+                            onClick={() => {
+                              if (onSelectZone) onSelectZone(zone);
+                              onNavigateToGIS();
+                            }}
+                          >
+                            Inspect on GIS Map
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )
+      ) : (
+        <Card padding={0} style={{ overflow: 'hidden' }}>
+          <div
+            style={{
+              padding: '14px 20px',
+              borderBottom: '1px solid var(--border-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 12,
+              backgroundColor: 'var(--bg-surface-elevated)'
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                Top Landslide Hazard Zones
+              </h3>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+                Micro-zone severity hierarchy ranked by geotechnical slope failure probability
+              </p>
+            </div>
+
+            <div style={{ width: 220 }}>
+              <SearchInput
+                size="sm"
+                placeholder="Filter zone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClear={() => setSearchTerm('')}
+              />
+            </div>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={filteredZones}
+            keyField="id"
+            onSelectKey={(id) => {
+              const found = exactRiskZones.find(z => z.id === id);
+              if (found) setSelectedZone(found);
+            }}
+          />
+        </Card>
+      )}
 
       {/* 3. Bottom Split: Zone Comparison Radar | Vulnerability & Inspector */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.15fr) minmax(360px, 1fr)',
-          gap: 16,
-          alignItems: 'stretch'
-        }}
-        className="simulation-xai-grid"
-      >
+      {(!isMobile || mobileTab === 'vulnerability') && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.15fr) minmax(360px, 1fr)',
+            gap: 16,
+            alignItems: 'stretch'
+          }}
+          className="simulation-xai-grid"
+        >
         {/* Left: Zone Comparison Radar Chart */}
         <Card padding={18}>
           <ZoneComparison zones={zones.length > 0 ? zones : exactRiskZones} />
@@ -415,6 +594,7 @@ export default function RiskIntelligenceView({
           </Card>
         </div>
       </div>
+      )}
     </div>
   );
 }
