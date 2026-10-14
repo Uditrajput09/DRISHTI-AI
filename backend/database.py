@@ -20,10 +20,17 @@ if raw_database_url.startswith("postgres://"):
     raw_database_url = raw_database_url.replace("postgres://", "postgresql://", 1)
 
 active_database_url = raw_database_url
+is_fallback = False
 
 
-def _create_postgres_engine(url: str):
-    """Create SQLAlchemy engine with enterprise PostgreSQL connection pooling."""
+def _create_db_engine(url: str):
+    """Create SQLAlchemy engine with appropriate connection parameters."""
+    if url.startswith("sqlite"):
+        return create_engine(
+            url,
+            connect_args={"check_same_thread": False},
+            echo=False
+        )
     return create_engine(
         url,
         pool_size=10,
@@ -34,22 +41,27 @@ def _create_postgres_engine(url: str):
     )
 
 
-# Initialize PostgreSQL engine and verify connection
+# Initialize PostgreSQL engine and verify connection with automatic SQLite fallback
 try:
-    engine = _create_postgres_engine(active_database_url)
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
+    engine = _create_db_engine(active_database_url)
+    if not active_database_url.startswith("sqlite"):
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
     safe_db_host = active_database_url.split("@")[-1] if "@" in active_database_url else "configured host"
     print(f"[Database] Successfully connected to PostgreSQL at {safe_db_host}")
     logger.info(f"Connected to PostgreSQL database ({safe_db_host})")
 except Exception as err:
-    logger.critical(f"[Database Critical] Failed to connect to PostgreSQL: {err}")
-    print(
-        f"\n❌ [CRITICAL DATABASE ERROR] Could not connect to PostgreSQL at {active_database_url.split('@')[-1] if '@' in active_database_url else active_database_url}!\n"
-        f"   Error: {err}\n"
-        f"   Please verify your DATABASE_URL in .env matches your active PostgreSQL / Supabase credentials.\n"
+    logger.warning(
+        f"[Database Warning] PostgreSQL initialization failed ({err}). "
+        f"Falling back to local SQLite database as specified in AGENTS.md."
     )
-    raise RuntimeError(f"DRISHTI-AI requires an active PostgreSQL database: {err}") from err
+    print(
+        f"\n⚠️ [Database Warning] PostgreSQL connection failed ({err}).\n"
+        f"   Falling back to local SQLite database (sqlite:///./drishti_landslide.db) as per AGENTS.md guardrail.\n"
+    )
+    active_database_url = "sqlite:///./drishti_landslide.db"
+    engine = _create_db_engine(active_database_url)
+    is_fallback = True
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -64,10 +76,11 @@ def get_db():
 
 
 def get_db_info() -> dict:
-    """Return runtime database dialect and host connection parameters."""
+    """Return runtime database dialect, host/file information, and fallback status."""
     return {
         "dialect": engine.dialect.name,
-        "is_fallback": False,
+        "is_fallback": is_fallback,
         "database": str(engine.url).split("@")[-1] if "@" in str(engine.url) else str(engine.url),
         "status": "connected"
     }
+

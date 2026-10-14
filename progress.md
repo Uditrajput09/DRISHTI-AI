@@ -434,6 +434,21 @@
     - Removed `Dev Knowledge Graph` navigation entry and `Network` icon from `frontend/src/components/ui/Sidebar.jsx` (under `SYSTEM` rail).
     - Removed `G` shortcut entry and `Network` icon from `frontend/src/components/KeyboardShortcutsModal.jsx`.
     - Validated: `npm run build` passed with 0 errors (`✓ built in 15.40s`), reducing bundle size with `DevKnowledgeGraphView` chunk completely eliminated; synchronized native Android container with `npx cap sync android` (0.242s).
+- 2026-09-15: Overhauled DRISHTI-AI Architecture Knowledge Graph (`graphify-out/graph.html`) to Match Graphify Reference Design:
+    - Designed exact header layout: Purple gradient brand card (`DRISHTI GRAPH / Project Knowledge Graph`), real-time pill badges (`Nodes`, `Edges`, `Communities`), full-width search bar (`Search functions, classes, models, files...`), and quick action buttons (`💥 Explode`, `[ ] Fit`, `Labels`, `📥 PNG`).
+    - Implemented floating Left Dock with 4 tabs: `● Clusters` (Architectural communities with Show All/Clear, color swatches, counts, and click-to-isolate), `⚡ God Nodes` (Top centrality architectural hubs), `⇄ Path` (Shortest dependency BFS tracer between any two symbols), and `⚙ Filters` (Min connections slider, subsystem filters, physics toggle).
+    - Added left dock status footer: `● ForceAtlas2: Settled` and `100% Extracted`.
+    - Added floating Right Inspector Dock that slides out when clicking any symbol, showing file location, total/in/out degree counters, and interactive caller/dependency trees.
+- 2026-10-14: Resolved Supabase PostgreSQL Pooler Connection Failure and Restored SQLite Fallback Guardrail:
+    - Fixed root-cause connection failure `FATAL: (ENOTFOUND) tenant/user postgres.bgoonhpgvuerhobaabyz not found` on Supabase: updated pooler port from `5432` (session mode tenant lookup failure) to `6543` (Supavisor transaction pooler mode) in `.env`.
+    - Restored automatic SQLite fallback in `backend/database.py` per `AGENTS.md` guardrail so that offline local development, network latency, or external database downtime never crashes the backend startup with `RuntimeError`.
+    - Confirmed live PostgreSQL connectivity: `[Database] Successfully connected to PostgreSQL at aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require` with 10 pre-seeded micro-zones.
+    - Verified 100% test pass rate across all 26 backend integration test cases (`pytest tests/test_api_endpoints.py`, 26 passed).
+- 2026-10-14: Remediated Supabase Linter 0013 (RLS Disabled in Public) Across All 9 Tables:
+    - Created `backend/enable_rls.py` and integrated `enable_row_level_security()` into `backend/seed_data.py`.
+    - Enabled Row Level Security on all 9 public tables: `infrastructure`, `subscribers`, `sos_events`, `zones`, `risk_scores`, `weather_readings`, `field_reports`, `annual_surveys`, and `alert_logs`.
+    - Created explicit granular policies for public view access, citizen field report submission, emergency SOS alerts, and phone number harvesting protection on `subscribers`.
+    - Verified `rowsecurity = True` across all 9 tables in PostgreSQL `pg_tables`.
 
 ## In Progress
 - Ready for re-test on Google PageSpeed Insights once Vercel Authentication is toggled off in the Vercel dashboard.

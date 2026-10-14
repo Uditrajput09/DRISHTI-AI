@@ -24,6 +24,7 @@ from backend.models import (
 from backend.ingestion.weather import weather_service
 from backend.ml.model import risk_model
 from backend.alerts.engine import alert_engine
+from backend.enable_rls import enable_row_level_security
 
 SEED_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "seed")
 
@@ -32,6 +33,7 @@ def seed_database():
     """Create all tables and populate initial datasets if empty."""
     print("[Seed Loader] Initializing database tables...")
     Base.metadata.create_all(bind=engine)
+    enable_row_level_security()
 
     db = SessionLocal()
     try:
