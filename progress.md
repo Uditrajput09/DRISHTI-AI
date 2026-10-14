@@ -444,11 +444,12 @@
     - Restored automatic SQLite fallback in `backend/database.py` per `AGENTS.md` guardrail so that offline local development, network latency, or external database downtime never crashes the backend startup with `RuntimeError`.
     - Confirmed live PostgreSQL connectivity: `[Database] Successfully connected to PostgreSQL at aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require` with 10 pre-seeded micro-zones.
     - Verified 100% test pass rate across all 26 backend integration test cases (`pytest tests/test_api_endpoints.py`, 26 passed).
-- 2026-10-14: Remediated Supabase Linter 0013 (RLS Disabled in Public) Across All 9 Tables:
-    - Created `backend/enable_rls.py` and integrated `enable_row_level_security()` into `backend/seed_data.py`.
+- 2026-10-14: Remediated Supabase Linter 0013 & 0024 (RLS Disabled in Public & Overly Permissive Policies):
     - Enabled Row Level Security on all 9 public tables: `infrastructure`, `subscribers`, `sos_events`, `zones`, `risk_scores`, `weather_readings`, `field_reports`, `annual_surveys`, and `alert_logs`.
-    - Created explicit granular policies for public view access, citizen field report submission, emergency SOS alerts, and phone number harvesting protection on `subscribers`.
-    - Verified `rowsecurity = True` across all 9 tables in PostgreSQL `pg_tables`.
+    - Resolved Linter 0024 warning: dropped overly permissive `WITH CHECK (true)` INSERT policies (`field_reports_citizen_insert`, `sos_events_insert`, `subscribers_insert`) that allowed unvalidated direct PostgREST mutations.
+    - Preserved legitimate public `SELECT USING (true)` policies for disaster awareness layers.
+    - Enforced that all database writes/inserts route strictly through the FastAPI backend (with SlowAPI rate limiting, PII phone masking, image MIME/size checks, and validation), operating with `postgres` owner role (`BYPASSRLS`).
+    - Updated `backend/enable_rls.py` to automate these policies during initialization.
 
 ## In Progress
 - Ready for re-test on Google PageSpeed Insights once Vercel Authentication is toggled off in the Vercel dashboard.

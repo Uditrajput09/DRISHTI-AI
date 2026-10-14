@@ -44,16 +44,17 @@ POLICIES = [
     # Alert Logs: Public Read
     ("alert_logs", "alert_logs_public_select", "CREATE POLICY alert_logs_public_select ON public.alert_logs FOR SELECT USING (true)"),
     
-    # Field Reports: Public Read + Citizen Insert
+    # Field Reports: Public Read
     ("field_reports", "field_reports_public_select", "CREATE POLICY field_reports_public_select ON public.field_reports FOR SELECT USING (true)"),
-    ("field_reports", "field_reports_citizen_insert", "CREATE POLICY field_reports_citizen_insert ON public.field_reports FOR INSERT WITH CHECK (true)"),
     
-    # SOS Events: Public Read + Emergency SOS Insert
+    # SOS Events: Public Read
     ("sos_events", "sos_events_public_select", "CREATE POLICY sos_events_public_select ON public.sos_events FOR SELECT USING (true)"),
-    ("sos_events", "sos_events_insert", "CREATE POLICY sos_events_insert ON public.sos_events FOR INSERT WITH CHECK (true)"),
-    
-    # Subscribers: Citizen Subscription Insert only (protects phone numbers from public harvesting)
-    ("subscribers", "subscribers_insert", "CREATE POLICY subscribers_insert ON public.subscribers FOR INSERT WITH CHECK (true)"),
+]
+
+PERMISSIVE_POLICIES_TO_DROP = [
+    ("field_reports", "field_reports_citizen_insert"),
+    ("sos_events", "sos_events_insert"),
+    ("subscribers", "subscribers_insert"),
 ]
 
 
@@ -77,6 +78,12 @@ def enable_row_level_security():
             )).fetchall()
         }
 
+        # Drop any flagged overly permissive INSERT policies
+        for table, policy_name in PERMISSIVE_POLICIES_TO_DROP:
+            if (table, policy_name) in existing_policies:
+                conn.execute(text(f"DROP POLICY IF EXISTS {policy_name} ON public.{table};"))
+                print(f"  ✓ Dropped permissive policy '{policy_name}' on public.{table}")
+
         print("\n[RLS] Applying security policies...")
         for table, policy_name, sql in POLICIES:
             if (table, policy_name) in existing_policies:
@@ -85,7 +92,7 @@ def enable_row_level_security():
                 conn.execute(text(sql))
                 print(f"  ✓ Created policy '{policy_name}' on public.{table}")
 
-    print("\n[RLS] Successfully secured all public tables in Supabase!")
+    print("\n[RLS] Successfully secured all public tables in Supabase without overly permissive policies!")
 
 
 if __name__ == "__main__":
